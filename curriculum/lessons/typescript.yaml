@@ -11,11 +11,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, setup, tsconfig, compiler]
     related_material_ids:
       - 1u4K8A6aZy2CQm2J779z1WU0RUWCGoOoHnLFnFizxXkw
       - 1IX3_8v_OODnvSZiAAUtrqfHnkJyXsS6L
+    body_path: authored/typescript/setup-and-basic-types/intro-and-setup.md
 
   - id: typescript/setup-and-basic-types/basic-types-and-inference
     chapter: typescript/setup-and-basic-types
@@ -24,10 +25,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [typescript, types, inference, primitives]
     related_material_ids:
       - 1TW8aWvUFafFEUa-JtM50wYvz0SpwUFv3g7pinqKGHCw
+    body_path: authored/typescript/setup-and-basic-types/basic-types-and-inference.md
 
   # ── objects-interfaces-aliases ─────────────────────────────────────────
   - id: typescript/objects-interfaces-aliases/objects-interface-type-alias
@@ -37,10 +39,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, interface, type-alias, object-types]
     related_material_ids:
       - 1YU1DAaCW_rVa9ycfG8lJQi0k5jUvLDuUQRTYaiVGwK0
+    body_path: authored/typescript/objects-interfaces-aliases/objects-interface-type-alias.md
 
   # ── functions-unions-guards ────────────────────────────────────────────
   - id: typescript/functions-unions-guards/function-types
@@ -50,10 +53,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, function-types, parameters, overload]
     related_material_ids:
       - 1lusAP0njMnYL7Z3oApeNvv56IRE4K5gblpj5e0yiCh0
+    body_path: authored/typescript/functions-unions-guards/function-types.md
 
   - id: typescript/functions-unions-guards/unions-and-type-guards
     chapter: typescript/functions-unions-guards
@@ -62,10 +66,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 20
-    status: skeleton
+    status: authored
     tags: [typescript, union, narrowing, type-guard, discriminated-union]
     related_material_ids:
       - 1DreidRVMMRlnSW8bZ1GpF3zSnl1Zdd2uddwcARh2eog
+    body_path: authored/typescript/functions-unions-guards/unions-and-type-guards.md
 
   # ── generics ──────────────────────────────────────────────────────────
   - id: typescript/generics/generics
@@ -75,10 +80,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, generics, type-parameters, constraints]
     related_material_ids:
       - 1vngEn0yZUB2jS2QqfGOGB80_bGqlJ_XnVv3HQejm6QQ
+    body_path: authored/typescript/generics/generics.md
 
   # ── classes-and-modules ───────────────────────────────────────────────
   - id: typescript/classes-and-modules/classes-and-access-modifiers
@@ -88,10 +94,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, class, public, private, readonly]
     related_material_ids:
       - 1J1TtJ0eMWIT1r_ICrF1M89qdo0Dba77jSNhbjANvlMw
+    body_path: authored/typescript/classes-and-modules/classes-and-access-modifiers.md
 
   - id: typescript/classes-and-modules/modules-and-namespaces
     chapter: typescript/classes-and-modules
@@ -100,10 +107,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [typescript, modules, namespace, import]
     related_material_ids:
       - 1kKr-fdcvZt_2pgaATCs9lkwdD8cR9Ig8J5vJ55ib7d4
+    body_path: authored/typescript/classes-and-modules/modules-and-namespaces.md
 
   # ── advanced-and-utility-types ────────────────────────────────────────
   - id: typescript/advanced-and-utility-types/utility-and-advanced-types
@@ -113,10 +121,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, utility-types, mapped-types, conditional-types, keyof]
     related_material_ids:
       - 1u5NUzv7wZC-jZKruRadITVvSYVeDiPCjCoVdSlSiRis
+    body_path: authored/typescript/advanced-and-utility-types/utility-and-advanced-types.md
 
   # ── typescript-in-practice ────────────────────────────────────────────
   - id: typescript/typescript-in-practice/practice-project
@@ -126,11 +135,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 120
     ord: 10
-    status: skeleton
+    status: authored
     tags: [typescript, project, cli, practice]
     related_material_ids:
       - 1iF9PprUXLgOKGBwqoTv0wP_7nhloyzX47xZEVA-Bx3U
       - 1w6DCrqmtw9TrG05k9LHvk1_G4FcY96Nd
+    body_path: authored/typescript/typescript-in-practice/practice-project.md
 
   - id: typescript/typescript-in-practice/todo-app-with-typescript
     chapter: typescript/typescript-in-practice
@@ -139,10 +149,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 90
     ord: 20
-    status: skeleton
+    status: authored
     tags: [typescript, todo, dom, practice]
     related_material_ids:
       - 1WZHzUP9pKVyZqDb3LERNWb-RS2zueuvc
+    body_path: authored/typescript/typescript-in-practice/todo-app-with-typescript.md
 
   - id: typescript/typescript-in-practice/react-with-typescript
     chapter: typescript/typescript-in-practice
@@ -151,9 +162,10 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 30
-    status: skeleton
+    status: authored
     tags: [typescript, react, props-types, generics-components]
     related_material_ids:
       - 1iF9PprUXLgOKGBwqoTv0wP_7nhloyzX47xZEVA-Bx3U
     sources:
       - reference_slug: react/Using-TypeScript
+    body_path: authored/typescript/typescript-in-practice/react-with-typescript.md

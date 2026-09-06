@@ -12,11 +12,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 20
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, intro, mental-model]
     related_material_ids:
       - 1lHGLaDCm7Ug_mS-3KrZ1r9vmE93o4MJyw3yi60j8nj0
       - 1iCvZI0msUX1IsK8kZC51_vKQ9lDrKYsCDP_23pNsoBk
+    body_path: authored/react/setup-and-jsx/why-react-for-publishers.md
 
   - id: react/setup-and-jsx/dev-environment
     chapter: react/setup-and-jsx
@@ -25,17 +26,17 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, vite, setup, npm]
     related_material_ids:
       - 1gvijL_vSUC-mSP03eE_wEGZkjcb6MGES7734SKUWGJs
       - 1orYZSB7hNsCAmCMyrobOSCkVorhUkCCAZOL9zzS_Z_E
       - 1wrl236qROd_hjiCOzQqWjF_6naBEBrS6nN7LDxtfF88
-      - 1k0hObTy4naQwvnx-jVg_J2pwtj3tNwFoIgMQ3UTmjSI
       - 1VNXrsvNf7SMF2H0XjKyWYOVW1QjxlqhIJLEEtAbZlh8
       - 1B5SKP6RYbz77fr508x4NdMPCmAUDIfVf
     sources:
       - reference_slug: react/Installation
+    body_path: authored/react/setup-and-jsx/dev-environment.md
 
   - id: react/setup-and-jsx/jsx
     chapter: react/setup-and-jsx
@@ -44,11 +45,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 30
-    status: skeleton
+    status: authored
     tags: [react, jsx, syntax]
     related_material_ids:
       - 1aVd84kX2qizpUkmlRXvzQO06eCP9I-64mxVkHYYMPv8
       - 1a0QJx6lfbzTr1FHQroS20cq07J3jk9htwcOkMNdYq0E
+    body_path: authored/react/setup-and-jsx/jsx.md
 
   # ── components-and-props ────────────────────────────────────────────────
   - id: react/components-and-props/creating-components
@@ -58,12 +60,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, component, structure]
     related_material_ids:
       - 1NEc37gENWll9_lbm1jpNIqpO3b84z8uia8ITuNCTXFc
       - 184rtxdCAnpjIk7S4Ovc4PDkeXy4La-lQJ4Oo7tmDg7Q
       - 1LDQv5dSs8Dq8vHLBw6LHFdhwyvIdjTqJJnoopzBUgd4
+    body_path: authored/react/components-and-props/creating-components.md
 
   - id: react/components-and-props/passing-props
     chapter: react/components-and-props
@@ -72,7 +75,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, props, data-flow, destructuring]
     related_material_ids:
       - 1m1LQPW0t_Slw1WRpgSOR_bcMy4PsBRgZYrn61sGGcvo
@@ -80,6 +83,7 @@ lessons:
     project_links:
       - unit: momentalk/button-variant-wrapper
         note: props 기본값과 spread로 MUI 버튼을 감싸는 실제 공통 컴포넌트
+    body_path: authored/react/components-and-props/passing-props.md
 
   # ── state-and-events ────────────────────────────────────────────────────
   - id: react/state-and-events/usestate-basics
@@ -115,13 +119,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, events, onClick, onChange, handler]
     related_material_ids:
       - 19w6uu-g9dyoacyEANxUApzRkp3FX2m1hZGCJPSotI3U
       - 1Et_OStoxyfctX2Shin0FizlwJbP0wt64hkG91wIKPQk
     prerequisites:
       - react/state-and-events/usestate-basics
+    body_path: authored/react/state-and-events/events-and-handlers.md
 
   # ── rendering-logic ────────────────────────────────────────────────────
   - id: react/rendering-logic/conditional-rendering
@@ -131,13 +136,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, conditional-rendering, jsx]
     related_material_ids:
       - 1Gjszssjrh0IglY766h3Xv-ggywJ4iPwI6EtxuxtigMo
     project_links:
       - unit: momentalk/chosung-quiz-state-machine
         note: "{step === '...' && <Child/>} 패턴"
+    body_path: authored/react/rendering-logic/conditional-rendering.md
 
   - id: react/rendering-logic/lists-and-keys
     chapter: react/rendering-logic
@@ -146,10 +152,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, list, map, key, reconciliation]
     related_material_ids:
       - 10pXiQ1-JoSE-ELl0BmMu6mX5LiPnLCH1c-551xnrPkY
+    body_path: authored/react/rendering-logic/lists-and-keys.md
 
   # ── hooks-effect-and-lifecycle ─────────────────────────────────────────
   - id: react/hooks-effect-and-lifecycle/useeffect-and-lifecycle
@@ -159,7 +166,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, useEffect, lifecycle, cleanup, side-effect]
     related_material_ids:
       - 14wmj7HCNsplUxO1VN49tqtCfaSow7md9TaQ1MS4shWU
@@ -170,6 +177,7 @@ lessons:
     project_links:
       - unit: momentalk/use-focus-trap-hook
         note: useEffect 정리(cleanup) 함수로 이벤트 리스너를 해제하는 실제 예
+    body_path: authored/react/hooks-effect-and-lifecycle/useeffect-and-lifecycle.md
 
   - id: react/hooks-effect-and-lifecycle/function-vs-class-components
     chapter: react/hooks-effect-and-lifecycle
@@ -178,12 +186,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, class-component, function-component, history]
     related_material_ids:
       - 1ZvMqD542Ib1vvfw0WHu9zwZu1-g5tXNLjiXqXlgkquo
     sources:
       - reference_slug: react/Component
+    body_path: authored/react/hooks-effect-and-lifecycle/function-vs-class-components.md
 
   # ── hooks-ref-memo-callback ────────────────────────────────────────────
   - id: react/hooks-ref-memo-callback/useref
@@ -193,7 +202,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, useRef, dom, mutable-ref]
     related_material_ids:
       - 11IY6WWNEtSjZNJALMsL5IflXLuoedHnD86ICDQr3RUc
@@ -202,6 +211,7 @@ lessons:
     project_links:
       - unit: momentalk/use-focus-trap-hook
         note: useRef로 컨테이너 요소를 잡아 포커스 트랩 구현
+    body_path: authored/react/hooks-ref-memo-callback/useref.md
 
   - id: react/hooks-ref-memo-callback/usememo-usecallback
     chapter: react/hooks-ref-memo-callback
@@ -210,7 +220,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, useMemo, useCallback, memoization, performance]
     related_material_ids:
       - 1ityo_Iuprr05vhTk4JyjmUrAmt3vl-7zs7Zd3fU4Zl4
@@ -218,6 +228,7 @@ lessons:
     sources:
       - reference_slug: react/useMemo
       - reference_slug: react/useCallback
+    body_path: authored/react/hooks-ref-memo-callback/usememo-usecallback.md
 
   # ── custom-hooks ───────────────────────────────────────────────────────
   - id: react/custom-hooks/writing-custom-hooks
@@ -227,7 +238,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, custom-hook, reuse, logic-extraction]
     related_material_ids:
       - 1H5toucLXeXOM8U_-XBGC2Oyi4iUx7ZZVe-cTsk5kOuU
@@ -238,6 +249,7 @@ lessons:
     project_links:
       - unit: momentalk/use-focus-trap-hook
         note: useEffect + useRef를 묶은 useFocusTrap 커스텀 훅
+    body_path: authored/react/custom-hooks/writing-custom-hooks.md
 
   # ── styling-in-react ───────────────────────────────────────────────────
   - id: react/styling-in-react/applying-css
@@ -247,10 +259,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, css, css-modules, styling]
     related_material_ids:
       - 1KyP9O0IaEBn1foRQIHXqzXIYjwvqnLT9IJZVnwRPp_M
+    body_path: authored/react/styling-in-react/applying-css.md
 
   - id: react/styling-in-react/images-and-icons
     chapter: react/styling-in-react
@@ -259,10 +272,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, assets, image, icon, import]
     related_material_ids:
       - 1jhiPigTL6WmRKFnE9eXiZuu-cqaiAp0Hnk7zOKGQM80
+    body_path: authored/react/styling-in-react/images-and-icons.md
 
   # ── routing ────────────────────────────────────────────────────────────
   - id: react/routing/react-router-dom
@@ -272,12 +286,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, react-router, routing, spa]
     related_material_ids:
       - 1DP7OhXDFNaMdpy6SCO_G4zH0R3nZyfYD5w1vgp9V000
       - 1rwB-ql-DY6hFYnjYs4sDmUurV9Gt4qgDHfWzG3UuDxM
       - 1TRypbCoPA_ws6ZzWEgxZyfS17jZBq95t
+    body_path: authored/react/routing/react-router-dom.md
 
   - id: react/routing/router-mission
     chapter: react/routing
@@ -301,13 +316,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, ajax, fetch, useEffect, data-fetching]
     related_material_ids:
       - 1WCflwTKb_6J-dTa7l71JNirtxcfa-mIGeYMPOhD_UoM
       - 1wUgE9qmUV6Xj-AxPGifPv9OhzHxQcaBfwhKtyFzy6OI
       - 1AEIr3Ugsq_zDPjbuWAjNO9LEzRDGs7tk
       - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
+    body_path: authored/react/data-fetching/fetching-in-react.md
 
   # ── state-management ───────────────────────────────────────────────────
   - id: react/state-management/context-api
@@ -317,7 +333,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, context, prop-drilling, global-state]
     related_material_ids:
       - 1Fl9V6dt0oKMz7QrzUPBO4M2c2LIKHWcWHTITx5eY3yc
@@ -325,6 +341,7 @@ lessons:
     sources:
       - reference_slug: react/useContext
       - reference_slug: react/createContext
+    body_path: authored/react/state-management/context-api.md
 
   - id: react/state-management/redux
     chapter: react/state-management
@@ -333,12 +350,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, redux, store, reducer, state-management]
     related_material_ids:
       - 1TLo7G8cwQbOzyCj_Db78_LYGChfaftRhGKDaAN4PnZI
       - 19s_s78Chllf9hPjDPny3CI4i_ksuhzfj3h5Z8phib44
       - 19Ojz7VxUScH5TJeNdqvntyVjggcPyFt0
+    body_path: authored/react/state-management/redux.md
 
   # ── board-crud-app ─────────────────────────────────────────────────────
   - id: react/board-crud-app/board-ui-and-list

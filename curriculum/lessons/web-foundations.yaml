@@ -10,7 +10,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [html, semantic, structure]
     related_material_ids:
       - 1jvP8IQ6HunrlbFLJYd2UoHS4kBFUqSk6bwXJ-wUzqWk
@@ -20,6 +20,7 @@ lessons:
     sources:
       - reference_slug: html/section-일반-구획-요소
       - reference_slug: html/article
+    body_path: authored/web-foundations/html-structure/semantic-tags.md
 
   - id: web-foundations/html-structure/hyperlinks
     chapter: web-foundations/html-structure
@@ -28,10 +29,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 20
-    status: skeleton
+    status: authored
     tags: [html, links, anchor]
     related_material_ids:
       - 1H-QRYRa7d_D6R-yy-lncNRj0syxbnrXp3BW2WD8xq1w
+    body_path: authored/web-foundations/html-structure/hyperlinks.md
 
   - id: web-foundations/html-structure/forms
     chapter: web-foundations/html-structure
@@ -40,7 +42,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: skeleton
+    status: authored
     tags: [html, forms, input]
     related_material_ids:
       - 1Qp1qLbicezo2hd7sYuaZw9UcnnLTvO_tTuJmqkO_-hM
@@ -49,6 +51,7 @@ lessons:
       - reference_slug: html/input-HTML-input-element
       - reference_slug: html/select-HTML-select-element
       - reference_slug: html/textarea-HTML-textarea-element
+    body_path: authored/web-foundations/html-structure/forms.md
 
   - id: web-foundations/html-structure/multimedia
     chapter: web-foundations/html-structure
@@ -57,13 +60,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 40
-    status: skeleton
-    tags: [html, audio, video, multimedia]
+    status: authored
+    tags: [html, audio, video, multimedia, image]
     related_material_ids:
       - 12_sMeeoS9nG0KR4aufL0d89hUJohHdO0GUKQ0XXTW6o
       - 1dZTAHHq8kdY4VrUYKoEVZqEdFnb7dF-6
     sources:
       - reference_slug: html/audio-HTML-embed-audio-element
+    body_path: authored/web-foundations/html-structure/multimedia.md
 
   - id: web-foundations/html-structure/markup-conventions-and-entities
     chapter: web-foundations/html-structure
@@ -72,11 +76,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 20
     ord: 50
-    status: skeleton
+    status: authored
     tags: [html, conventions, entities]
     related_material_ids:
       - 1o9ZCbrTXf3rAXiub3Jg8qeoG9iLdvhWE
       - 1-5EX3dXHBagUi4jGWwpIeV5Mo5glLD8gjXcmHDPdWBE
+    body_path: authored/web-foundations/html-structure/markup-conventions-and-entities.md
 
   # ── css-fundamentals ────────────────────────────────────────────────────
   - id: web-foundations/css-fundamentals/selectors-and-cascade
@@ -84,15 +89,16 @@ lessons:
     title: 선택자와 캐스케이드
     mastery: required
     lesson_kind: lesson
-    estimated_minutes: 40
+    estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, selectors, specificity, cascade]
     related_material_ids:
       - 1Qd3kB6lwdBYkf-odC4A_EOu5NY8e22Lf
       - 1k7WygVfG3-G6Bx6ubTdNoVyiLwL31vZeQZ4B7OZ_E_Q
       - 1YDCfnjIjNUkg6ISOxoUOmxgja_TSgo8l
       - 1dKeDl5-zCxTbWOMWlvgAf1VV91YNb_nT
+    body_path: authored/web-foundations/css-fundamentals/selectors-and-cascade.md
 
   - id: web-foundations/css-fundamentals/box-model-and-positioning
     chapter: web-foundations/css-fundamentals
@@ -101,7 +107,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, box-model, position, layout]
     related_material_ids:
       - 1IJrbFE3fzMN9e3jDbu_oemIG-lU9ciZ-
@@ -112,6 +118,7 @@ lessons:
     sources:
       - reference_slug: css/display-CSS-property
       - reference_slug: css/overflow
+    body_path: authored/web-foundations/css-fundamentals/box-model-and-positioning.md
 
   - id: web-foundations/css-fundamentals/backgrounds-and-sprites
     chapter: web-foundations/css-fundamentals
@@ -120,7 +127,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 30
-    status: skeleton
+    status: authored
     tags: [css, background, sprites]
     related_material_ids:
       - 1j_6_pa70S-iJ77JQhfiK1OSfqAl75Le5
@@ -130,6 +137,7 @@ lessons:
     sources:
       - reference_slug: css/background
       - reference_slug: css/background-image
+    body_path: authored/web-foundations/css-fundamentals/backgrounds-and-sprites.md
 
   - id: web-foundations/css-fundamentals/css-review
     chapter: web-foundations/css-fundamentals
@@ -138,11 +146,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 40
-    status: skeleton
+    status: authored
     tags: [css, review]
     related_material_ids:
       - 1xqF2yfWDNjs4FDCKRQAK07YrENv2qFowTcC2nk7l27Y
       - 1akfI8Q-Wul3qWhu1vSZUI-PI2KVkKMKJDYNEQdeiPbc
+    body_path: authored/web-foundations/css-fundamentals/css-review.md
 
   # ── css-layout-flexbox ──────────────────────────────────────────────────
   - id: web-foundations/css-layout-flexbox/flexbox-core
@@ -152,7 +161,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, flexbox, layout]
     related_material_ids:
       - 1bz3nNb6yKnf3SOwPyo2a00GZHN84sTDuR1v__e0Ty_s
@@ -163,6 +172,7 @@ lessons:
       - reference_slug: css/flex-direction
       - reference_slug: css/justify-content
       - reference_slug: css/align-items
+    body_path: authored/web-foundations/css-layout-flexbox/flexbox-core.md
 
   - id: web-foundations/css-layout-flexbox/flexbox-navigation-practice
     chapter: web-foundations/css-layout-flexbox
@@ -171,11 +181,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, flexbox, navigation, practice]
     related_material_ids:
       - 1cqQya4ua9cIqZ3gxpu2xR6sSDqCrJ9CF
       - 1El27_13sIpf9TbdF_qMKmt6LISeYyqH2
+    body_path: authored/web-foundations/css-layout-flexbox/flexbox-navigation-practice.md
 
   # ── css-layout-grid ─────────────────────────────────────────────────────
   - id: web-foundations/css-layout-grid/grid-core
@@ -185,7 +196,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, grid, layout]
     related_material_ids:
       - 1dy9elEZOHNEPppLAHXCxjOnARtPxL0l-ZiTPJH0O9cs
@@ -209,6 +220,7 @@ lessons:
       - reference_slug: css/grid-CSS-property
       - reference_slug: css/grid-template-columns
       - reference_slug: css/grid-template-rows-CSS-property
+    body_path: authored/web-foundations/css-layout-grid/grid-core.md
 
   - id: web-foundations/css-layout-grid/grid-areas-and-auto-flow
     chapter: web-foundations/css-layout-grid
@@ -217,7 +229,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, grid, grid-template-areas, auto-flow]
     related_material_ids:
       - 19zTTram0-JqtXFiR_lBbBwflt_oqnfZq
@@ -236,6 +248,7 @@ lessons:
       - 1oaks_FRL0Tvtb9fUtV3lP6DBBSloH5o2
     sources:
       - reference_slug: css/grid-template-CSS-property
+    body_path: authored/web-foundations/css-layout-grid/grid-areas-and-auto-flow.md
 
   - id: web-foundations/css-layout-grid/grid-card-ui-practice
     chapter: web-foundations/css-layout-grid
@@ -244,13 +257,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 30
-    status: skeleton
+    status: authored
     tags: [css, grid, flexbox, card-ui, practice]
     related_material_ids:
       - 14HwGstOvQePEM5PQdHBEYekTP0S9Zqzv
       - 1I5X4dKGlBct5B4fa134Swv66QyAPS8iS
       - 14SBZAa_l-r1n7rhG66IK6m8UPwpy5qZY
       - 1VjoCLp9Ge90zSLR-uMSR_KtbXIFb2XRT
+    body_path: authored/web-foundations/css-layout-grid/grid-card-ui-practice.md
 
   # ── css-text-and-effects ────────────────────────────────────────────────
   - id: web-foundations/css-text-and-effects/text-and-paragraph-effects
@@ -260,12 +274,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, text, typography, css3]
     related_material_ids:
       - 1zXGQ5OWDsb1YUe1Myrmv5I4KsSMAySmC3jOH1dNRdIA
     sources:
       - reference_slug: css/columns-CSS-property
+    body_path: authored/web-foundations/css-text-and-effects/text-and-paragraph-effects.md
 
   - id: web-foundations/css-text-and-effects/transitions-and-hover
     chapter: web-foundations/css-text-and-effects
@@ -274,7 +289,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, transition, hover, interaction]
     related_material_ids:
       - 0B0HRSf3dPjJiMExkQXdyQ2hWalk
@@ -283,6 +298,7 @@ lessons:
       - 13wub4tP5SjPdTUensi3_Ysh6EIwx2yjp
       - 1tCe1s6iwE_IMLTjZwHXYVMW6VC5dAxo4
       - 1MmEWPW0DuLYxXhJ6F_jCncAQoaxD6-sU
+    body_path: authored/web-foundations/css-text-and-effects/transitions-and-hover.md
 
   - id: web-foundations/css-text-and-effects/animation-and-transform
     chapter: web-foundations/css-text-and-effects
@@ -291,7 +307,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: skeleton
+    status: authored
     tags: [css, animation, transform, keyframes, svg]
     related_material_ids:
       - 0B0HRSf3dPjJib2tEMXpWMlhEQjQ
@@ -303,6 +319,7 @@ lessons:
       - reference_slug: css/animation
       - reference_slug: css/animation-name-CSS-property
       - reference_slug: css/animation-timing-function-CSS-property
+    body_path: authored/web-foundations/css-text-and-effects/animation-and-transform.md
 
   # ── css-preprocessors-and-frameworks ────────────────────────────────────
   - id: web-foundations/css-preprocessors-and-frameworks/sass
@@ -312,13 +329,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, sass, scss, preprocessor]
     related_material_ids:
       - 1AB7EULjblvytiAVX4M3NUEuGeWgztsJ83b-JhRL7MRQ
       - 1ooeGajkllhTB8ZaFrj051uqmyNDy-FErkCZu1z0ZRTM
       - 1CzyoTqdSf_B53IaVp8pzjZTGkhUCeXsH8akT4xkGrWk
       - 1a_6sWxmaKs7lOYrxFAI-jQzAzH2lccJq
+    body_path: authored/web-foundations/css-preprocessors-and-frameworks/sass.md
 
   - id: web-foundations/css-preprocessors-and-frameworks/less
     chapter: web-foundations/css-preprocessors-and-frameworks
@@ -327,11 +345,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 20
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, less, preprocessor]
     related_material_ids:
       - 0B0HRSf3dPjJid1FZeWtxbkJHTzQ
       - 1mhyHw-mDlhJLfPv_xKPl_WxPR83Ft9pB
+    body_path: authored/web-foundations/css-preprocessors-and-frameworks/less.md
 
   - id: web-foundations/css-preprocessors-and-frameworks/tailwind
     chapter: web-foundations/css-preprocessors-and-frameworks
@@ -340,10 +359,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 30
-    status: skeleton
+    status: authored
     tags: [css, tailwind, utility-first, framework]
     related_material_ids:
       - 1wNYZU3qdkUnBLU8D0Vt7XN6cHms1Wp70GlkD8ZVrLQQ
+    body_path: authored/web-foundations/css-preprocessors-and-frameworks/tailwind.md
 
   # ── responsive-and-modern-css ───────────────────────────────────────────
   - id: web-foundations/responsive-and-modern-css/responsive-layout
@@ -353,10 +373,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [css, responsive, media-query]
     related_material_ids:
       - 1jC3cwTiy_a0rMUdAPu2JXjSF-RPmZ9bx
+    body_path: authored/web-foundations/responsive-and-modern-css/responsive-layout.md
 
   - id: web-foundations/responsive-and-modern-css/container-queries
     chapter: web-foundations/responsive-and-modern-css
@@ -365,7 +386,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [css, container-queries, responsive]
     related_material_ids:
       - 1QuBkowN_ZHeYlkuQQLfIaAgaoPhV80JPFeDxi-7A-BM
@@ -374,6 +395,7 @@ lessons:
       - 13s2oWZ82IugnBapXYxtSSBW0NZf5f0Pd
     sources:
       - reference_slug: css/container
+    body_path: authored/web-foundations/responsive-and-modern-css/container-queries.md
 
   - id: web-foundations/responsive-and-modern-css/logical-properties
     chapter: web-foundations/responsive-and-modern-css
@@ -382,7 +404,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 30
-    status: skeleton
+    status: authored
     tags: [css, logical-properties, i18n]
     related_material_ids:
       - 11IQVvtab5VnXLxyrdKW_jjIfGxlobP8SQ0YV21NABIg
@@ -390,6 +412,7 @@ lessons:
       - 1391lC9kSnUu3dzMr1HaBw2jZsgUSi8bZ
     sources:
       - reference_slug: css/direction-CSS-property
+    body_path: authored/web-foundations/responsive-and-modern-css/logical-properties.md
 
   # ── web-standards-and-accessibility ─────────────────────────────────────
   - id: web-foundations/web-standards-and-accessibility/accessibility-checklist
@@ -399,11 +422,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [accessibility, a11y, wcag, web-standards]
     related_material_ids:
       - 1-I_e9yiEaL4hH-5vbA7sntQQ6piAoeurEMT1B1eBF2M
       - 1FJRCOzictcVSZKBlfLt6FVgBPRAp4EDj
+    body_path: authored/web-foundations/web-standards-and-accessibility/accessibility-checklist.md
 
   - id: web-foundations/web-standards-and-accessibility/document-load-order
     chapter: web-foundations/web-standards-and-accessibility
@@ -412,9 +436,10 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 20
-    status: skeleton
+    status: authored
     tags: [web-standards, performance, loading, script, link]
     related_material_ids:
       - 13SSDvGWJGozhRP4T2Xeo7S2LD84haGL59U5ZJr5449I
     sources:
       - reference_slug: html/script-스크립트-요소
+    body_path: authored/web-foundations/web-standards-and-accessibility/document-load-order.md

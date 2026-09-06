@@ -10,11 +10,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [git, version-control, commit]
     related_material_ids:
       - 1jMXiGIp9TTK_WfbKs-mArTS83-tPZ5D9uN6UFlYCRno
       - 1iqOzKcxQnvrL0Fym1BAj7LTvK1AIQF8yCBuL4Z_8pVA
+    prerequisites:
+      - tooling-and-collaboration/editor-setup/vscode-setup
+    body_path: authored/tooling-and-collaboration/git-basics/version-control-and-commits.md
 
   - id: tooling-and-collaboration/git-basics/branches-merge
     chapter: tooling-and-collaboration/git-basics
@@ -23,22 +26,28 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 20
-    status: skeleton
+    status: authored
     tags: [git, branch, merge]
     related_material_ids:
       - 1B9VYYeGi7iPMRB6FeXw_mhkAnkJncIi1Dxxxvg_DJdA
+    prerequisites:
+      - tooling-and-collaboration/git-basics/version-control-and-commits
+    body_path: authored/tooling-and-collaboration/git-basics/branches-merge.md
 
   - id: tooling-and-collaboration/git-basics/common-git-errors
     chapter: tooling-and-collaboration/git-basics
     title: 자주 만나는 Git 에러 대처
     mastery: understand
     lesson_kind: lesson
-    estimated_minutes: 25
+    estimated_minutes: 30
     ord: 30
-    status: skeleton
+    status: authored
     tags: [git, troubleshooting]
     related_material_ids:
       - 1jMXiGIp9TTK_WfbKs-mArTS83-tPZ5D9uN6UFlYCRno
+    prerequisites:
+      - tooling-and-collaboration/git-basics/branches-merge
+    body_path: authored/tooling-and-collaboration/git-basics/common-git-errors.md
 
   # ── github-workflow ─────────────────────────────────────────────────────
   - id: tooling-and-collaboration/github-workflow/github-desktop
@@ -48,10 +57,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [github, github-desktop, remote]
     related_material_ids:
       - 2PACX-1vQncLWg0uERomqED1z0Yol6iCD0srwRU9T5SDXM8t9F1g0jj5zTk2-Exf0Rbd4RiRSqOYr16tHiG6WV
+    prerequisites:
+      - tooling-and-collaboration/git-basics/branches-merge
+    body_path: authored/tooling-and-collaboration/github-workflow/github-desktop.md
 
   - id: tooling-and-collaboration/github-workflow/writing-a-readme
     chapter: tooling-and-collaboration/github-workflow
@@ -60,10 +72,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 20
     ord: 20
-    status: skeleton
+    status: authored
     tags: [github, readme, documentation, markdown]
     related_material_ids:
       - 1p595QXIctbX-CW7R7cSYOZfV_9UPWxJcXYV2OU8f-UQ
+    prerequisites:
+      - tooling-and-collaboration/github-workflow/github-desktop
+    body_path: authored/tooling-and-collaboration/github-workflow/writing-a-readme.md
 
   # ── diagrams-and-docs ───────────────────────────────────────────────────
   - id: tooling-and-collaboration/diagrams-and-docs/drawing-diagrams
@@ -73,10 +88,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 10
-    status: skeleton
-    tags: [diagrams, documentation]
+    status: authored
+    tags: [diagrams, documentation, mermaid]
     related_material_ids:
       - 1RpLWa3bKzu7-osltdYZob9R9OQvXPxohRUAFxXZ9WXs
+    prerequisites:
+      - tooling-and-collaboration/github-workflow/writing-a-readme
+    body_path: authored/tooling-and-collaboration/diagrams-and-docs/drawing-diagrams.md
 
   # ── editor-setup ────────────────────────────────────────────────────────
   - id: tooling-and-collaboration/editor-setup/vscode-setup
@@ -86,10 +104,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 10
-    status: skeleton
+    status: authored
     tags: [vscode, editor, setup]
     related_material_ids:
       - 1aiShBBmoTCUJF4JXZhf3wJU58IVAOxxLSbkb7Xf00bA
+    body_path: authored/tooling-and-collaboration/editor-setup/vscode-setup.md
 
   - id: tooling-and-collaboration/editor-setup/npm-basics
     chapter: tooling-and-collaboration/editor-setup
@@ -98,7 +117,10 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [npm, node, package-manager]
     related_material_ids:
       - 1_ocUBLoWrO_oO5VshStFlwJd9Zu9Khga3MT6kkWCYh0
+    prerequisites:
+      - tooling-and-collaboration/git-basics/version-control-and-commits
+    body_path: authored/tooling-and-collaboration/editor-setup/npm-basics.md

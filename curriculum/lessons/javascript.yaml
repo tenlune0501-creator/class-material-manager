@@ -10,12 +10,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, basics, syntax]
     related_material_ids:
       - 1_PSuXMsznOaF231zDZTGSFHjIstCGxOmmiqmbIVsZ1k
       - 1edNbFgnIHPS6iVctKeqL7XORLvuDhAvK
       - 1EsnGnQl3e940Y_612wTxnpqnCcWFr6EQ
+    body_path: authored/javascript/language-basics/must-know.md
 
   - id: javascript/language-basics/data-types
     chapter: javascript/language-basics
@@ -24,7 +25,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, types, primitives]
     related_material_ids:
       - 1fhRBcjSPLJxleIVwjxC3KOhhNyHNL_vi6r8suTlEP-Q
@@ -32,6 +33,7 @@ lessons:
       - reference_slug: javascript/Number
       - reference_slug: javascript/String
       - reference_slug: javascript/Boolean
+    body_path: authored/javascript/language-basics/data-types.md
 
   - id: javascript/language-basics/variables-and-type-conversion
     chapter: javascript/language-basics
@@ -40,11 +42,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, variables, let, const, type-coercion]
     related_material_ids:
       - 1HTDn2pwfM2avNkOkLI0BXguLr_vEyVym-cnh0A-RLgc
       - 1F2hOny7c3oBdq-CM9rlGWbELheWfDIB8
+    body_path: authored/javascript/language-basics/variables-and-type-conversion.md
 
   - id: javascript/language-basics/conditionals
     chapter: javascript/language-basics
@@ -53,10 +56,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 40
-    status: skeleton
+    status: authored
     tags: [javascript, conditionals, if, switch]
     related_material_ids:
       - 1UmeYeEM-QIPQu3ul8-W3cLsYRqj4IbCKs4u8uxUNb5o
+    body_path: authored/javascript/language-basics/conditionals.md
 
   - id: javascript/language-basics/arrays-and-loops
     chapter: javascript/language-basics
@@ -65,12 +69,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 50
-    status: skeleton
+    status: authored
     tags: [javascript, array, loop, for, while]
     related_material_ids:
       - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
     sources:
       - reference_slug: javascript/Array
+    body_path: authored/javascript/language-basics/arrays-and-loops.md
 
   - id: javascript/language-basics/functions
     chapter: javascript/language-basics
@@ -79,13 +84,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 60
-    status: skeleton
+    status: authored
     tags: [javascript, function, parameter, return]
     related_material_ids:
       - 1_dLoqERFBN2rIv8x40PtyGlzpbVGaOKAm0LUFEeYTEs
       - 12W77c-tGjeY_8kAFSi59nwWsfuFwPoCh
     sources:
       - reference_slug: javascript/Function
+    body_path: authored/javascript/language-basics/functions.md
 
   # ── functions-and-scope ─────────────────────────────────────────────────
   - id: javascript/functions-and-scope/scope-and-closures
@@ -95,10 +101,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, scope, closure, hoisting]
     related_material_ids:
       - 1_dLoqERFBN2rIv8x40PtyGlzpbVGaOKAm0LUFEeYTEs
+    body_path: authored/javascript/functions-and-scope/scope-and-closures.md
 
   - id: javascript/functions-and-scope/callbacks-and-delayed-execution
     chapter: javascript/functions-and-scope
@@ -107,10 +114,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, callback, setTimeout, async-intro]
     related_material_ids:
       - 1lrm8gd4VJVHMgZWYnXZaKT3vRtEa_y6JiJhVip3PwJU
+    body_path: authored/javascript/functions-and-scope/callbacks-and-delayed-execution.md
 
   # ── objects-and-builtins ────────────────────────────────────────────────
   - id: javascript/objects-and-builtins/working-with-objects
@@ -120,12 +128,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, object, property, destructuring]
     related_material_ids:
       - 1edNbFgnIHPS6iVctKeqL7XORLvuDhAvK
     sources:
       - reference_slug: javascript/Object
+    body_path: authored/javascript/objects-and-builtins/working-with-objects.md
 
   - id: javascript/objects-and-builtins/array-methods
     chapter: javascript/objects-and-builtins
@@ -134,12 +143,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, array, map, filter, reduce, higher-order]
     related_material_ids:
       - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
     sources:
       - reference_slug: javascript/Array
+    body_path: authored/javascript/objects-and-builtins/array-methods.md
 
   - id: javascript/objects-and-builtins/builtin-objects
     chapter: javascript/objects-and-builtins
@@ -148,7 +158,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, builtins, Math, JSON, Date]
     related_material_ids:
       - 1F2hOny7c3oBdq-CM9rlGWbELheWfDIB8
@@ -156,6 +166,7 @@ lessons:
       - reference_slug: javascript/Math
       - reference_slug: javascript/JSON
       - reference_slug: javascript/Date
+    body_path: authored/javascript/objects-and-builtins/builtin-objects.md
 
   # ── classes-and-modules ─────────────────────────────────────────────────
   - id: javascript/classes-and-modules/classes
@@ -165,12 +176,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, class, constructor, this, inheritance]
     related_material_ids:
       - 1_vcEvfntPW20h8NiTeCZFEwaG904c4sF5h_O-fLfozc
       - 1QwoyuXNuzWgCxDlBok2OBkWrkd5f7NbL
       - 1_VVpVAer8laiICbMwS69GNjReoRFwg7P
+    body_path: authored/javascript/classes-and-modules/classes.md
 
   - id: javascript/classes-and-modules/es-modules
     chapter: javascript/classes-and-modules
@@ -179,7 +191,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, modules, import, export, esm]
     related_material_ids:
       - 19E-NTySANRnlXoi-BXW7oqvCfyINBsHp93sXko8QnT0
@@ -187,6 +199,7 @@ lessons:
       - 1puC4XZdZSWmeSO3ZrkLylO07SPqduzTz
       - 1oM0miaWU0ETlOdn34zx54KAMPTD1ncKj
       - 1JlNq4MRLPX9bXOYv1UzPYZYvSJqQULdk
+    body_path: authored/javascript/classes-and-modules/es-modules.md
 
   - id: javascript/classes-and-modules/slideshow-module-practice
     chapter: javascript/classes-and-modules
@@ -195,11 +208,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, modules, slideshow, practice]
     related_material_ids:
       - 1JgvZcovh4kSME4OpUdYZeOQniaWepvv7
       - 1799_v3_0i5erA9qU4Fu2qPI9yFs8yeaA
+    body_path: authored/javascript/classes-and-modules/slideshow-module-practice.md
 
   # ── dom-and-events ──────────────────────────────────────────────────────
   - id: javascript/dom-and-events/selecting-and-manipulating
@@ -209,11 +223,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, dom, queryselector, classlist]
     related_material_ids:
       - 1CIn7DIpQ75B75uQE0mCGTevqzKfWYGul
       - 1UA5i_5w9nz2we1EOl0juhqCwdlsxfvk2
+    body_path: authored/javascript/dom-and-events/selecting-and-manipulating.md
 
   - id: javascript/dom-and-events/events-and-delegation
     chapter: javascript/dom-and-events
@@ -222,11 +237,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, dom, events, addEventListener, delegation]
     related_material_ids:
       - 19mP18ldFS7_FSzgFZtbH72nZTl033mD2
       - 1RfTKoSkDllWZI-XJM1WUgNC9jQxxEKgz
+    body_path: authored/javascript/dom-and-events/events-and-delegation.md
 
   # ── async-and-http ──────────────────────────────────────────────────────
   - id: javascript/async-and-http/http-basics
@@ -236,10 +252,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, http, https, web]
     related_material_ids:
       - 1PzESoOFesMH-_WakTHF7TU_aHrmZh22abSq24LUda8Y
+    body_path: authored/javascript/async-and-http/http-basics.md
 
   - id: javascript/async-and-http/promises-async-await
     chapter: javascript/async-and-http
@@ -248,12 +265,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, promise, async, await, asynchronous]
     related_material_ids:
       - 1lrm8gd4VJVHMgZWYnXZaKT3vRtEa_y6JiJhVip3PwJU
     sources:
       - reference_slug: javascript/Promise
+    body_path: authored/javascript/async-and-http/promises-async-await.md
 
   - id: javascript/async-and-http/fetch-and-ajax
     chapter: javascript/async-and-http
@@ -262,10 +280,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, fetch, ajax, api]
     related_material_ids:
       - 1oZk7DMHPvLOpK6-eNlbM12QDTj06luJ7-z_X4pK-sm4
+    body_path: authored/javascript/async-and-http/fetch-and-ajax.md
 
   # ── browser-apis-and-storage ────────────────────────────────────────────
   - id: javascript/browser-apis-and-storage/cookies
@@ -275,11 +294,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, cookie, browser]
     related_material_ids:
       - 1E0tcY8QGdPaPoXa5BPB8P3--7p30oDvxX2XCbo-XOzQ
       - 1-FMIiz7J0AcovsslpBhOT_OBhbBeNbmC
+    body_path: authored/javascript/browser-apis-and-storage/cookies.md
 
   - id: javascript/browser-apis-and-storage/local-storage
     chapter: javascript/browser-apis-and-storage
@@ -288,10 +308,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, localstorage, web-storage]
     related_material_ids:
       - 1m0ERPZSlPw_OHTsby-9pp1tiAzAFs9Vi
+    body_path: authored/javascript/browser-apis-and-storage/local-storage.md
 
   - id: javascript/browser-apis-and-storage/timers
     chapter: javascript/browser-apis-and-storage
@@ -300,10 +321,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, timer, setTimeout, setInterval]
     related_material_ids:
       - 1U2sMPS2lrlD_sUSX_vbHSUzkKlOqYVoY
+    body_path: authored/javascript/browser-apis-and-storage/timers.md
 
   # ── external-apis ───────────────────────────────────────────────────────
   - id: javascript/external-apis/map-api
@@ -354,7 +376,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, slider, carousel, ui]
     related_material_ids:
       - 1LIkvyoZb7Lgi2D9sxPjmP5b-R07sePmk
@@ -363,6 +385,7 @@ lessons:
       - 1lMZEWt1eILew6G0bNNqGcY3q4BrBmxg9
       - 1ydIkwY1tXxmZ1B0drCnlFvukU4Bb9sjx
       - 1Ac6CXlY30HnvPw4Od8TqRvdoigtZIMav
+    body_path: authored/javascript/ui-implementation-patterns/slideshows-and-sliders.md
 
   - id: javascript/ui-implementation-patterns/filtering-and-pagination
     chapter: javascript/ui-implementation-patterns
@@ -371,13 +394,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, filter, pagination, ui]
     related_material_ids:
       - 1l4lpnBwi2kODMxmlB3noONNS5sWrpENW
       - 10kj1r4rA1hrzM6FiSYhrBh0ngLs5B8ri
       - 1cvet9qugHhHJ2kmbqkCnHGGDG4H9wn-M
       - 1Lz4__eRVWJtXdl_VJHXUNDIhzLtCmHHk
+    body_path: authored/javascript/ui-implementation-patterns/filtering-and-pagination.md
 
   - id: javascript/ui-implementation-patterns/skeleton-ui-and-number-animation
     chapter: javascript/ui-implementation-patterns
@@ -386,7 +410,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, skeleton-ui, animation, loading, ui]
     related_material_ids:
       - 1U9d8s6WjpbDQbaRyBE7NhogK_Awqx2EcRy9G67K03yg
@@ -395,6 +419,7 @@ lessons:
       - 14tzeASyfnNoqN0Swk4OVs3PJoPQG4Vm9
       - 1hKwoevx3RAkAFw47SP_bcmkfjGZjhzZd
       - 1Th4fzRJ6eOYhBOYM2mQSs3_pvZ7UBncC
+    body_path: authored/javascript/ui-implementation-patterns/skeleton-ui-and-number-animation.md
 
   - id: javascript/ui-implementation-patterns/file-preview-and-drag-drop
     chapter: javascript/ui-implementation-patterns
@@ -403,11 +428,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 40
-    status: skeleton
+    status: authored
     tags: [javascript, file, drag-drop, preview, ui]
     related_material_ids:
       - 1VEJLbuN5OQrHfq3EkQeuGdYDl711wDYf
       - 1rRAtQa5zw7U4v4DORf58-iQtrmDEy3iz
+    body_path: authored/javascript/ui-implementation-patterns/file-preview-and-drag-drop.md
 
   - id: javascript/ui-implementation-patterns/banners-and-effects
     chapter: javascript/ui-implementation-patterns
@@ -416,12 +442,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 50
-    status: skeleton
+    status: authored
     tags: [javascript, banner, hover, cursor, ui]
     related_material_ids:
       - 1ydIkwY1tXxmZ1B0drCnlFvukU4Bb9sjx
       - 1UA5i_5w9nz2we1EOl0juhqCwdlsxfvk2
       - 19mP18ldFS7_FSzgFZtbH72nZTl033mD2
+    body_path: authored/javascript/ui-implementation-patterns/banners-and-effects.md
 
   - id: javascript/ui-implementation-patterns/calendar-grid
     chapter: javascript/ui-implementation-patterns
@@ -430,10 +457,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 60
-    status: skeleton
+    status: authored
     tags: [javascript, calendar, date, grid, ui]
     related_material_ids:
       - 1CIn7DIpQ75B75uQE0mCGTevqzKfWYGul
+    body_path: authored/javascript/ui-implementation-patterns/calendar-grid.md
 
   # ── jquery ──────────────────────────────────────────────────────────────
   - id: javascript/jquery/jquery-basics
@@ -443,13 +471,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [jquery, dom, legacy]
     related_material_ids:
       - 1z1ZazOejwksm81nP5m5b2zdEQcRaN1Ei
       - 0B0HRSf3dPjJidHpZaU9jUS1qTm8
       - 1eNRD5Jtxwmp_NXPEXMHGA49DtRYt-jPRYfeBU_xyO10
       - 1dThjd-2mJtkqHzUtuVP0tDN_voqzbN3m7JdTT_0acTw
+    body_path: authored/javascript/jquery/jquery-basics.md
 
   - id: javascript/jquery/jquery-vs-vanilla
     chapter: javascript/jquery
@@ -458,10 +487,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 20
-    status: skeleton
+    status: authored
     tags: [jquery, vanilla-js, comparison]
     related_material_ids:
       - 1R-LC_LxenaZj4eZ7IK61vAQAhOJE_GHCVAAyN8QtWic
+    body_path: authored/javascript/jquery/jquery-vs-vanilla.md
 
   - id: javascript/jquery/jquery-hover-and-animation
     chapter: javascript/jquery
@@ -470,11 +500,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 30
-    status: skeleton
+    status: authored
     tags: [jquery, hover, animation, event]
     related_material_ids:
       - 0B0HRSf3dPjJiSmlFbDlaQnBxQzQ
       - 1T_9Ofx3Ea4c3kwcm632fmXAmIrw8U49Y
+    body_path: authored/javascript/jquery/jquery-hover-and-animation.md
 
   - id: javascript/jquery/scroll-libraries
     chapter: javascript/jquery
@@ -483,7 +514,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 40
-    status: skeleton
+    status: authored
     tags: [jquery, scroll, scrollmagic, wowjs, fullpage, animation]
     related_material_ids:
       - 1Syu2Owv5OR0McZaobXkcWR8yoinxNXPU
@@ -492,3 +523,4 @@ lessons:
       - 1NopRne5Ihf1ShjufAwHS8gBFi7whlejw
       - 10YXGXxB-VlKPzHC1qDhMg6T9PahEoWrm
       - 1WuiU6uPBHdrEcM0RLZNxP-2Fjtd1zEyQ
+    body_path: authored/javascript/jquery/scroll-libraries.md
