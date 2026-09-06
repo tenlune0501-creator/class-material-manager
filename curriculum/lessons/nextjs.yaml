@@ -1,0 +1,177 @@
+# Track: nextjs — Lesson 골격
+# 규격: curriculum/README.md §4
+# 강사 자료가 01~16 넘버링(2025) + 배포/환경변수로 정리돼 있어 그 흐름을 따른다.
+
+lessons:
+  # ── app-setup ─────────────────────────────────────────────────────────
+  - id: nextjs/app-setup/create-next-app
+    chapter: nextjs/app-setup
+    title: create-next-app으로 앱 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [nextjs, setup, create-next-app]
+    related_material_ids:
+      - 1wsIFI6TvOlQaOKo9v9dh-JAqQMo1dhWi5GYS9f-oELs
+
+  - id: nextjs/app-setup/sample-app-structure
+    chapter: nextjs/app-setup
+    title: 샘플 앱 구조 파악하기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [nextjs, project-structure, app-router]
+    related_material_ids:
+      - 1mEpVHXmFMNaE1WgtwrlBfd97saAxznV_rVGCNrobFho
+
+  # ── routing-and-layout ────────────────────────────────────────────────
+  - id: nextjs/routing-and-layout/layout-and-page
+    chapter: nextjs/routing-and-layout
+    title: layout과 page로 뼈대 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [nextjs, layout, page, app-router]
+    related_material_ids:
+      - 18CUxbf3--TfKOVa6o4monPBZTPUeejSS6m9DzcZSZMU
+    project_links:
+      - unit: momentalk/app-router-page-metadata
+        note: 서버 컴포넌트 page.jsx가 metadata를 선언하고 클라이언트 컴포넌트에 위임
+
+  - id: nextjs/routing-and-layout/file-based-routing
+    chapter: nextjs/routing-and-layout
+    title: 파일 기반 라우팅
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [nextjs, routing, dynamic-routes, link]
+    related_material_ids:
+      - 1KC_ycwHIIj-Lx3RJNT2x7eSQ8mIMWQoJ7VGknVVy2DM
+
+  - id: nextjs/routing-and-layout/spa-navigation
+    chapter: nextjs/routing-and-layout
+    title: SPA처럼 이동하기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 30
+    status: skeleton
+    tags: [nextjs, spa, client-navigation, prefetch]
+    related_material_ids:
+      - 11d8ppC3NPbP4SpV-5qHBH0JGBwgWAcV3ME5mf5fR4E0
+
+  # ── assets-and-styling ────────────────────────────────────────────────
+  - id: nextjs/assets-and-styling/public-assets
+    chapter: nextjs/assets-and-styling
+    title: public 폴더로 정적 자원 다루기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 10
+    status: skeleton
+    tags: [nextjs, public, static-assets, image]
+    related_material_ids:
+      - 1esDYub3lfcCsU8QMMkfTy3t64-dRmReHTR0f2zOEXe0
+
+  - id: nextjs/assets-and-styling/styling-in-nextjs
+    chapter: nextjs/assets-and-styling
+    title: Next.js에서 CSS 적용
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [nextjs, css, css-modules, global-css]
+    related_material_ids:
+      - 1ZxdBe7qwrMkUbEQ0O-sNhE6TDI6SnMOPtOv7FdAfVLc
+
+  # ── data-and-backend ──────────────────────────────────────────────────
+  - id: nextjs/data-and-backend/json-as-backend
+    chapter: nextjs/data-and-backend
+    title: JSON 데이터를 백엔드처럼 쓰기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [nextjs, route-handler, json, api, server]
+    related_material_ids:
+      - 1pVRYcYZM4XyofD3QoUm-NCuI0nfU4a-IXDig_vOW3lQ
+    project_links:
+      - unit: momentalk/password-route-handler
+        note: Route Handler에서 서버측 입력 검증과 신뢰 경계 처리
+
+  - id: nextjs/data-and-backend/caching
+    chapter: nextjs/data-and-backend
+    title: 캐시 동작 이해하기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 20
+    status: skeleton
+    tags: [nextjs, cache, revalidate, fetch-cache]
+    related_material_ids:
+      - 1HTav7144_WnoqG0Te0XTdp_umBFWwvU1dUPtbt6FxbE
+
+  # ── board-crud ────────────────────────────────────────────────────────
+  - id: nextjs/board-crud/list-and-read
+    chapter: nextjs/board-crud
+    title: 글 목록과 읽기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 10
+    status: skeleton
+    tags: [nextjs, crud, list, detail, practice]
+    related_material_ids:
+      - 1Cgfdp8l6wbW5DT_EsZk3nVpqLj8LYrbWDDlComch6u0
+      - 1LPMDi2RwM3ycFYpP9OryTvWrpgTHDiZ9WtimuO5UdSk
+
+  - id: nextjs/board-crud/create-update-delete
+    chapter: nextjs/board-crud
+    title: 글 생성·수정·삭제
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 20
+    status: skeleton
+    tags: [nextjs, crud, mutation, form, practice]
+    related_material_ids:
+      - 1r7c8dDwIztwquCzKBgu-04_0JGkU2TBMkjgLfHePYJk
+      - 1En630wIfLSwNpcOfJbd0Mp4FaWYDq_MkIjGm30zy39o
+      - 1W9XqBADjSVtpFuUMcQ8sDtXPF7a1yX3XBsONGsxFfgM
+      - 12XxhDowIcJiG109TECWyBg79FymQ6PLsO9AOTtH3ePc
+
+  # ── env-and-deployment ────────────────────────────────────────────────
+  - id: nextjs/env-and-deployment/build-and-deploy
+    chapter: nextjs/env-and-deployment
+    title: 빌드와 배포
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [nextjs, build, deploy, vercel]
+    related_material_ids:
+      - 1M7uAN4K5Bl9pfjU5K3Am3hBLhKNoctEkiiTKqTFeATc
+      - 1b4IhqIgN-ku2n1WnlPPgpwpXmFqpnIPm9RdIV_ZVj-w
+
+  - id: nextjs/env-and-deployment/environment-variables
+    chapter: nextjs/env-and-deployment
+    title: 환경변수 다루기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [nextjs, env, environment-variables, secrets]
+    related_material_ids:
+      - 1kw3FXI2AunNXfxnFC4zyV3-UU8Q6BiFGme2Dj6_3W6o

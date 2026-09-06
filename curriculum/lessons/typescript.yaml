@@ -1,0 +1,159 @@
+# Track: typescript — Lesson 골격
+# 규격: curriculum/README.md §4
+# 강사 자료가 01~10 넘버링으로 잘 정리돼 있어 그 흐름을 거의 그대로 따른다.
+
+lessons:
+  # ── setup-and-basic-types ──────────────────────────────────────────────
+  - id: typescript/setup-and-basic-types/intro-and-setup
+    chapter: typescript/setup-and-basic-types
+    title: TypeScript 소개와 개발환경 설정
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [typescript, setup, tsconfig, compiler]
+    related_material_ids:
+      - 1u4K8A6aZy2CQm2J779z1WU0RUWCGoOoHnLFnFizxXkw
+      - 1IX3_8v_OODnvSZiAAUtrqfHnkJyXsS6L
+
+  - id: typescript/setup-and-basic-types/basic-types-and-inference
+    chapter: typescript/setup-and-basic-types
+    title: 기본 타입과 타입 추론
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [typescript, types, inference, primitives]
+    related_material_ids:
+      - 1TW8aWvUFafFEUa-JtM50wYvz0SpwUFv3g7pinqKGHCw
+
+  # ── objects-interfaces-aliases ─────────────────────────────────────────
+  - id: typescript/objects-interfaces-aliases/objects-interface-type-alias
+    chapter: typescript/objects-interfaces-aliases
+    title: 객체 타입, interface, type 별칭
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [typescript, interface, type-alias, object-types]
+    related_material_ids:
+      - 1YU1DAaCW_rVa9ycfG8lJQi0k5jUvLDuUQRTYaiVGwK0
+
+  # ── functions-unions-guards ────────────────────────────────────────────
+  - id: typescript/functions-unions-guards/function-types
+    chapter: typescript/functions-unions-guards
+    title: 함수 타입
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [typescript, function-types, parameters, overload]
+    related_material_ids:
+      - 1lusAP0njMnYL7Z3oApeNvv56IRE4K5gblpj5e0yiCh0
+
+  - id: typescript/functions-unions-guards/unions-and-type-guards
+    chapter: typescript/functions-unions-guards
+    title: 유니언 타입과 타입 가드
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [typescript, union, narrowing, type-guard, discriminated-union]
+    related_material_ids:
+      - 1DreidRVMMRlnSW8bZ1GpF3zSnl1Zdd2uddwcARh2eog
+
+  # ── generics ──────────────────────────────────────────────────────────
+  - id: typescript/generics/generics
+    chapter: typescript/generics
+    title: 제네릭
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [typescript, generics, type-parameters, constraints]
+    related_material_ids:
+      - 1vngEn0yZUB2jS2QqfGOGB80_bGqlJ_XnVv3HQejm6QQ
+
+  # ── classes-and-modules ───────────────────────────────────────────────
+  - id: typescript/classes-and-modules/classes-and-access-modifiers
+    chapter: typescript/classes-and-modules
+    title: 클래스와 접근 제한자
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [typescript, class, public, private, readonly]
+    related_material_ids:
+      - 1J1TtJ0eMWIT1r_ICrF1M89qdo0Dba77jSNhbjANvlMw
+
+  - id: typescript/classes-and-modules/modules-and-namespaces
+    chapter: typescript/classes-and-modules
+    title: 모듈과 네임스페이스
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [typescript, modules, namespace, import]
+    related_material_ids:
+      - 1kKr-fdcvZt_2pgaATCs9lkwdD8cR9Ig8J5vJ55ib7d4
+
+  # ── advanced-and-utility-types ────────────────────────────────────────
+  - id: typescript/advanced-and-utility-types/utility-and-advanced-types
+    chapter: typescript/advanced-and-utility-types
+    title: 유틸리티 타입과 고급 타입
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 10
+    status: skeleton
+    tags: [typescript, utility-types, mapped-types, conditional-types, keyof]
+    related_material_ids:
+      - 1u5NUzv7wZC-jZKruRadITVvSYVeDiPCjCoVdSlSiRis
+
+  # ── typescript-in-practice ────────────────────────────────────────────
+  - id: typescript/typescript-in-practice/practice-project
+    chapter: typescript/typescript-in-practice
+    title: 실전 프로젝트 1 (CLI 또는 웹앱)
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 120
+    ord: 10
+    status: skeleton
+    tags: [typescript, project, cli, practice]
+    related_material_ids:
+      - 1iF9PprUXLgOKGBwqoTv0wP_7nhloyzX47xZEVA-Bx3U
+      - 1w6DCrqmtw9TrG05k9LHvk1_G4FcY96Nd
+
+  - id: typescript/typescript-in-practice/todo-app-with-typescript
+    chapter: typescript/typescript-in-practice
+    title: TypeScript로 만든 Todo 앱
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 90
+    ord: 20
+    status: skeleton
+    tags: [typescript, todo, dom, practice]
+    related_material_ids:
+      - 1WZHzUP9pKVyZqDb3LERNWb-RS2zueuvc
+
+  - id: typescript/typescript-in-practice/react-with-typescript
+    chapter: typescript/typescript-in-practice
+    title: React + TypeScript
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 30
+    status: skeleton
+    tags: [typescript, react, props-types, generics-components]
+    related_material_ids:
+      - 1iF9PprUXLgOKGBwqoTv0wP_7nhloyzX47xZEVA-Bx3U
+    sources:
+      - reference_slug: react/Using-TypeScript

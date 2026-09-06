@@ -1,0 +1,268 @@
+# 실전 프로젝트 학습 — Project / Unit 골격
+# 규격: project-learning/README.md §3
+
+projects:
+  # ══════════════════════════════════════════════════════════════════════
+  - id: momentalk
+    title: Momentalk
+    summary: >-
+      오르미 FE 13기 3차 팀 프로젝트(TEAM MOSAIC). 초성 퀴즈·랜덤 픽 같은 미니게임과
+      커뮤니티 게시판을 갖춘 React + Next.js App Router + MUI + Supabase 웹앱.
+      아래 Unit 은 고정 커밋에서 원문 그대로 발췌한 project_examples 11개를 감싼다.
+    repo_url: https://github.com/minho0391/est-fe-3rd-project
+    repo_ref: 004b4e856f95892d44759b8936e1e797c7216dc9
+    stack: [react, nextjs, mui, supabase, javascript]
+    ord: 10
+    units:
+      - id: momentalk/overview
+        title: 프로젝트 개요 — 구조와 스택
+        unit_kind: overview
+        feature_area: 전체
+        summary: 폴더 구조(app/ components/ hooks/ lib/ utils/), 라우팅, 서버·클라이언트 컴포넌트 경계, Supabase 사용 범위를 한눈에.
+        concepts: [프로젝트 구조, App Router, 서버/클라이언트 컴포넌트, 스택 선택]
+        related_material_ids:
+          - 18CUxbf3--TfKOVa6o4monPBZTPUeejSS6m9DzcZSZMU
+          - 1mEpVHXmFMNaE1WgtwrlBfd97saAxznV_rVGCNrobFho
+        example_ids: []
+        ord: 10
+
+      - id: momentalk/chosung-quiz-state-machine
+        title: 초성 퀴즈 — step 상태 머신
+        unit_kind: component
+        feature_area: 미니게임
+        summary: step 상태 하나로 setup·play·answer 화면을 전환하고, 자식에 콜백을 props로 내려 상태를 부모가 소유한다.
+        concepts: [useState, 조건부 렌더링, 이벤트 처리, 컴포넌트 합성, 상태 끌어올리기, MUI]
+        related_material_ids:
+          - 1JLvhOpeNX8-EdPkEp1eYgqQP4XmiVI6CEc3Tg9EQpro
+          - 1Et_OStoxyfctX2Shin0FizlwJbP0wt64hkG91wIKPQk
+          - 1Gjszssjrh0IglY766h3Xv-ggywJ4iPwI6EtxuxtigMo
+          - 1LDQv5dSs8Dq8vHLBw6LHFdhwyvIdjTqJJnoopzBUgd4
+        example_ids: [momentalk-chosung-quiz-state-machine]
+        ord: 20
+
+      - id: momentalk/random-pick-game-logic
+        title: 랜덤 픽 — 셔플과 여러 훅으로 짠 게임 로직
+        unit_kind: feature
+        feature_area: 미니게임
+        summary: Fisher–Yates 셔플, useState/useEffect/useMemo/useRef 조합, Supabase 조회까지 한 컴포넌트에서.
+        concepts: [게임 로직, Fisher–Yates 셔플, useState, useEffect, 정리 함수, useMemo, useRef, 조건부 렌더링, Supabase 조회]
+        related_material_ids:
+          - 1Gjszssjrh0IglY766h3Xv-ggywJ4iPwI6EtxuxtigMo
+          - 1Et_OStoxyfctX2Shin0FizlwJbP0wt64hkG91wIKPQk
+          - 14wmj7HCNsplUxO1VN49tqtCfaSow7md9TaQ1MS4shWU
+          - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
+        example_ids: [momentalk-random-pick-game-logic]
+        ord: 30
+
+      - id: momentalk/use-focus-trap-hook
+        title: useFocusTrap — 커스텀 훅
+        unit_kind: hook
+        feature_area: 접근성
+        summary: useEffect 정리 함수와 useRef로 만든 포커스 트랩 커스텀 훅. 이벤트 리스너 등록·해제의 정석.
+        concepts: [커스텀 훅, useEffect, 정리(cleanup) 함수, useRef, 이벤트 리스너, 웹 접근성]
+        related_material_ids:
+          - 14wmj7HCNsplUxO1VN49tqtCfaSow7md9TaQ1MS4shWU
+          - 1H5toucLXeXOM8U_-XBGC2Oyi4iUx7ZZVe-cTsk5kOuU
+          - 11IY6WWNEtSjZNJALMsL5IflXLuoedHnD86ICDQr3RUc
+        example_ids: [momentalk-use-focus-trap-hook]
+        ord: 40
+
+      - id: momentalk/button-variant-wrapper
+        title: 공통 Button — props 기본값과 variant 매핑으로 MUI 감싸기
+        unit_kind: component
+        feature_area: 공통 UI
+        summary: props 구조 분해와 기본값 매개변수, spread로 MUI Button을 감싼 재사용 컴포넌트.
+        concepts: [props 구조 분해, 기본값 매개변수, 공통 컴포넌트 재사용, MUI, 합성(spread)]
+        related_material_ids:
+          - 1m1LQPW0t_Slw1WRpgSOR_bcMy4PsBRgZYrn61sGGcvo
+          - 164YOHvw-BvtwB9Ue_x593k_C02cfFbnKgTuF6xD5qxw
+          - 1Ps3Gdi8rQLekmWM55h5bHc5AMJQlLOv4oQO5EljLRZI
+        example_ids: [momentalk-button-variant-wrapper]
+        ord: 50
+
+      - id: momentalk/hangul-chosung-util
+        title: 한글 초성 추출 — 유니코드 계산 순수 함수
+        unit_kind: feature
+        feature_area: 유틸리티
+        summary: 유니코드 오프셋 계산으로 초성을 뽑는 순수 함수. 부수효과 없어 테스트하기 쉽다.
+        concepts: [순수 함수, 문자열/유니코드 처리, 배열 메서드, 테스트 용이성]
+        related_material_ids:
+          - 1_dLoqERFBN2rIv8x40PtyGlzpbVGaOKAm0LUFEeYTEs
+          - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
+          - 1fhRBcjSPLJxleIVwjxC3KOhhNyHNL_vi6r8suTlEP-Q
+        example_ids: [momentalk-hangul-chosung-util]
+        ord: 60
+
+      - id: momentalk/app-router-page-metadata
+        title: App Router page — 서버 컴포넌트가 metadata 선언, 클라이언트에 위임
+        unit_kind: feature
+        feature_area: 라우팅
+        summary: page.jsx(서버 컴포넌트)가 정적 metadata를 export하고 실제 UI는 클라이언트 컴포넌트에 맡긴다.
+        concepts: [Next.js App Router, page.jsx, 정적 metadata, 서버/클라이언트 컴포넌트 경계, 라우팅]
+        related_material_ids:
+          - 18CUxbf3--TfKOVa6o4monPBZTPUeejSS6m9DzcZSZMU
+          - 1KC_ycwHIIj-Lx3RJNT2x7eSQ8mIMWQoJ7VGknVVy2DM
+        example_ids: [momentalk-app-router-page-metadata]
+        ord: 70
+
+      - id: momentalk/supabase-ssr-client
+        title: Supabase 서버 클라이언트 — 쿠키 어댑터로 세션 읽기
+        unit_kind: infra
+        feature_area: 인증
+        summary: createServerClient에 쿠키 get/set 어댑터를 넘겨 SSR에서 인증 세션을 읽는다.
+        concepts: [Supabase 연동, SSR, 쿠키 어댑터, createServerClient, 인증 세션]
+        related_material_ids:
+          - 1NFB5KVAZTGy2GEmVAD80IGTl2xC5wpFh8kiGrPETHzY
+          - 1lihKRwRC3KHP4RXBvzGiuIG7bLEJRkgCilkk1LBSZPo
+        example_ids: [momentalk-supabase-ssr-client]
+        ord: 80
+
+      - id: momentalk/next-middleware-session
+        title: 미들웨어에서 Supabase 세션 갱신
+        unit_kind: infra
+        feature_area: 인증
+        summary: 미들웨어가 매 요청마다 세션을 갱신하고 쿠키를 NextResponse로 전파한다.
+        concepts: [Next.js 미들웨어, 세션 갱신, 쿠키 전파, NextResponse, 라우팅]
+        related_material_ids:
+          - 1KC_ycwHIIj-Lx3RJNT2x7eSQ8mIMWQoJ7VGknVVy2DM
+          - 1NFB5KVAZTGy2GEmVAD80IGTl2xC5wpFh8kiGrPETHzY
+        example_ids: [momentalk-next-middleware-session]
+        ord: 90
+
+      - id: momentalk/password-route-handler
+        title: 비밀번호 변경 Route Handler — 서버측 검증과 신뢰 경계
+        unit_kind: feature
+        feature_area: 인증
+        summary: Route Handler에서 입력을 서버가 다시 검증한다. 클라이언트 검증은 신뢰 경계 밖.
+        concepts: [Route Handler, API, 폼/입력 검증, 인증, 신뢰 경계, 에러 처리]
+        related_material_ids:
+          - 1M7uAN4K5Bl9pfjU5K3Am3hBLhKNoctEkiiTKqTFeATc
+          - 11yovWterP-P7ykquVIBWJFJ9QOxWQTYBlrsspDs1ODU
+          - 1_YT0-5KoVzW2_Xm1uDPzKYNrnO35VEpRhPsKCGD6z8I
+        example_ids: [momentalk-password-route-handler]
+        ord: 100
+
+      - id: momentalk/community-crud-embed
+        title: 게시판 조회 — PostgREST embed 조인 + 행 매핑
+        unit_kind: data_model
+        feature_area: 커뮤니티
+        summary: PostgREST embed로 작성자·댓글을 한 번에 조인해 N+1을 피하고, 결과를 화면용 형태로 매핑한다.
+        concepts: [Supabase CRUD, PostgREST embed 조인, N+1 회피, 데이터 매핑, 게시판]
+        related_material_ids:
+          - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
+          - 1mfJcfoBmjHjA6EXkPX2iy-Gww18Z-FxAFPz-XJvSyDk
+          - 1rsBbWw5onKYlPIrqH_o1gtVUq5wQPK9anoD1R6d4mwM
+          - 1kCaN-DWCp2QUo2Bq3yn4AQiDH8_tp--k8Gf6KUtScO0
+        example_ids: [momentalk-community-crud-embed]
+        ord: 110
+
+      - id: momentalk/signin-controlled-form
+        title: 로그인 폼 — 제어 컴포넌트, useState, 리다이렉트
+        unit_kind: component
+        feature_area: 인증
+        summary: 이메일·비밀번호를 제어 컴포넌트로 받고, useSearchParams로 리다이렉트 목적지를 읽어 로그인 후 이동한다.
+        concepts: [로그인/인증, 제어 컴포넌트 폼, useState, 이벤트 처리, 리다이렉트, 에러 처리, useSearchParams]
+        related_material_ids:
+          - 1_YT0-5KoVzW2_Xm1uDPzKYNrnO35VEpRhPsKCGD6z8I
+          - 1WMmAYKcERJ0YfJR4Hxpp181m28O9-SuycckMF6XcwHE
+          - 11yovWterP-P7ykquVIBWJFJ9QOxWQTYBlrsspDs1ODU
+          - 1JLvhOpeNX8-EdPkEp1eYgqQP4XmiVI6CEc3Tg9EQpro
+        example_ids: [momentalk-signin-controlled-form]
+        ord: 120
+
+  # ══════════════════════════════════════════════════════════════════════
+  - id: class-material-manager
+    title: Class Material Manager
+    summary: >-
+      이 저장소. 강사 Google Docs 수업자료를 수집·분류·보충하는 TypeScript/Node CLI
+      데이터 파이프라인과, 그 결과를 읽기 전용으로 보여주는 Next.js 16 + MUI 뷰어.
+      Supabase 는 인증과 (일부) 데이터 저장에 쓴다. Unit 은 이 저장소 코드에서 직접 확인.
+    repo_url: https://github.com/minho0391/class-material-manager
+    repo_ref: HEAD
+    stack: [typescript, nodejs, nextjs, mui, supabase]
+    ord: 20
+    units:
+      - id: class-material-manager/overview
+        title: 프로젝트 개요 — 파이프라인과 뷰어
+        unit_kind: overview
+        feature_area: 전체
+        summary: 빌드 없는 Node 24 TS 실행, src/ CLI 10단계 refresh 파이프라인, viewer/ 읽기 전용 뷰어, data/ 1차 저장소와 Supabase 이관 범위.
+        concepts: [모노 저장소 구조, CLI 파이프라인, 증분 처리, 읽기 전용 뷰어]
+        related_material_ids:
+          - 1u4K8A6aZy2CQm2J779z1WU0RUWCGoOoHnLFnFizxXkw
+          - 1aiShBBmoTCUJF4JXZhf3wJU58IVAOxxLSbkb7Xf00bA
+        example_ids: []
+        ord: 10
+
+      - id: class-material-manager/data-pipeline-refresh
+        title: refresh 파이프라인 — 10단계 증분 실행
+        unit_kind: feature
+        feature_area: 데이터 파이프라인
+        summary: src/refresh/refresh-runner.ts. 링크 목록 → 수집 → 분류 → 압축 확인 → 공식문서 보충 → 관계 재계산 → 통합자료 → 비교 → 학습설명. 각 단계 증분.
+        concepts: [파이프라인 오케스트레이션, 증분 처리, 단계 분리, CLI 서브커맨드]
+        related_material_ids:
+          - 1kKr-fdcvZt_2pgaATCs9lkwdD8cR9Ig8J5vJ55ib7d4
+          - 1lusAP0njMnYL7Z3oApeNvv56IRE4K5gblpj5e0yiCh0
+        example_ids: []
+        ord: 20
+
+      - id: class-material-manager/frontmatter-parsing
+        title: frontmatter 파싱 — 수업자료 .md 읽기
+        unit_kind: component
+        feature_area: 데이터 파이프라인
+        summary: src/sync/frontmatter.ts. YAML frontmatter + 본문을 분리해 파이프라인과 뷰어가 공유. 이 커리큘럼 Source of Truth 도 같은 방식.
+        concepts: [frontmatter, YAML 파싱, 순수 함수, 재사용 모듈]
+        related_material_ids:
+          - 1YU1DAaCW_rVa9ycfG8lJQi0k5jUvLDuUQRTYaiVGwK0
+        example_ids: []
+        ord: 30
+
+      - id: class-material-manager/postgrest-sync
+        title: PostgREST 동기화와 파이프라인 격리
+        unit_kind: infra
+        feature_area: 데이터 파이프라인
+        summary: src/sync/postgrest-client.ts(청크 upsert, 페이지네이션 select), sync-runner.ts, verify.ts. project_examples 는 별도 CLI·verify 로 격리 — 신규 curriculum 시스템도 같은 패턴.
+        concepts: [PostgREST, upsert, 청크 처리, 파이프라인 격리, 검증]
+        related_material_ids:
+          - 1NFB5KVAZTGy2GEmVAD80IGTl2xC5wpFh8kiGrPETHzY
+          - 1Hn4jKnNU0sURe1TUOIE_ESNK3Kr6nMH-TcsJbEQ35Wk
+        example_ids: []
+        ord: 40
+
+      - id: class-material-manager/viewer-app-router
+        title: 뷰어 — Next.js 16 App Router 읽기 전용 화면
+        unit_kind: feature
+        feature_area: 뷰어
+        summary: viewer/app. 홈·자료 상세(/m)·참조(/r)·학습설명(/s)·비교·검색·다시공부하기. 주소 ID를 index.json 과 대조한 뒤에만 파일을 연다(쓰기·삭제 코드 없음).
+        concepts: [App Router, 서버 컴포넌트, 동적 라우트, 입력 검증, 읽기 전용 설계]
+        related_material_ids:
+          - 18CUxbf3--TfKOVa6o4monPBZTPUeejSS6m9DzcZSZMU
+          - 1KC_ycwHIIj-Lx3RJNT2x7eSQ8mIMWQoJ7VGknVVy2DM
+          - 1ZxdBe7qwrMkUbEQ0O-sNhE6TDI6SnMOPtOv7FdAfVLc
+        example_ids: []
+        ord: 50
+
+      - id: class-material-manager/supabase-auth-proxy
+        title: Supabase 인증 — 서버 클라이언트와 미들웨어 세션
+        unit_kind: infra
+        feature_area: 인증
+        summary: viewer/lib/supabase/{server,proxy,actions}.ts. 이메일/비밀번호 로그인, 쿠키 세션, proxy.ts(Next 16 미들웨어)가 요청마다 갱신. 모든 화면이 로그인 요구.
+        concepts: [Supabase Auth, SSR 쿠키 세션, 미들웨어, 서버 액션, 보호된 라우트]
+        related_material_ids:
+          - 1lihKRwRC3KHP4RXBvzGiuIG7bLEJRkgCilkk1LBSZPo
+          - 1n7X2GMDnGnzKD4MKqSIG6cc-qFRxPKvDBupYQwgzPxY
+          - 1_YT0-5KoVzW2_Xm1uDPzKYNrnO35VEpRhPsKCGD6z8I
+        example_ids: []
+        ord: 60
+
+      - id: class-material-manager/viewer-db-mapping
+        title: 뷰어의 DB 매핑 — 파일과 테이블 사이
+        unit_kind: data_model
+        feature_area: 뷰어
+        summary: viewer/lib/{db,db-map,projectExamples}.ts. 로컬 data/ 파일이 1차 저장소이고, 일부 화면은 Supabase 테이블도 읽는다. 두 소스의 형태를 맞추는 매핑 계층.
+        concepts: [데이터 매핑, 소스 추상화, 스키마 대응, 점진적 이관]
+        related_material_ids:
+          - 1gmX8yMuc3IJPkYjkzUoOHjboPirybRBDMjeK3LuxKWQ
+          - 14E6y0TieVisd_jpln3_F9wwbmdR4LKka7XJ05KZJ1zo
+        example_ids: []
+        ord: 70

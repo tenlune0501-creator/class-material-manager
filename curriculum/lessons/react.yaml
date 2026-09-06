@@ -1,0 +1,647 @@
+# Track: react — Lesson 골격
+# 규격: curriculum/README.md §4
+# 참고: subject=react 로 분류됐지만 실제 주제가 DB/배포인 자료는
+#       data-and-backend / deployment-and-infra 트랙에서 참조한다(여기서 중복 참조하지 않음).
+
+lessons:
+  # ── setup-and-jsx ───────────────────────────────────────────────────────
+  - id: react/setup-and-jsx/why-react-for-publishers
+    chapter: react/setup-and-jsx
+    title: 퍼블리셔가 React를 배우는 이유
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 10
+    status: skeleton
+    tags: [react, intro, mental-model]
+    related_material_ids:
+      - 1lHGLaDCm7Ug_mS-3KrZ1r9vmE93o4MJyw3yi60j8nj0
+      - 1iCvZI0msUX1IsK8kZC51_vKQ9lDrKYsCDP_23pNsoBk
+
+  - id: react/setup-and-jsx/dev-environment
+    chapter: react/setup-and-jsx
+    title: Vite + React 개발환경 세팅
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 20
+    status: skeleton
+    tags: [react, vite, setup, npm]
+    related_material_ids:
+      - 1gvijL_vSUC-mSP03eE_wEGZkjcb6MGES7734SKUWGJs
+      - 1orYZSB7hNsCAmCMyrobOSCkVorhUkCCAZOL9zzS_Z_E
+      - 1wrl236qROd_hjiCOzQqWjF_6naBEBrS6nN7LDxtfF88
+      - 1k0hObTy4naQwvnx-jVg_J2pwtj3tNwFoIgMQ3UTmjSI
+      - 1VNXrsvNf7SMF2H0XjKyWYOVW1QjxlqhIJLEEtAbZlh8
+      - 1B5SKP6RYbz77fr508x4NdMPCmAUDIfVf
+    sources:
+      - reference_slug: react/Installation
+
+  - id: react/setup-and-jsx/jsx
+    chapter: react/setup-and-jsx
+    title: JSX 문법과 HTML의 차이
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 30
+    status: skeleton
+    tags: [react, jsx, syntax]
+    related_material_ids:
+      - 1aVd84kX2qizpUkmlRXvzQO06eCP9I-64mxVkHYYMPv8
+      - 1a0QJx6lfbzTr1FHQroS20cq07J3jk9htwcOkMNdYq0E
+
+  # ── components-and-props ────────────────────────────────────────────────
+  - id: react/components-and-props/creating-components
+    chapter: react/components-and-props
+    title: 컴포넌트 만들고 파일로 분리하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [react, component, structure]
+    related_material_ids:
+      - 1NEc37gENWll9_lbm1jpNIqpO3b84z8uia8ITuNCTXFc
+      - 184rtxdCAnpjIk7S4Ovc4PDkeXy4La-lQJ4Oo7tmDg7Q
+      - 1LDQv5dSs8Dq8vHLBw6LHFdhwyvIdjTqJJnoopzBUgd4
+
+  - id: react/components-and-props/passing-props
+    chapter: react/components-and-props
+    title: props로 데이터 전달하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [react, props, data-flow, destructuring]
+    related_material_ids:
+      - 1m1LQPW0t_Slw1WRpgSOR_bcMy4PsBRgZYrn61sGGcvo
+      - 164YOHvw-BvtwB9Ue_x593k_C02cfFbnKgTuF6xD5qxw
+    project_links:
+      - unit: momentalk/button-variant-wrapper
+        note: props 기본값과 spread로 MUI 버튼을 감싸는 실제 공통 컴포넌트
+
+  # ── state-and-events ────────────────────────────────────────────────────
+  - id: react/state-and-events/usestate-basics
+    chapter: react/state-and-events
+    title: useState로 상태 관리 시작하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: authored
+    tags: [react, state, useState, hooks, rerender]
+    related_material_ids:
+      - 1JLvhOpeNX8-EdPkEp1eYgqQP4XmiVI6CEc3Tg9EQpro
+      - 1z5idwIpcnePvJWVwa_PmoJZgp1r52fzh6oa-g3Xuscg
+      - 1Ps3Gdi8rQLekmWM55h5bHc5AMJQlLOv4oQO5EljLRZI
+      - 1ATnGguACNmVAFOBCng1Us_kgBz9gadab
+    sources:
+      - reference_slug: react/useState
+    prerequisites:
+      - react/setup-and-jsx/jsx
+      - react/components-and-props/passing-props
+    project_links:
+      - unit: momentalk/chosung-quiz-state-machine
+        note: step 상태 하나로 setup·play·answer 화면 단계를 전환하는 실제 예
+      - unit: momentalk/signin-controlled-form
+        note: 입력값을 useState로 제어하는 로그인 폼
+    body_path: authored/react/state-and-events/usestate-basics.md
+
+  - id: react/state-and-events/events-and-handlers
+    chapter: react/state-and-events
+    title: 이벤트 핸들링 (onClick, onChange)
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [react, events, onClick, onChange, handler]
+    related_material_ids:
+      - 19w6uu-g9dyoacyEANxUApzRkp3FX2m1hZGCJPSotI3U
+      - 1Et_OStoxyfctX2Shin0FizlwJbP0wt64hkG91wIKPQk
+    prerequisites:
+      - react/state-and-events/usestate-basics
+
+  # ── rendering-logic ────────────────────────────────────────────────────
+  - id: react/rendering-logic/conditional-rendering
+    chapter: react/rendering-logic
+    title: 조건부 렌더링
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [react, conditional-rendering, jsx]
+    related_material_ids:
+      - 1Gjszssjrh0IglY766h3Xv-ggywJ4iPwI6EtxuxtigMo
+    project_links:
+      - unit: momentalk/chosung-quiz-state-machine
+        note: "{step === '...' && <Child/>} 패턴"
+
+  - id: react/rendering-logic/lists-and-keys
+    chapter: react/rendering-logic
+    title: 리스트 렌더링과 key
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 20
+    status: skeleton
+    tags: [react, list, map, key, reconciliation]
+    related_material_ids:
+      - 10pXiQ1-JoSE-ELl0BmMu6mX5LiPnLCH1c-551xnrPkY
+
+  # ── hooks-effect-and-lifecycle ─────────────────────────────────────────
+  - id: react/hooks-effect-and-lifecycle/useeffect-and-lifecycle
+    chapter: react/hooks-effect-and-lifecycle
+    title: useEffect와 컴포넌트 생명주기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [react, useEffect, lifecycle, cleanup, side-effect]
+    related_material_ids:
+      - 14wmj7HCNsplUxO1VN49tqtCfaSow7md9TaQ1MS4shWU
+      - 1hg_rdVuQsgzGyptOYaw6AfADkUTagzPVU4ybN4uh7qk
+      - 1dr40cVwMdPVW_3IEQWE6fv-4EjWTX9UY
+    sources:
+      - reference_slug: react/useEffect
+    project_links:
+      - unit: momentalk/use-focus-trap-hook
+        note: useEffect 정리(cleanup) 함수로 이벤트 리스너를 해제하는 실제 예
+
+  - id: react/hooks-effect-and-lifecycle/function-vs-class-components
+    chapter: react/hooks-effect-and-lifecycle
+    title: 함수형과 클래스형 컴포넌트 비교
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [react, class-component, function-component, history]
+    related_material_ids:
+      - 1ZvMqD542Ib1vvfw0WHu9zwZu1-g5tXNLjiXqXlgkquo
+    sources:
+      - reference_slug: react/Component
+
+  # ── hooks-ref-memo-callback ────────────────────────────────────────────
+  - id: react/hooks-ref-memo-callback/useref
+    chapter: react/hooks-ref-memo-callback
+    title: useRef — 리렌더 없이 값·DOM 참조
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [react, useRef, dom, mutable-ref]
+    related_material_ids:
+      - 11IY6WWNEtSjZNJALMsL5IflXLuoedHnD86ICDQr3RUc
+    sources:
+      - reference_slug: react/useRef
+    project_links:
+      - unit: momentalk/use-focus-trap-hook
+        note: useRef로 컨테이너 요소를 잡아 포커스 트랩 구현
+
+  - id: react/hooks-ref-memo-callback/usememo-usecallback
+    chapter: react/hooks-ref-memo-callback
+    title: useMemo와 useCallback
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [react, useMemo, useCallback, memoization, performance]
+    related_material_ids:
+      - 1ityo_Iuprr05vhTk4JyjmUrAmt3vl-7zs7Zd3fU4Zl4
+      - 17MmYtDVPs1hyHrRSQqSquLgZYpn22jBVT0AmzPiW1og
+    sources:
+      - reference_slug: react/useMemo
+      - reference_slug: react/useCallback
+
+  # ── custom-hooks ───────────────────────────────────────────────────────
+  - id: react/custom-hooks/writing-custom-hooks
+    chapter: react/custom-hooks
+    title: 커스텀 훅 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [react, custom-hook, reuse, logic-extraction]
+    related_material_ids:
+      - 1H5toucLXeXOM8U_-XBGC2Oyi4iUx7ZZVe-cTsk5kOuU
+      - 1agxOyJ-iaV_WIo0dX_Ma9i2WK2lkJPBS
+      - 1OTNXRKEkpp9fBFfTM2PN0LaAx7XTZEg4
+    sources:
+      - reference_slug: react/rules-of-hooks
+    project_links:
+      - unit: momentalk/use-focus-trap-hook
+        note: useEffect + useRef를 묶은 useFocusTrap 커스텀 훅
+
+  # ── styling-in-react ───────────────────────────────────────────────────
+  - id: react/styling-in-react/applying-css
+    chapter: react/styling-in-react
+    title: React에서 CSS 적용하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [react, css, css-modules, styling]
+    related_material_ids:
+      - 1KyP9O0IaEBn1foRQIHXqzXIYjwvqnLT9IJZVnwRPp_M
+
+  - id: react/styling-in-react/images-and-icons
+    chapter: react/styling-in-react
+    title: 이미지·아이콘 불러오기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [react, assets, image, icon, import]
+    related_material_ids:
+      - 1jhiPigTL6WmRKFnE9eXiZuu-cqaiAp0Hnk7zOKGQM80
+
+  # ── routing ────────────────────────────────────────────────────────────
+  - id: react/routing/react-router-dom
+    chapter: react/routing
+    title: React Router DOM
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [react, react-router, routing, spa]
+    related_material_ids:
+      - 1DP7OhXDFNaMdpy6SCO_G4zH0R3nZyfYD5w1vgp9V000
+      - 1rwB-ql-DY6hFYnjYs4sDmUurV9Gt4qgDHfWzG3UuDxM
+      - 1TRypbCoPA_ws6ZzWEgxZyfS17jZBq95t
+
+  - id: react/routing/router-mission
+    chapter: react/routing
+    title: 실전 — 라우터 미션
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: skeleton
+    tags: [react, react-router, practice, mission]
+    related_material_ids:
+      - 1QY0VqaDsQsLBtctH7PwB1SGWGhpj1n3GUXtJmvbOiy0
+      - 1nL6ZmqlkdfHgneWfSILL6V89jeajAbPRhlkwxrqiEHI
+      - 1ob-o3WlDEiyF_udGfhA4MQTB_fG8UP8f
+
+  # ── data-fetching ──────────────────────────────────────────────────────
+  - id: react/data-fetching/fetching-in-react
+    chapter: react/data-fetching
+    title: React에서 Ajax/fetch로 데이터 연동
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [react, ajax, fetch, useEffect, data-fetching]
+    related_material_ids:
+      - 1WCflwTKb_6J-dTa7l71JNirtxcfa-mIGeYMPOhD_UoM
+      - 1wUgE9qmUV6Xj-AxPGifPv9OhzHxQcaBfwhKtyFzy6OI
+      - 1AEIr3Ugsq_zDPjbuWAjNO9LEzRDGs7tk
+      - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
+
+  # ── state-management ───────────────────────────────────────────────────
+  - id: react/state-management/context-api
+    chapter: react/state-management
+    title: Context API
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [react, context, prop-drilling, global-state]
+    related_material_ids:
+      - 1Fl9V6dt0oKMz7QrzUPBO4M2c2LIKHWcWHTITx5eY3yc
+      - 1UF3v3QjzQgZXrD8r4GOd1K4Cj7DwNekp
+    sources:
+      - reference_slug: react/useContext
+      - reference_slug: react/createContext
+
+  - id: react/state-management/redux
+    chapter: react/state-management
+    title: Redux와 프로젝트 도입
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: skeleton
+    tags: [react, redux, store, reducer, state-management]
+    related_material_ids:
+      - 1TLo7G8cwQbOzyCj_Db78_LYGChfaftRhGKDaAN4PnZI
+      - 19s_s78Chllf9hPjDPny3CI4i_ksuhzfj3h5Z8phib44
+      - 19Ojz7VxUScH5TJeNdqvntyVjggcPyFt0
+
+  # ── board-crud-app ─────────────────────────────────────────────────────
+  - id: react/board-crud-app/board-ui-and-list
+    chapter: react/board-crud-app
+    title: 게시판 UI와 목록 조회
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 10
+    status: skeleton
+    tags: [react, board, list, crud, practice]
+    related_material_ids:
+      - 15h7tMuI67jHapvXEW9Fug4g6lArnNgVq9BqEoNPaImo
+      - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
+      - 1OxTMR5Q9sE6zsgq2R-CPCFuFPysMPv9HoKDJ1vrtBRU
+      - 1BavurLXerauVD6im1pp_KqKT1B50FWRbKrGtdrTBq0I
+      - 1zpIYS4w_Mn_B1t5lgMsjGxIU3E1ROpwd8JLwDisCf3Q
+      - 1bJ9rmZ7rUcYcFU8QimOKRWbXAphew2TP
+      - 1a3QZKQlOnWb4T5UB4uwgClajgsDRHSE6
+      - 1I1pWDuAZ2_LrkA5NG-dgtfekAY9cnKwpBr4oNTRLxTU
+
+  - id: react/board-crud-app/create-update-delete
+    chapter: react/board-crud-app
+    title: 글 쓰기·수정·삭제
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 20
+    status: skeleton
+    tags: [react, crud, form, mutation, practice]
+    related_material_ids:
+      - 1peKntI-8PW-rTz3_YEqlvQ5o9WgWOPbcL0-13fyerVE
+      - 1KeXe0iqOamu8O2Sy37-3aTCvuKgjtanc0sHFfEOLCqQ
+      - 1mfJcfoBmjHjA6EXkPX2iy-Gww18Z-FxAFPz-XJvSyDk
+      - 1bos2ISUIaSOOV4QvfS6odYxRW65jUoxfdsOVetOaQMQ
+      - 1rsBbWw5onKYlPIrqH_o1gtVUq5wQPK9anoD1R6d4mwM
+      - 1kCaN-DWCp2QUo2Bq3yn4AQiDH8_tp--k8Gf6KUtScO0
+
+  - id: react/board-crud-app/board-with-firestore
+    chapter: react/board-crud-app
+    title: 외부 DB(Firestore)에 붙인 게시판
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 80
+    ord: 30
+    status: skeleton
+    tags: [react, firestore, crud, realtime, database, practice]
+    related_material_ids:
+      - 10tvGjA_zcG_nB0TbtKX3Y2E2HrQ-rC-ZrSp4Qk1XQ18
+      - 1OylAVlJs5dd-N8THl1Z2dtaBzHs-ntk8dOm_GUYx9zU
+      - 1jaw2HQSehc14S_tBh2JMjhN-tqUXjx-H67YJV1vTheM
+      - 1be3S2o6brQ_5_Riwe1l5CdQP7A2Ocz3NRAtPjJyFfXM
+      - 1ZnXC7D8AGkocyuI9ORQczsy_PCGj1RqggM9plKCq_JU
+
+  - id: react/board-crud-app/file-upload
+    chapter: react/board-crud-app
+    title: 파일 첨부와 업로드·삭제
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 40
+    status: skeleton
+    tags: [react, file-upload, storage, practice]
+    related_material_ids:
+      - 1AkBUevgwRooF_sqef8D80r2tGnx4Swm1LwWWzgAVWCk
+      - 1xOMXJxTmpgkoVd8UDm9xWu_UP2HWI5SdpLxc8SjSLPU
+      - 104xxvLKOsWPr6n93ncFBxTlmPSBoampNCZC54UANcuA
+      - 17bLGPEf8dAeyKc2hXPdsCuswVb-mBqb_
+
+  # ── firebase-integration ───────────────────────────────────────────────
+  - id: react/firebase-integration/setup-and-firestore
+    chapter: react/firebase-integration
+    title: Firebase 설정과 Firestore 연동
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 10
+    status: skeleton
+    tags: [react, firebase, firestore, baas, setup]
+    related_material_ids:
+      - 1bavjSi0xWx-Kgks4at7mCi4fJuyPoNaeJKqQJLcYy7o
+      - 1-4o3Z2qGu6vB4aeqUdKuJS0itmC72w1LMZ-N1jJ2QK0
+
+  - id: react/firebase-integration/auth-email-and-social
+    chapter: react/firebase-integration
+    title: Firebase Auth — 이메일·소셜 로그인·로그아웃
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 20
+    status: skeleton
+    tags: [react, firebase, auth, oauth, login, logout]
+    related_material_ids:
+      - 1n7X2GMDnGnzKD4MKqSIG6cc-qFRxPKvDBupYQwgzPxY
+      - 1_YT0-5KoVzW2_Xm1uDPzKYNrnO35VEpRhPsKCGD6z8I
+      - 1WMmAYKcERJ0YfJR4Hxpp181m28O9-SuycckMF6XcwHE
+      - 1xVNkx0zawoduCMk0Qgs4pMgKKEyIlJFQ-hDxnC6qJoc
+
+  # ── optimization-and-refactoring ───────────────────────────────────────
+  - id: react/optimization-and-refactoring/reducing-rerenders
+    chapter: react/optimization-and-refactoring
+    title: 불필요한 렌더 줄이기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [react, performance, memo, optimization]
+    related_material_ids:
+      - 1Y_4ajA89SNegKtIZX6lLczA3_JUfz3jUuA0QHBak3M0
+    sources:
+      - reference_slug: react/memo
+
+  - id: react/optimization-and-refactoring/refactoring-components
+    chapter: react/optimization-and-refactoring
+    title: 컴포넌트 구조 리팩토링
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [react, refactoring, structure]
+    related_material_ids:
+      - 1RTWGlU0b_R-ueTd4c8U7pPdGLBvLkIpQkowKWBHktUw
+
+  # ── testing ────────────────────────────────────────────────────────────
+  - id: react/testing/tdd-practice
+    chapter: react/testing
+    title: React에서 TDD 실습
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [react, tdd, testing, jest, react-testing-library]
+    related_material_ids:
+      - 1Jg_F1mqoikOOqE4gFXJS1cysZRjaDFPA_-s11vtKczE
+
+  # ── seo-and-rendering ──────────────────────────────────────────────────
+  - id: react/seo-and-rendering/csr-vs-ssr
+    chapter: react/seo-and-rendering
+    title: CSR과 SSR
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [react, csr, ssr, rendering, nextjs-intro]
+    related_material_ids:
+      - 1PCcfvs93XEb4lqKh-V9Z7hA4D7b5cc9TXERLFm4t7z8
+
+  - id: react/seo-and-rendering/react-seo
+    chapter: react/seo-and-rendering
+    title: React 앱의 SEO
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [react, seo, meta, ssr]
+    related_material_ids:
+      - 1thbu8MKlX-u3gKdNzThlKF-56w2e3qyo-TAdipGI38I
+
+  # ── ui-libraries ──────────────────────────────────────────────────────
+  - id: react/ui-libraries/datepicker-and-swiper
+    chapter: react/ui-libraries
+    title: 데이트피커와 스와이퍼
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [react, datepicker, swiper, ui-library]
+    related_material_ids:
+      - 1BhV087Hh_BZm26KqfboEHRd09WvswkeHz_jzwhjjeBg
+      - 1cqIEN2t9v8bmvgjb8fh74Bx6fCIgBoyIkIRo2U6Oql4
+      - 1k80DnPEL_7Tdlx6oC59yARGTHsf3DKL1
+
+  - id: react/ui-libraries/chartjs-in-react
+    chapter: react/ui-libraries
+    title: React에서 Chart.js 쓰기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [react, chartjs, visualization]
+    related_material_ids:
+      - 17Pfk5sLLHCsAHo_6609VTXRxP1PpE6Nx6u-SNdjwJKI
+
+  # ── missions ──────────────────────────────────────────────────────────
+  - id: react/missions/react-basic-mission
+    chapter: react/missions
+    title: React Basic Mission
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 120
+    ord: 10
+    status: skeleton
+    tags: [react, mission, capstone, practice]
+    related_material_ids:
+      - 17skefIHLsgs97Y3R7mdzKWb8vG2dVvWA4AuNWH_0sTQ
+      - 1gZHjfRVNSgQjcQQ4LCYRcuBM7weDZDi8QmPsN6kd8f0
+      - 1FovqWYuEFX5HFt9Zj2PbI9j5-ZaPRvhRn_ckotLXOuQ
+
+  - id: react/missions/portfolio-next-project
+    chapter: react/missions
+    title: "미션 7 — Next.js 포트폴리오 프로젝트"
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 240
+    ord: 20
+    status: skeleton
+    tags: [react, nextjs, mission, portfolio, capstone, auth, crud]
+    related_material_ids:
+      - 1Xl9WGO67SFyXSnNxNuAWeloqs23fkzViiaqHHHrhqOI
+      - 1MTQQ8p3B1BwWCLQ4NZKa8YlJkGq7j_fX9BBYNq4XqMs
+      - 1DaI47_4NGS2fxY0H-89oDfM6_sdh7Do7huV6Lg7Rtjs
+      - 1-v08-i8vKVhNDs3K-ClUbk58pElbUyHsjkAZXlu3VwU
+      - 12heIiuI1S-aDL5YNKnYY6_sjg99pSv9XqPGpLRd3PM4
+      - 1F6bHHdq_xbi-GwCAmUs3pEpdkak72_u27mA7h77NHtM
+      - 1zR1UbQStVGowt7j6TlEDdkfT9dqltiqwUD-em-Mbqr0
+      - 1CHVG06EkNAQLGr6JHH7kOr3LU9ShgJ1WrsRToZ-yo9M
+      - 1YmIbPNGYiGNZjv8nxNUfhEQWCe5y0lIq4JQmnTHvs04
+      - 11yovWterP-P7ykquVIBWJFJ9QOxWQTYBlrsspDs1ODU
+      - 1j2QUk1wUrx_MUmKl2NL7VvrYw2f5WugY29i07XSlhN4
+      - 1WNWY1eoqHwpAVNdhnvTvPgVCFxoJMDnY57BdEMzNF38
+      - 1vmABcUPCl1j2O4ScZgSTaERTnaxh3if20cP_jpbM_c8
+      - 19Jx0c6_Z1ZGTR9GFK6fJVDX0ZpraOcjLyRFQoVlRMGA
+      - 1cusGghzQ5ROMXbXEgouHJ3sG1DKqdit5
+
+  - id: react/missions/react-basic-mission-8
+    chapter: react/missions
+    title: React Basic Mission 8
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 180
+    ord: 30
+    status: skeleton
+    tags: [react, mission, capstone, practice]
+    related_material_ids:
+      - 1gDF0BVE4sFtEwJXjGCl93p10zXlHvzXOM7hA87zNAJM
+      - 1O9496od15d2eFjx_LgdRDaRqvfZ0gITm1K_xaBQz80c
+      - 1Jyha-NxLXz6teWjNaRdzfdG9P1QPswwioZDYdTMnhGs
+      - 1AQdGoQUUcuoUgfiKXTNvtzNf_j3jFRpZ
+
+  # ── portfolio-project ──────────────────────────────────────────────────
+  - id: react/portfolio-project/profile-edit-and-timeline
+    chapter: react/portfolio-project
+    title: 프로필 편집과 타임라인
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 90
+    ord: 10
+    status: skeleton
+    tags: [react, portfolio, profile, timeline, practice]
+    related_material_ids:
+      - 1iObU3n2lHX823U9Om2tZqUiOzHbWE602t_wIdCtJnro
+      - 1LyfAMLdaVHcEcFLbvFBAKyJav0AXm_8UzzzB7oDpsaA
+      - 18-i6VFtzV-14OLI8Yi7_KrF3PFsfej-j-dLsleoSgvE
+      - 1PUjS-7voqhcPnI1v8bh7lzD-trTZhUuN
+
+  - id: react/portfolio-project/pagination-and-deploy
+    chapter: react/portfolio-project
+    title: 페이지네이션과 배포
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: skeleton
+    tags: [react, pagination, deploy, portfolio, practice]
+    related_material_ids:
+      - 1j8lcOvnP0GZfOFV-uRzCa7Wwjq5qjfadhnGUPZF5rUQ
+      - 1IeehQhjAszfx3WusWYochDLtZHGh6YQnrflz3s77axU
+      - 1hiK1TGrT9IEVLiTy5mBPs3c6e_3bSqOx
+
+  # ── react-deployment ──────────────────────────────────────────────────
+  - id: react/react-deployment/deploy-with-github-actions
+    chapter: react/react-deployment
+    title: GitHub Actions로 자동 배포
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [react, deploy, github-actions, ci-cd]
+    related_material_ids:
+      - 1m-E8FWFbhiCWekrvwVZKzvkGpkxjN3tk88Zj6-GxtHA
+      - 1Vy2qH2_CNLZBpmybJeCDsHHUflrl7Kt_tPdFxDKuEJQ
+      - 1to7zF_68YLwOp-C0D8kYIT07XbxxGL5KOtiZCAHYnxo
+      - 1bPuO0PdIH9jPgvRFADOR-_mPcbdrP2KVpOH25Dgg5Qo
+
+  - id: react/react-deployment/deploy-to-gcp-vm
+    chapter: react/react-deployment
+    title: GCP VM에 직접 배포하기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: skeleton
+    tags: [react, deploy, gcp, vm, nginx, infra]
+    related_material_ids:
+      - 1MjC0nvq1rc_wQbO1st7P5_mUtCaROXGelLiSNub_aC4
+      - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
+      - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
+      - 1b9CclzJ5-MUY-jv0n82pDpNyOt71isP9_B9kbG5QJJ4

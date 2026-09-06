@@ -1,0 +1,104 @@
+# Track: tooling-and-collaboration — Lesson 골격
+# 규격: curriculum/README.md §4
+
+lessons:
+  # ── git-basics ──────────────────────────────────────────────────────────
+  - id: tooling-and-collaboration/git-basics/version-control-and-commits
+    chapter: tooling-and-collaboration/git-basics
+    title: 버전 관리와 커밋
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [git, version-control, commit]
+    related_material_ids:
+      - 1jMXiGIp9TTK_WfbKs-mArTS83-tPZ5D9uN6UFlYCRno
+      - 1iqOzKcxQnvrL0Fym1BAj7LTvK1AIQF8yCBuL4Z_8pVA
+
+  - id: tooling-and-collaboration/git-basics/branches-merge
+    chapter: tooling-and-collaboration/git-basics
+    title: 브랜치 생성·병합·삭제
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [git, branch, merge]
+    related_material_ids:
+      - 1B9VYYeGi7iPMRB6FeXw_mhkAnkJncIi1Dxxxvg_DJdA
+
+  - id: tooling-and-collaboration/git-basics/common-git-errors
+    chapter: tooling-and-collaboration/git-basics
+    title: 자주 만나는 Git 에러 대처
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 30
+    status: skeleton
+    tags: [git, troubleshooting]
+    related_material_ids:
+      - 1jMXiGIp9TTK_WfbKs-mArTS83-tPZ5D9uN6UFlYCRno
+
+  # ── github-workflow ─────────────────────────────────────────────────────
+  - id: tooling-and-collaboration/github-workflow/github-desktop
+    chapter: tooling-and-collaboration/github-workflow
+    title: GitHub Desktop로 원격 저장소 다루기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [github, github-desktop, remote]
+    related_material_ids:
+      - 2PACX-1vQncLWg0uERomqED1z0Yol6iCD0srwRU9T5SDXM8t9F1g0jj5zTk2-Exf0Rbd4RiRSqOYr16tHiG6WV
+
+  - id: tooling-and-collaboration/github-workflow/writing-a-readme
+    chapter: tooling-and-collaboration/github-workflow
+    title: README.md 작성법
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 20
+    status: skeleton
+    tags: [github, readme, documentation, markdown]
+    related_material_ids:
+      - 1p595QXIctbX-CW7R7cSYOZfV_9UPWxJcXYV2OU8f-UQ
+
+  # ── diagrams-and-docs ───────────────────────────────────────────────────
+  - id: tooling-and-collaboration/diagrams-and-docs/drawing-diagrams
+    chapter: tooling-and-collaboration/diagrams-and-docs
+    title: 흐름도·구조도 그리기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 10
+    status: skeleton
+    tags: [diagrams, documentation]
+    related_material_ids:
+      - 1RpLWa3bKzu7-osltdYZob9R9OQvXPxohRUAFxXZ9WXs
+
+  # ── editor-setup ────────────────────────────────────────────────────────
+  - id: tooling-and-collaboration/editor-setup/vscode-setup
+    chapter: tooling-and-collaboration/editor-setup
+    title: VS Code 세팅
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 10
+    status: skeleton
+    tags: [vscode, editor, setup]
+    related_material_ids:
+      - 1aiShBBmoTCUJF4JXZhf3wJU58IVAOxxLSbkb7Xf00bA
+
+  - id: tooling-and-collaboration/editor-setup/npm-basics
+    chapter: tooling-and-collaboration/editor-setup
+    title: npm 기초
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [npm, node, package-manager]
+    related_material_ids:
+      - 1_ocUBLoWrO_oO5VshStFlwJd9Zu9Khga3MT6kkWCYh0

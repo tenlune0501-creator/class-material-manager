@@ -1,0 +1,420 @@
+# Track: web-foundations — Lesson 골격
+# 규격: curriculum/README.md §4
+
+lessons:
+  # ── html-structure ──────────────────────────────────────────────────────
+  - id: web-foundations/html-structure/semantic-tags
+    chapter: web-foundations/html-structure
+    title: HTML5 시맨틱 태그
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [html, semantic, structure]
+    related_material_ids:
+      - 1jvP8IQ6HunrlbFLJYd2UoHS4kBFUqSk6bwXJ-wUzqWk
+      - 1hMS4ne2bcesEkboVYloviQj_H5MR6IvV
+      - 13XVJT8KzkXeg6LArIdFSL8yrjw34vQ_4
+      - 1afi7aBfZ-6gwlgtufgR5G0S-xBpE0HMa
+    sources:
+      - reference_slug: html/section-일반-구획-요소
+      - reference_slug: html/article
+
+  - id: web-foundations/html-structure/hyperlinks
+    chapter: web-foundations/html-structure
+    title: 하이퍼링크
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [html, links, anchor]
+    related_material_ids:
+      - 1H-QRYRa7d_D6R-yy-lncNRj0syxbnrXp3BW2WD8xq1w
+
+  - id: web-foundations/html-structure/forms
+    chapter: web-foundations/html-structure
+    title: 폼 양식
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: skeleton
+    tags: [html, forms, input]
+    related_material_ids:
+      - 1Qp1qLbicezo2hd7sYuaZw9UcnnLTvO_tTuJmqkO_-hM
+      - 11_5H7eq8ddkf_zt2goN4HWBpc_L_fSVI
+    sources:
+      - reference_slug: html/input-HTML-input-element
+      - reference_slug: html/select-HTML-select-element
+      - reference_slug: html/textarea-HTML-textarea-element
+
+  - id: web-foundations/html-structure/multimedia
+    chapter: web-foundations/html-structure
+    title: 멀티미디어 (audio/video)
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 40
+    status: skeleton
+    tags: [html, audio, video, multimedia]
+    related_material_ids:
+      - 12_sMeeoS9nG0KR4aufL0d89hUJohHdO0GUKQ0XXTW6o
+      - 1dZTAHHq8kdY4VrUYKoEVZqEdFnb7dF-6
+    sources:
+      - reference_slug: html/audio-HTML-embed-audio-element
+
+  - id: web-foundations/html-structure/markup-conventions-and-entities
+    chapter: web-foundations/html-structure
+    title: 마크업 코딩 컨벤션과 특수문자
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 50
+    status: skeleton
+    tags: [html, conventions, entities]
+    related_material_ids:
+      - 1o9ZCbrTXf3rAXiub3Jg8qeoG9iLdvhWE
+      - 1-5EX3dXHBagUi4jGWwpIeV5Mo5glLD8gjXcmHDPdWBE
+
+  # ── css-fundamentals ────────────────────────────────────────────────────
+  - id: web-foundations/css-fundamentals/selectors-and-cascade
+    chapter: web-foundations/css-fundamentals
+    title: 선택자와 캐스케이드
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [css, selectors, specificity, cascade]
+    related_material_ids:
+      - 1Qd3kB6lwdBYkf-odC4A_EOu5NY8e22Lf
+      - 1k7WygVfG3-G6Bx6ubTdNoVyiLwL31vZeQZ4B7OZ_E_Q
+      - 1YDCfnjIjNUkg6ISOxoUOmxgja_TSgo8l
+      - 1dKeDl5-zCxTbWOMWlvgAf1VV91YNb_nT
+
+  - id: web-foundations/css-fundamentals/box-model-and-positioning
+    chapter: web-foundations/css-fundamentals
+    title: 박스모델과 포지셔닝
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: skeleton
+    tags: [css, box-model, position, layout]
+    related_material_ids:
+      - 1IJrbFE3fzMN9e3jDbu_oemIG-lU9ciZ-
+      - 1vIhYSoX7H99c3sYmtCWCw4s5fXPiAdJEITnMoUyFdvo
+      - 1cWFMPrI5KVaCxr4B0VaS2rP9jZ2Q5Ho5
+      - 1swz4tlQwlDZTNZc7k6UN34GzwrXEKb6c
+      - 1L-SOl1fBOCZ6kLLUCjhoXi_jDnOjuJvZ
+    sources:
+      - reference_slug: css/display-CSS-property
+      - reference_slug: css/overflow
+
+  - id: web-foundations/css-fundamentals/backgrounds-and-sprites
+    chapter: web-foundations/css-fundamentals
+    title: 배경과 스프라이트
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 30
+    status: skeleton
+    tags: [css, background, sprites]
+    related_material_ids:
+      - 1j_6_pa70S-iJ77JQhfiK1OSfqAl75Le5
+      - 1vUSFFY_nzNLpFwPVvorvRK4B0aKFBQSv
+      - 1jtdbigsYncKzx-FpPi-PJZu42h-0NDKK
+      - 0B0HRSf3dPjJiYldNN3NEVDBYQU0
+    sources:
+      - reference_slug: css/background
+      - reference_slug: css/background-image
+
+  - id: web-foundations/css-fundamentals/css-review
+    chapter: web-foundations/css-fundamentals
+    title: HTML·CSS 종합 리뷰
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 40
+    status: skeleton
+    tags: [css, review]
+    related_material_ids:
+      - 1xqF2yfWDNjs4FDCKRQAK07YrENv2qFowTcC2nk7l27Y
+      - 1akfI8Q-Wul3qWhu1vSZUI-PI2KVkKMKJDYNEQdeiPbc
+
+  # ── css-layout-flexbox ──────────────────────────────────────────────────
+  - id: web-foundations/css-layout-flexbox/flexbox-core
+    chapter: web-foundations/css-layout-flexbox
+    title: Flexbox 핵심 — 축과 정렬
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [css, flexbox, layout]
+    related_material_ids:
+      - 1bz3nNb6yKnf3SOwPyo2a00GZHN84sTDuR1v__e0Ty_s
+      - 1KQXiYrN-e2elFKAS4S5ttfjbUIA16Ycf
+      - 1dLMDsMH_EkhNXtJTQw2W_S_5fVFci0Sm
+    sources:
+      - reference_slug: css/flex
+      - reference_slug: css/flex-direction
+      - reference_slug: css/justify-content
+      - reference_slug: css/align-items
+
+  - id: web-foundations/css-layout-flexbox/flexbox-navigation-practice
+    chapter: web-foundations/css-layout-flexbox
+    title: 실전 — Flexbox로 내비게이션 만들기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [css, flexbox, navigation, practice]
+    related_material_ids:
+      - 1cqQya4ua9cIqZ3gxpu2xR6sSDqCrJ9CF
+      - 1El27_13sIpf9TbdF_qMKmt6LISeYyqH2
+
+  # ── css-layout-grid ─────────────────────────────────────────────────────
+  - id: web-foundations/css-layout-grid/grid-core
+    chapter: web-foundations/css-layout-grid
+    title: CSS Grid 핵심 — 트랙·fr·gap
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 10
+    status: skeleton
+    tags: [css, grid, layout]
+    related_material_ids:
+      - 1dy9elEZOHNEPppLAHXCxjOnARtPxL0l-ZiTPJH0O9cs
+      - 1JG9hpif-NzFB7NQudzAlFA6nkp-28uT7
+      - 1Uqv_9mJM7Z6K-s8CZUQ0yaIBpkcZYg2C
+      - 1e49Dj7XkF-rrpvI6oXXBF-rp4m3ZYkUX
+      - 1vN4i17I8INm6TWQRVe6OblQ7NPCzHbgu
+      - 1hnlnjs7cKycd1YT7wo0iG08QqV7S8Xie
+      - 1lVQ_zfaN8zFrhgav5cQRF8sCNLz2_R3K
+      - 1O4KomINSTzbS8E0T7tUydHfMBw6VwFWN
+      - 1ngW8gI3KGa5nh9G9616XA8Ue7Cz7dpw6
+      - 1-6wPnxl8QPhpc22xLty37QwDvcsJ6wO-
+      - 1RYRArVbH1MU5IjAMuhf265bt0V3PQ_81
+      - 1_LML0t0Aw1lzE9DEkgxdCV9J1XHBoXI5
+      - 1j9dNwKecfOehs0AxBULVz5VVWandYik_
+      - 1yIke2M8sgdMmHhLaTsSo29ZJijTef3V2
+      - 1CymD55bdbdqQp5jdtMd_FbxVgQZPDjL_
+      - 1TkJSP7BTkt_esfAXj0CPEyOrr5X8ZUpC
+      - 1XS_UHNT7tQdPY-zHFfZhvSxofRwypv4x
+    sources:
+      - reference_slug: css/grid-CSS-property
+      - reference_slug: css/grid-template-columns
+      - reference_slug: css/grid-template-rows-CSS-property
+
+  - id: web-foundations/css-layout-grid/grid-areas-and-auto-flow
+    chapter: web-foundations/css-layout-grid
+    title: 영역 이름과 auto-flow
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [css, grid, grid-template-areas, auto-flow]
+    related_material_ids:
+      - 19zTTram0-JqtXFiR_lBbBwflt_oqnfZq
+      - 1Hw8_xfPCQ1huxYnrJhgA2QJ1q2nDyD7w
+      - 1knQKx0H-jpjevp2hB14R2JIcD0XV9UbU
+      - 1Mu3Q3ghbBV2m79gLWOE5_HMZDEK-5jd2
+      - 1FabTfw5s-0xJvbjyC9JB95AML7f2gCs0
+      - 1AeJFQzhRIb60TVaPTk1fxDsMDmpyZRpR
+      - 1pltXJEAT26pcUrupi57ixKaLItxyUS4y
+      - 1jzV0jK-E6kVsuc8bRxaE6Lc1qzcgtaOG
+      - 1uA0vx-7teQZ99BQG4qXlsrPcDySzeh-l
+      - 1vCpPPPIuI_H4WlKSyU8vvfhkekfM1iuU
+      - 1y7W44sBop-tJJ4Nspv8GDdewyROkaTEu
+      - 1rQ2B3Eu4-1Pk9--3pjX6gYyyvudmysmz
+      - 1nfHn8DYmn3Oy_rFT3muczNUI5U0OHEua
+      - 1oaks_FRL0Tvtb9fUtV3lP6DBBSloH5o2
+    sources:
+      - reference_slug: css/grid-template-CSS-property
+
+  - id: web-foundations/css-layout-grid/grid-card-ui-practice
+    chapter: web-foundations/css-layout-grid
+    title: 실전 — Grid로 카드 UI와 깨진 그리드
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 30
+    status: skeleton
+    tags: [css, grid, flexbox, card-ui, practice]
+    related_material_ids:
+      - 14HwGstOvQePEM5PQdHBEYekTP0S9Zqzv
+      - 1I5X4dKGlBct5B4fa134Swv66QyAPS8iS
+      - 14SBZAa_l-r1n7rhG66IK6m8UPwpy5qZY
+      - 1VjoCLp9Ge90zSLR-uMSR_KtbXIFb2XRT
+
+  # ── css-text-and-effects ────────────────────────────────────────────────
+  - id: web-foundations/css-text-and-effects/text-and-paragraph-effects
+    chapter: web-foundations/css-text-and-effects
+    title: CSS3 확장된 텍스트·단락 효과
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [css, text, typography, css3]
+    related_material_ids:
+      - 1zXGQ5OWDsb1YUe1Myrmv5I4KsSMAySmC3jOH1dNRdIA
+    sources:
+      - reference_slug: css/columns-CSS-property
+
+  - id: web-foundations/css-text-and-effects/transitions-and-hover
+    chapter: web-foundations/css-text-and-effects
+    title: transition과 hover 효과
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [css, transition, hover, interaction]
+    related_material_ids:
+      - 0B0HRSf3dPjJiMExkQXdyQ2hWalk
+      - 1-a2vGyThLHay5XtuDEMQlbACHv2mp9wX
+      - 0B0HRSf3dPjJicU9KYjFCbGl5bDQ
+      - 13wub4tP5SjPdTUensi3_Ysh6EIwx2yjp
+      - 1tCe1s6iwE_IMLTjZwHXYVMW6VC5dAxo4
+      - 1MmEWPW0DuLYxXhJ6F_jCncAQoaxD6-sU
+
+  - id: web-foundations/css-text-and-effects/animation-and-transform
+    chapter: web-foundations/css-text-and-effects
+    title: 애니메이션과 transform
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: skeleton
+    tags: [css, animation, transform, keyframes, svg]
+    related_material_ids:
+      - 0B0HRSf3dPjJib2tEMXpWMlhEQjQ
+      - 1xDaIrUfiC5orGgZ_9rZoUKWbTo8JFQ9e
+      - 1aXahIAS5AJHAjqgQgVgaE0w1LB7XDBUD
+      - 19aSAgS50ov6T5MjHQOjt46ubAfKD9PSK
+      - 1TeKq4Lb57mMDpkMd9dxhupUn7xezrHBe
+    sources:
+      - reference_slug: css/animation
+      - reference_slug: css/animation-name-CSS-property
+      - reference_slug: css/animation-timing-function-CSS-property
+
+  # ── css-preprocessors-and-frameworks ────────────────────────────────────
+  - id: web-foundations/css-preprocessors-and-frameworks/sass
+    chapter: web-foundations/css-preprocessors-and-frameworks
+    title: Sass — 변수·중첩·믹스인
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [css, sass, scss, preprocessor]
+    related_material_ids:
+      - 1AB7EULjblvytiAVX4M3NUEuGeWgztsJ83b-JhRL7MRQ
+      - 1ooeGajkllhTB8ZaFrj051uqmyNDy-FErkCZu1z0ZRTM
+      - 1CzyoTqdSf_B53IaVp8pzjZTGkhUCeXsH8akT4xkGrWk
+      - 1a_6sWxmaKs7lOYrxFAI-jQzAzH2lccJq
+
+  - id: web-foundations/css-preprocessors-and-frameworks/less
+    chapter: web-foundations/css-preprocessors-and-frameworks
+    title: LESS 훑어보기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 20
+    status: skeleton
+    tags: [css, less, preprocessor]
+    related_material_ids:
+      - 0B0HRSf3dPjJid1FZeWtxbkJHTzQ
+      - 1mhyHw-mDlhJLfPv_xKPl_WxPR83Ft9pB
+
+  - id: web-foundations/css-preprocessors-and-frameworks/tailwind
+    chapter: web-foundations/css-preprocessors-and-frameworks
+    title: Tailwind CSS 기초
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 30
+    status: skeleton
+    tags: [css, tailwind, utility-first, framework]
+    related_material_ids:
+      - 1wNYZU3qdkUnBLU8D0Vt7XN6cHms1Wp70GlkD8ZVrLQQ
+
+  # ── responsive-and-modern-css ───────────────────────────────────────────
+  - id: web-foundations/responsive-and-modern-css/responsive-layout
+    chapter: web-foundations/responsive-and-modern-css
+    title: 반응형 레이아웃과 미디어 쿼리
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [css, responsive, media-query]
+    related_material_ids:
+      - 1jC3cwTiy_a0rMUdAPu2JXjSF-RPmZ9bx
+
+  - id: web-foundations/responsive-and-modern-css/container-queries
+    chapter: web-foundations/responsive-and-modern-css
+    title: Container Queries
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [css, container-queries, responsive]
+    related_material_ids:
+      - 1QuBkowN_ZHeYlkuQQLfIaAgaoPhV80JPFeDxi-7A-BM
+      - 1i-AXimrzXIHXaTgadpZi9dqEvhibf2Z9
+      - 1ukmpO5ps0AF9cYIK6itohEojmEJyv1PO
+      - 13s2oWZ82IugnBapXYxtSSBW0NZf5f0Pd
+    sources:
+      - reference_slug: css/container
+
+  - id: web-foundations/responsive-and-modern-css/logical-properties
+    chapter: web-foundations/responsive-and-modern-css
+    title: Logical Properties
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 30
+    status: skeleton
+    tags: [css, logical-properties, i18n]
+    related_material_ids:
+      - 11IQVvtab5VnXLxyrdKW_jjIfGxlobP8SQ0YV21NABIg
+      - 1jjNRYV5lwp5ZA-WaZR_6hjTLZ_9QFCKA
+      - 1391lC9kSnUu3dzMr1HaBw2jZsgUSi8bZ
+    sources:
+      - reference_slug: css/direction-CSS-property
+
+  # ── web-standards-and-accessibility ─────────────────────────────────────
+  - id: web-foundations/web-standards-and-accessibility/accessibility-checklist
+    chapter: web-foundations/web-standards-and-accessibility
+    title: 웹접근성 체크리스트
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [accessibility, a11y, wcag, web-standards]
+    related_material_ids:
+      - 1-I_e9yiEaL4hH-5vbA7sntQQ6piAoeurEMT1B1eBF2M
+      - 1FJRCOzictcVSZKBlfLt6FVgBPRAp4EDj
+
+  - id: web-foundations/web-standards-and-accessibility/document-load-order
+    chapter: web-foundations/web-standards-and-accessibility
+    title: 웹페이지 리소스 연결·로드 순서
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [web-standards, performance, loading, script, link]
+    related_material_ids:
+      - 13SSDvGWJGozhRP4T2Xeo7S2LD84haGL59U5ZJr5449I
+    sources:
+      - reference_slug: html/script-스크립트-요소

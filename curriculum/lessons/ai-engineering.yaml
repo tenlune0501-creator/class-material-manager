@@ -1,0 +1,335 @@
+# Track: ai-engineering — Lesson 골격
+# 규격: curriculum/README.md §4
+#
+# 보유 수업자료는 "프론트엔드에서 생성형 AI API 붙이기" 수준의 얕은 미니프로젝트 3~5개뿐
+# (generative-ai-in-frontend 챕터). 나머지 3개 챕터는 CMM 자료 없음.
+# 2026-09-06 외부 조사(research/ai-engineering.md, research/evaluation-and-coding-test.md) 후:
+#   - llm-app-fundamentals → READY. 대표 Lesson `prompts-tokens-context` 집필됨. 나머지는 skeleton 분할.
+#   - rag-and-agents      → PARTIAL. 3개로 분할, 전부 needs_external_research.
+#   - prompt-and-evaluation → READY. 대표 Lesson `prompting-as-development` 집필됨. 나머지 분할.
+# status 는 여전히 "CMM 자료 유무" 축이라, 집필 안 된 것은 needs_external_research 로 둔다
+# (외부 조사 완료 여부는 research/README.md 의 READY/PARTIAL 판정에 기록).
+
+lessons:
+  # ── generative-ai-in-frontend ─────────────────────────────────────────
+  - id: ai-engineering/generative-ai-in-frontend/openai-image-generation
+    chapter: ai-engineering/generative-ai-in-frontend
+    title: OpenAI 이미지 생성 API를 React 앱에 붙이기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 10
+    status: skeleton
+    tags: [ai, openai, image-generation, react, api-key]
+    related_material_ids:
+      - 10fqbfUnvErZI2L0-iL5rbUwfGLhxq6TNa1bBmPewq-k
+      - 1f1uVS9cRS0sGrJv9NUSdBZTwTjSJHMGh
+      - 16n0hgBx0COr3XsZGxa4FQSeZRpGLGO96
+
+  - id: ai-engineering/generative-ai-in-frontend/generative-ai-react-app
+    chapter: ai-engineering/generative-ai-in-frontend
+    title: 생성형 AI를 쓰는 React 앱
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: skeleton
+    tags: [ai, generative-ai, react, integration]
+    related_material_ids:
+      - 1G-txw9xv7fa5BMU2lE7yLk5GcTSLlN46zjol5S3rKLE
+
+  - id: ai-engineering/generative-ai-in-frontend/alan-api
+    chapter: ai-engineering/generative-ai-in-frontend
+    title: alan API 사용하기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 30
+    status: skeleton
+    tags: [ai, alan-api, integration]
+    related_material_ids:
+      - 1JkD6XwOOUHfmil1eLM3CTGGbpbgMZI-M9j-sIfnFp9M
+
+  # ── llm-app-fundamentals ─────────────────────────────────────────────
+  # 자료 없음. OpenAI/Anthropic/HF 공식 문서 기반 (research/ai-engineering.md).
+  # 기존 단일 60분 Lesson 을 개념 단위로 분할했다.
+  - id: ai-engineering/llm-app-fundamentals/prompts-tokens-context
+    chapter: ai-engineering/llm-app-fundamentals
+    title: LLM API와 컨텍스트 윈도
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 10
+    status: authored
+    tags: [ai, llm, messages, roles, tokens, context-window, cost]
+    related_material_ids: []
+    sources:
+      - title: "Text generation"
+        url: https://developers.openai.com/api/docs/guides/text
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Context windows"
+        url: https://platform.claude.com/docs/en/build-with-claude/context-windows
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "LLM Course — Chapter 1 (Introduction / NLP & LLMs)"
+        url: https://huggingface.co/learn/llm-course/chapter1/1
+        publisher: "Hugging Face"
+        checked_at: 2026-09-06
+        source_type: course_material
+    prerequisites:
+      - ai-engineering/generative-ai-in-frontend/generative-ai-react-app
+    body_path: authored/ai-engineering/llm-app-fundamentals/prompts-tokens-context.md
+
+  - id: ai-engineering/llm-app-fundamentals/structured-outputs
+    chapter: ai-engineering/llm-app-fundamentals
+    title: 구조화 출력으로 결과 받기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: needs_external_research
+    tags: [ai, llm, structured-outputs, json-schema]
+    related_material_ids: []
+    sources:
+      - title: "Structured Outputs"
+        url: https://developers.openai.com/api/docs/guides/structured-outputs
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/llm-app-fundamentals/tool-calling
+    chapter: ai-engineering/llm-app-fundamentals
+    title: 도구 호출 왕복 직접 구현하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 30
+    status: needs_external_research
+    tags: [ai, llm, tool-use, function-calling]
+    related_material_ids: []
+    sources:
+      - title: "Tool use with Claude (overview)"
+        url: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Function calling"
+        url: https://developers.openai.com/api/docs/guides/function-calling
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/llm-app-fundamentals/streaming-and-errors
+    chapter: ai-engineering/llm-app-fundamentals
+    title: 스트리밍·에러·재시도·비용
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 40
+    status: needs_external_research
+    tags: [ai, llm, streaming, sse, retries, rate-limit, cost]
+    related_material_ids: []
+    sources:
+      - title: "Streaming API responses"
+        url: https://developers.openai.com/api/docs/guides/streaming-responses
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Claude API errors"
+        url: https://platform.claude.com/docs/en/api/errors
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  # ── rag-and-agents (needs_external_research) ──────────────────────────
+  # PARTIAL: RAG 절반은 공식 문서로 커버, 에이전트 절반은 개념 수준.
+  # 기존 단일 90분 Lesson 을 3개로 분할. (research/ai-engineering.md)
+  - id: ai-engineering/rag-and-agents/embeddings-and-semantic-search
+    chapter: ai-engineering/rag-and-agents
+    title: 임베딩과 의미 검색
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: needs_external_research
+    tags: [ai, embeddings, similarity, vector-search]
+    related_material_ids: []
+    sources:
+      - title: "Vector embeddings"
+        url: https://developers.openai.com/api/docs/guides/embeddings
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Embeddings"
+        url: https://platform.claude.com/docs/en/build-with-claude/embeddings
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/rag-and-agents/retrieval-augmented-generation
+    chapter: ai-engineering/rag-and-agents
+    title: RAG가 필요한 이유와 기본 흐름
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: needs_external_research
+    tags: [ai, rag, retrieval, chunking, grounding, citation]
+    related_material_ids: []
+    sources:
+      - title: "Retrieval"
+        url: https://developers.openai.com/api/docs/guides/retrieval
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Simple RAG (Zephyr + LangChain) cookbook"
+        url: https://huggingface.co/learn/cookbook/rag_zephyr_langchain
+        publisher: "Hugging Face"
+        checked_at: 2026-09-06
+        source_type: course_material
+      - title: "Introducing Contextual Retrieval"
+        url: https://www.anthropic.com/news/contextual-retrieval
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_guide
+
+  - id: ai-engineering/rag-and-agents/agents-intro
+    chapter: ai-engineering/rag-and-agents
+    title: 에이전트 기초 — 도구를 루프에서 쓰기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: needs_external_research
+    tags: [ai, agents, agent-loop, tools, workflow]
+    related_material_ids: []
+    sources:
+      - title: "Building effective agents"
+        url: https://www.anthropic.com/engineering/building-effective-agents
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_guide
+      - title: "Agents (Agents SDK guide)"
+        url: https://developers.openai.com/api/docs/guides/agents
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  # ── prompt-and-evaluation ────────────────────────────────────────────
+  # 자료 없음. Anthropic/OpenAI 공식 문서 + promptfoo/HF Evaluate (research/evaluation-and-coding-test.md).
+  # "AI 앱을 개발하고 검증한다" 프레이밍. 평가가 프롬프트 튜닝보다 먼저 존재해야 한다.
+  - id: ai-engineering/prompt-and-evaluation/prompting-as-development
+    chapter: ai-engineering/prompt-and-evaluation
+    title: 프롬프트를 개발 산출물로 다루기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: authored
+    tags: [ai, prompt-engineering, instruction-hierarchy, versioning, structured-prompting]
+    related_material_ids: []
+    sources:
+      - title: "Prompt engineering overview"
+        url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Claude prompting best practices"
+        url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Prompt engineering"
+        url: https://developers.openai.com/api/docs/guides/prompt-engineering
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+    prerequisites:
+      - ai-engineering/llm-app-fundamentals/prompts-tokens-context
+    body_path: authored/ai-engineering/prompt-and-evaluation/prompting-as-development.md
+
+  - id: ai-engineering/prompt-and-evaluation/structured-and-fewshot
+    chapter: ai-engineering/prompt-and-evaluation
+    title: 구조적 출력과 few-shot
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: needs_external_research
+    tags: [ai, prompt-engineering, few-shot, structured-output, context-design]
+    related_material_ids: []
+    sources:
+      - title: "Claude prompting best practices"
+        url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/prompt-and-evaluation/defining-success-and-evals
+    chapter: ai-engineering/prompt-and-evaluation
+    title: 성공 기준 정의와 평가셋 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: needs_external_research
+    tags: [ai, evaluation, success-criteria, eval-set, metrics]
+    related_material_ids: []
+    sources:
+      - title: "Define success criteria and build evaluations"
+        url: https://platform.claude.com/docs/en/test-and-evaluate/define-success
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Working with evals"
+        url: https://developers.openai.com/api/docs/guides/evals
+        publisher: "OpenAI"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/prompt-and-evaluation/evaluating-llm-output
+    chapter: ai-engineering/prompt-and-evaluation
+    title: 채점 방법 — 코드·유사도·LLM-as-judge·사람
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 40
+    status: needs_external_research
+    tags: [ai, evaluation, llm-as-judge, grading, deterministic]
+    related_material_ids: []
+    sources:
+      - title: "Assertions and Metrics — LLM Output Validation"
+        url: https://www.promptfoo.dev/docs/configuration/expected-outputs/
+        publisher: "promptfoo"
+        checked_at: 2026-09-06
+        source_type: community_reference
+      - title: "Evaluate on the Hub"
+        url: https://huggingface.co/docs/evaluate/index
+        publisher: "Hugging Face"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: ai-engineering/prompt-and-evaluation/regression-and-failure-analysis
+    chapter: ai-engineering/prompt-and-evaluation
+    title: 회귀 평가와 실패·환각 분석
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 50
+    status: needs_external_research
+    tags: [ai, evaluation, regression, hallucination, failure-analysis]
+    related_material_ids: []
+    sources:
+      - title: "Reduce hallucinations"
+        url: https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations
+        publisher: "Anthropic"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Intro | Promptfoo"
+        url: https://www.promptfoo.dev/docs/intro/
+        publisher: "promptfoo"
+        checked_at: 2026-09-06
+        source_type: community_reference

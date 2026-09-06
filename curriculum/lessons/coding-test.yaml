@@ -1,0 +1,51 @@
+# Track: coding-test — Lesson 골격
+# 규격: curriculum/README.md §4
+#
+# kind: coding_test 트랙. 보유 수업자료 없음.
+# 전체 로드맵(5 Chapter / 15 개념 Lesson / 8 예제 문제)은
+#   research/evaluation-and-coding-test.md PART 2 에 설계돼 있다 (MIT OCW 6.006 시퀀스 기반).
+# 이번 라운드는 foundations Chapter 만 반영하고 big-o-notation 을 대표 집필했다.
+#
+# 문제(lesson_kind: problem) Lesson 은 CMM 자작 지문(source_type: generated_minimal)이 있어야
+# 추가한다. 외부 문제(LeetCode/프로그래머스/백준)는 sources 에 title+url 로만 참조하고
+# 지문을 저장하지 않는다 (저작권 — research 파일 참조).
+
+lessons:
+  - id: coding-test/foundations/problem-solving-approach
+    chapter: coding-test/foundations
+    title: 문제 해결 접근법
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 10
+    status: needs_external_research
+    tags: [coding-test, problem-solving, approach]
+    related_material_ids: []
+
+  - id: coding-test/foundations/big-o-notation
+    chapter: coding-test/foundations
+    title: Big-O 표기법과 복잡도 분석
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: authored
+    tags: [coding-test, big-o, complexity, time-complexity, space-complexity]
+    related_material_ids: []
+    sources:
+      - title: "6.006 Introduction to Algorithms, Spring 2020 — Lecture Notes"
+        url: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/
+        publisher: "MIT OpenCourseWare"
+        checked_at: 2026-09-06
+        source_type: course_material
+      - title: "TimeComplexity — Python Wiki (CPython 내장 자료구조 연산 복잡도)"
+        url: https://wiki.python.org/moin/TimeComplexity
+        publisher: "Python Software Foundation"
+        checked_at: 2026-09-06
+        source_type: community_reference
+      - title: "Array — JavaScript | MDN"
+        url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+        publisher: "Mozilla (MDN)"
+        checked_at: 2026-09-06
+        source_type: official_docs
+    body_path: authored/coding-test/foundations/big-o-notation.md

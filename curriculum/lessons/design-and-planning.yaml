@@ -1,0 +1,179 @@
+# Track: design-and-planning — Lesson 골격
+# 규격: curriculum/README.md §4
+
+lessons:
+  # ── ui-design-foundations ────────────────────────────────────────────────
+  - id: design-and-planning/ui-design-foundations/typography
+    chapter: design-and-planning/ui-design-foundations
+    title: 웹 타이포그래피 기초
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 10
+    status: skeleton
+    tags: [design, typography]
+    related_material_ids:
+      - 1N_QFuagkhnJsK_AAX6aAieeYaFOU3Z-U
+      - 1FZTnhS4iDbxQ4da8guiu8qw7uMFGtPokf4QScA_j5FM
+
+  - id: design-and-planning/ui-design-foundations/contrast-and-color
+    chapter: design-and-planning/ui-design-foundations
+    title: 대비와 색
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 20
+    ord: 20
+    status: skeleton
+    tags: [design, contrast, color, accessibility]
+    related_material_ids:
+      - 1ONAaSVhhv1jV65LvMjyfo4ekt1YRj3p6
+
+  - id: design-and-planning/ui-design-foundations/backgrounds-and-forms
+    chapter: design-and-planning/ui-design-foundations
+    title: 배경과 폼 디자인
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 30
+    status: skeleton
+    tags: [design, forms, background]
+    related_material_ids:
+      - 1HA6tVHH1bWQ9k9m-fRXcrt8fB-a_V-Q9
+      - 1zc-XxXqk4xOA6GeaDBCrWgeiEwnWpPhR
+      - 1okH3qLEtDAeTO2P4sEbCPBkiOLiOOam-
+
+  - id: design-and-planning/ui-design-foundations/design-tokens-and-auto-layout
+    chapter: design-and-planning/ui-design-foundations
+    title: 디자인 토큰과 오토레이아웃 사고
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 40
+    status: skeleton
+    tags: [design, design-tokens, auto-layout, workflow]
+    related_material_ids:
+      - 1Ra0bbcQUIcm78jr-OVxzgX3403WlgvyMobsK2ydfYc4
+      - 11lB8Eju8IsBlxCsQha8gSiXRlbZnHeLcyXS3fX0t9g8
+      - 1_-yWsy2vF53CltSMvHKP7jqsqDzgIEPl1L6PSogEgNE
+      - 1DQUn2tGjVDo92LWlbb-LzBBnFkx6bZHsIiabR-_bkWk
+
+  # ── figma ───────────────────────────────────────────────────────────────
+  - id: design-and-planning/figma/figma-basics
+    chapter: design-and-planning/figma
+    title: Figma 기본 조작
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [figma, design-tools]
+    related_material_ids:
+      - 1t4OiOiMeL3L97LGm7V_PLc5TvTD2hEi6
+      - 17b6Up6v5tVBIcKfsxnZmByJ3OGH5jsrh
+      - 1xnZet5KmRFBf-5iVAnwP_MBdz7a2agIF
+      - 1Jyv8RFRBxnKdANi2NE1iGsn6ERgSc5t1
+      - 16WmAhtRtcehFEm_wqCrjNhFK2u4PtxvE
+      - 1864bTT5tIEtRSM_l_yGCr6qFeBAkh93K
+      - 19D05WtqP8k-pZZFaUOpTYSUkPubPNJdM
+      - 1QfG-bPkg-JuZbotT3O200IieV_9ghZsM
+      - 1Sgy6gj860F2Blk3AjMk6_coGmGaMDpqY
+      - 1Rs3xuoSOFQGBZi8kOqUgdtWDW79SS0Mp
+      - 1TNqalkFtspY7U0RMfElPCS-FsnRiSh-e
+      - 1dT2py26HBCBl4fvCQ1TgfRzWkQMdPVMM
+      - 1mxYXAX4_6cQo9d8puskT9R1DkESDYZig
+      - 0B0HRSf3dPjJicmRvRzNIcGFYZlU
+
+  - id: design-and-planning/figma/plugins-and-mcp
+    chapter: design-and-planning/figma
+    title: Figma 플러그인과 MCP 연동
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [figma, plugins, mcp]
+    related_material_ids:
+      - 1TbvhY_tdTQlHC-oWTYLarZOQdNmBuk5FOU2hHGnAaqY
+      - 186Pniw5Fo9HgDGksXtfxe3F__El_WCa4D65pqDp-ID8
+      - 1WhBa5Vy7afTcG7gUc48eaJ26B0Jo7ZmQ-Libi9o8yPw
+
+  # ── planning-and-ia ─────────────────────────────────────────────────────
+  - id: design-and-planning/planning-and-ia/information-architecture
+    chapter: design-and-planning/planning-and-ia
+    title: 정보구조(IA) 잡기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [planning, ia]
+    related_material_ids:
+      - 1ZJoiV5mQXua-dWOG8M08O_pf-fe2CFBOUf3atyHK4Fw
+
+  - id: design-and-planning/planning-and-ia/reference-research
+    chapter: design-and-planning/planning-and-ia
+    title: 레퍼런스 조사와 분석
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [planning, research]
+    related_material_ids:
+      - 1tvrQFteEzAlmRxKwSUXWvnBCGgUkU6mMNTF3g7sWQmI
+
+  - id: design-and-planning/planning-and-ia/storyboard-and-site-launch
+    chapter: design-and-planning/planning-and-ia
+    title: 스토리보드와 홈페이지 개설 절차
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 30
+    status: skeleton
+    tags: [planning, storyboard]
+    related_material_ids:
+      - 0B0HRSf3dPjJieEowYVZtZ1VEQ00
+      - 14oLUXcHxODKFiS6xJft0Y927Iim_Fdw9_wP_mXNFSD8
+
+  # ── design-to-code ──────────────────────────────────────────────────────
+  - id: design-and-planning/design-to-code/coding-from-a-reference
+    chapter: design-and-planning/design-to-code
+    title: 디자인 참조해서 코딩하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 10
+    status: skeleton
+    tags: [design-to-code, publishing]
+    related_material_ids:
+      - 1ywjoGYpCZZVggGI_YRa6u0EFSsc7UPdpk1_ME-jFNSs
+      - 1cySMLVRezEvANW4MAhnRYm7x3EIB4Dib0Ve7RVbDSe8
+      - 1R4cQytjc00wjV2WSml1LeJr8EZjVlhUg
+      - 1tRxk52dS2rwKAjv_VA3bveWr5hbpjArP
+
+  - id: design-and-planning/design-to-code/detail-page-linking
+    chapter: design-and-planning/design-to-code
+    title: 목록에서 상세페이지로 연결하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [design-to-code, routing, list-detail]
+    related_material_ids:
+      - 1QFb547W5eflOP4BdA7DSkOKWTn4BOAEsW7Xsxv6bQJE
+
+  - id: design-and-planning/design-to-code/sort-filter-cart-patterns
+    chapter: design-and-planning/design-to-code
+    title: 정렬·필터·장바구니 화면 패턴
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 30
+    status: skeleton
+    tags: [design-to-code, sorting, filter, cart, ecommerce]
+    related_material_ids:
+      - 1hCQl-_87H6K3EtODs1_Ds7PiBueP2RoRKUxLJh_JgPQ
+      - 1ZPW1DgdtI0TNAni3m6LU-wlDFDhpawV-tFzZd4TRQFM
+      - 1Qgm1rfMo12mUiMJtK7uF_HrdcMa8_NRUCx-mB-rRq7c
+      - 13qd38LBHTXG4UaiVKHKRb3fVlcKGDrMo

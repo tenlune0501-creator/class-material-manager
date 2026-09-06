@@ -1,0 +1,29 @@
+# 커리큘럼 Lesson / Project Unit 에 매핑하지 않은 수업자료 등록부
+#
+# 목적: "자료를 조용히 누락하지 않았다"를 감사 가능하게 만든다.
+#   material_metadata 393개 = (어떤 Lesson/Unit 의 related_material_ids 에 등장) ∪ (이 파일)
+#   → validation 스크립트가 이 등식을 강제한다.
+#
+# 여기 있는 항목은 "학습 개념 콘텐츠가 아님"이라고 판단한 것이다. 삭제한 것이 아니라
+# 커리큘럼 본문 밖에 두는 것이며, 사유를 남긴다. 나중에 판단이 바뀌면 옮기면 된다.
+
+unmapped:
+  # 수업 운영·일정·제출·발표 안내. 기술 학습 콘텐츠가 아니다.
+  course_admin:
+    - id: 12cb2CCTIF5PwENeMy279qKCi2jkilRw0ThuJZnEIyjQ   # 강사소개 - v2026
+    - id: 1B_ckDZZEButAQVSKUyAIH2x9DPHPHn5hZPUFv8QnFM0   # Portfolio URL - V26 (제출용 URL 모음)
+    - id: 1GaSYHsxdOcxSPQvk4gXUNscs3kCoragoAXpdImdxC6c   # 클래스룸 - 과제 제출하기
+    - id: 1HvaHHYKqlvN28oGu9joYbxhkPixgl0Okos64dqWVKuI   # 포트폴리오 발표(2026_04)
+    - id: 1JDQZsXCDvJ3po7VWmBV27MEKTeY9Az6IBfks6e7s5u4   # 주요 핵심 요약 - KDT(2026_04) — 과정 개요/일정 요약
+    - id: 1M3HmAJz_ZYLHzqSTsE1CCa4XJKLaHS7x             # (시간표) 260407_260821 프론트엔드(13회차).pdf
+
+  # Google Drive 폴더 인덱스 / 임시 화면. 실제 콘텐츠는 다른 자료가 담고 있다.
+  navigation_or_placeholder:
+    - id: 1TfIgJf8H-ya7IAxUJUYhhLyua0TNw3Mu             # TEMP (폴더 목록)
+    - id: 1fbFC3rGy-GVA6g_liuU7siS0Kovt7nKX             # 수업영상 (폴더 목록)
+    - id: 1nkNMOYVfSEeLiOMFnPS862eGwUL45skJUBlIjcwY1uU   # 임시화면(13기)
+
+  # 내용 식별 불가 / 임시 산출물. 학습 자료로 쓸 수 없다.
+  scratch_or_unclear:
+    - id: 14pHZyd8gd2R2kYM5GaaaLqIgrpsnmVpW             # 7월20일_01.txt (수업영상 섹션의 메모)
+    - id: 1dlgmbiQw-dNd56YVYjGz5x5FL4tK3l8p             # my-app.zip (TEMP 섹션)

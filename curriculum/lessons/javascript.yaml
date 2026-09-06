@@ -1,0 +1,494 @@
+# Track: javascript — Lesson 골격
+# 규격: curriculum/README.md §4
+
+lessons:
+  # ── language-basics (강사 00~05 넘버링 시리즈) ──────────────────────────
+  - id: javascript/language-basics/must-know
+    chapter: javascript/language-basics
+    title: 시작 전 필수 암기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [javascript, basics, syntax]
+    related_material_ids:
+      - 1_PSuXMsznOaF231zDZTGSFHjIstCGxOmmiqmbIVsZ1k
+      - 1edNbFgnIHPS6iVctKeqL7XORLvuDhAvK
+      - 1EsnGnQl3e940Y_612wTxnpqnCcWFr6EQ
+
+  - id: javascript/language-basics/data-types
+    chapter: javascript/language-basics
+    title: 자료형
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 20
+    status: skeleton
+    tags: [javascript, types, primitives]
+    related_material_ids:
+      - 1fhRBcjSPLJxleIVwjxC3KOhhNyHNL_vi6r8suTlEP-Q
+    sources:
+      - reference_slug: javascript/Number
+      - reference_slug: javascript/String
+      - reference_slug: javascript/Boolean
+
+  - id: javascript/language-basics/variables-and-type-conversion
+    chapter: javascript/language-basics
+    title: 변수와 자료형 변환
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 30
+    status: skeleton
+    tags: [javascript, variables, let, const, type-coercion]
+    related_material_ids:
+      - 1HTDn2pwfM2avNkOkLI0BXguLr_vEyVym-cnh0A-RLgc
+      - 1F2hOny7c3oBdq-CM9rlGWbELheWfDIB8
+
+  - id: javascript/language-basics/conditionals
+    chapter: javascript/language-basics
+    title: 조건문
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 40
+    status: skeleton
+    tags: [javascript, conditionals, if, switch]
+    related_material_ids:
+      - 1UmeYeEM-QIPQu3ul8-W3cLsYRqj4IbCKs4u8uxUNb5o
+
+  - id: javascript/language-basics/arrays-and-loops
+    chapter: javascript/language-basics
+    title: 배열과 반복문
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 50
+    status: skeleton
+    tags: [javascript, array, loop, for, while]
+    related_material_ids:
+      - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
+    sources:
+      - reference_slug: javascript/Array
+
+  - id: javascript/language-basics/functions
+    chapter: javascript/language-basics
+    title: 함수
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 60
+    status: skeleton
+    tags: [javascript, function, parameter, return]
+    related_material_ids:
+      - 1_dLoqERFBN2rIv8x40PtyGlzpbVGaOKAm0LUFEeYTEs
+      - 12W77c-tGjeY_8kAFSi59nwWsfuFwPoCh
+    sources:
+      - reference_slug: javascript/Function
+
+  # ── functions-and-scope ─────────────────────────────────────────────────
+  - id: javascript/functions-and-scope/scope-and-closures
+    chapter: javascript/functions-and-scope
+    title: 스코프와 클로저
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [javascript, scope, closure, hoisting]
+    related_material_ids:
+      - 1_dLoqERFBN2rIv8x40PtyGlzpbVGaOKAm0LUFEeYTEs
+
+  - id: javascript/functions-and-scope/callbacks-and-delayed-execution
+    chapter: javascript/functions-and-scope
+    title: 콜백과 지연 실행
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 20
+    status: skeleton
+    tags: [javascript, callback, setTimeout, async-intro]
+    related_material_ids:
+      - 1lrm8gd4VJVHMgZWYnXZaKT3vRtEa_y6JiJhVip3PwJU
+
+  # ── objects-and-builtins ────────────────────────────────────────────────
+  - id: javascript/objects-and-builtins/working-with-objects
+    chapter: javascript/objects-and-builtins
+    title: 객체 다루기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 10
+    status: skeleton
+    tags: [javascript, object, property, destructuring]
+    related_material_ids:
+      - 1edNbFgnIHPS6iVctKeqL7XORLvuDhAvK
+    sources:
+      - reference_slug: javascript/Object
+
+  - id: javascript/objects-and-builtins/array-methods
+    chapter: javascript/objects-and-builtins
+    title: 배열 메서드 (map/filter/reduce)
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 20
+    status: skeleton
+    tags: [javascript, array, map, filter, reduce, higher-order]
+    related_material_ids:
+      - 17MerbozH6mLKSw-5KnqnyLCOf2x1vAxBt2C9DYBE_Sc
+    sources:
+      - reference_slug: javascript/Array
+
+  - id: javascript/objects-and-builtins/builtin-objects
+    chapter: javascript/objects-and-builtins
+    title: 내장 객체 (Math/JSON/Date)
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 30
+    status: skeleton
+    tags: [javascript, builtins, Math, JSON, Date]
+    related_material_ids:
+      - 1F2hOny7c3oBdq-CM9rlGWbELheWfDIB8
+    sources:
+      - reference_slug: javascript/Math
+      - reference_slug: javascript/JSON
+      - reference_slug: javascript/Date
+
+  # ── classes-and-modules ─────────────────────────────────────────────────
+  - id: javascript/classes-and-modules/classes
+    chapter: javascript/classes-and-modules
+    title: class 문법
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [javascript, class, constructor, this, inheritance]
+    related_material_ids:
+      - 1_vcEvfntPW20h8NiTeCZFEwaG904c4sF5h_O-fLfozc
+      - 1QwoyuXNuzWgCxDlBok2OBkWrkd5f7NbL
+      - 1_VVpVAer8laiICbMwS69GNjReoRFwg7P
+
+  - id: javascript/classes-and-modules/es-modules
+    chapter: javascript/classes-and-modules
+    title: ES 모듈 (import/export)
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [javascript, modules, import, export, esm]
+    related_material_ids:
+      - 19E-NTySANRnlXoi-BXW7oqvCfyINBsHp93sXko8QnT0
+      - 1DTpQdOS-8kFQiIELp4baCQGE-vJSZiYP0f-Zi0onjW8
+      - 1puC4XZdZSWmeSO3ZrkLylO07SPqduzTz
+      - 1oM0miaWU0ETlOdn34zx54KAMPTD1ncKj
+      - 1JlNq4MRLPX9bXOYv1UzPYZYvSJqQULdk
+
+  - id: javascript/classes-and-modules/slideshow-module-practice
+    chapter: javascript/classes-and-modules
+    title: 실전 — 모듈로 슬라이드쇼 나누기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 30
+    status: skeleton
+    tags: [javascript, modules, slideshow, practice]
+    related_material_ids:
+      - 1JgvZcovh4kSME4OpUdYZeOQniaWepvv7
+      - 1799_v3_0i5erA9qU4Fu2qPI9yFs8yeaA
+
+  # ── dom-and-events ──────────────────────────────────────────────────────
+  - id: javascript/dom-and-events/selecting-and-manipulating
+    chapter: javascript/dom-and-events
+    title: DOM 요소 선택과 조작
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [javascript, dom, queryselector, classlist]
+    related_material_ids:
+      - 1CIn7DIpQ75B75uQE0mCGTevqzKfWYGul
+      - 1UA5i_5w9nz2we1EOl0juhqCwdlsxfvk2
+
+  - id: javascript/dom-and-events/events-and-delegation
+    chapter: javascript/dom-and-events
+    title: 이벤트 등록과 위임
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [javascript, dom, events, addEventListener, delegation]
+    related_material_ids:
+      - 19mP18ldFS7_FSzgFZtbH72nZTl033mD2
+      - 1RfTKoSkDllWZI-XJM1WUgNC9jQxxEKgz
+
+  # ── async-and-http ──────────────────────────────────────────────────────
+  - id: javascript/async-and-http/http-basics
+    chapter: javascript/async-and-http
+    title: HTTP(S) 기본
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [javascript, http, https, web]
+    related_material_ids:
+      - 1PzESoOFesMH-_WakTHF7TU_aHrmZh22abSq24LUda8Y
+
+  - id: javascript/async-and-http/promises-async-await
+    chapter: javascript/async-and-http
+    title: Promise와 async/await
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: skeleton
+    tags: [javascript, promise, async, await, asynchronous]
+    related_material_ids:
+      - 1lrm8gd4VJVHMgZWYnXZaKT3vRtEa_y6JiJhVip3PwJU
+    sources:
+      - reference_slug: javascript/Promise
+
+  - id: javascript/async-and-http/fetch-and-ajax
+    chapter: javascript/async-and-http
+    title: fetch와 Ajax로 데이터 가져오기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: skeleton
+    tags: [javascript, fetch, ajax, api]
+    related_material_ids:
+      - 1oZk7DMHPvLOpK6-eNlbM12QDTj06luJ7-z_X4pK-sm4
+
+  # ── browser-apis-and-storage ────────────────────────────────────────────
+  - id: javascript/browser-apis-and-storage/cookies
+    chapter: javascript/browser-apis-and-storage
+    title: 쿠키 생성·조회·삭제
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 10
+    status: skeleton
+    tags: [javascript, cookie, browser]
+    related_material_ids:
+      - 1E0tcY8QGdPaPoXa5BPB8P3--7p30oDvxX2XCbo-XOzQ
+      - 1-FMIiz7J0AcovsslpBhOT_OBhbBeNbmC
+
+  - id: javascript/browser-apis-and-storage/local-storage
+    chapter: javascript/browser-apis-and-storage
+    title: localStorage
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 20
+    status: skeleton
+    tags: [javascript, localstorage, web-storage]
+    related_material_ids:
+      - 1m0ERPZSlPw_OHTsby-9pp1tiAzAFs9Vi
+
+  - id: javascript/browser-apis-and-storage/timers
+    chapter: javascript/browser-apis-and-storage
+    title: 타이머 (setTimeout/setInterval)
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 30
+    status: skeleton
+    tags: [javascript, timer, setTimeout, setInterval]
+    related_material_ids:
+      - 1U2sMPS2lrlD_sUSX_vbHSUzkKlOqYVoY
+
+  # ── external-apis ───────────────────────────────────────────────────────
+  - id: javascript/external-apis/map-api
+    chapter: javascript/external-apis
+    title: 지도 API 붙이기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [javascript, map, api, geolocation]
+    related_material_ids:
+      - 1p-9VZXmvak564yNKRy_a4Hxds09brFhFUf_hg2azQII
+      - 1fWq89qe3p3OveESC8EuOX57X3XYd9Qp3
+
+  - id: javascript/external-apis/weather-api
+    chapter: javascript/external-apis
+    title: 날씨 API (기상청·공공데이터)
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: skeleton
+    tags: [javascript, weather, api, public-data]
+    related_material_ids:
+      - 1KulC-xgMNEzQBPH7piSFCpTE_tEryIPzlZ-ioBnawK8
+      - 1ImZMs1l7VZ33ZUplGFP_VofjyrWrDgi_tw_kvacsf8k
+      - 1j43M8gac2zVaF-eiQQ3_YHy_3q3Z7aPHOLMLEZsjomU
+
+  - id: javascript/external-apis/chartjs
+    chapter: javascript/external-apis
+    title: Chart.js로 데이터 시각화
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 30
+    status: skeleton
+    tags: [javascript, chartjs, visualization, chart]
+    related_material_ids:
+      - 1CXsWroXCl9PJUygoTIIrWFZenRq4W83k
+      - 1ze4bEucBoRWPCSoqcvau97Og64GwjLBXfFK9RyJzsGo
+
+  # ── ui-implementation-patterns ──────────────────────────────────────────
+  - id: javascript/ui-implementation-patterns/slideshows-and-sliders
+    chapter: javascript/ui-implementation-patterns
+    title: 슬라이드쇼와 슬라이더
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 10
+    status: skeleton
+    tags: [javascript, slider, carousel, ui]
+    related_material_ids:
+      - 1LIkvyoZb7Lgi2D9sxPjmP5b-R07sePmk
+      - 1Ifq3B-gVdvjZ1ApmuSNKbN1b6l6-vx0G
+      - 1et1YaQ-Zz316r-hxfmC5H6ebbj8JXXCI
+      - 1lMZEWt1eILew6G0bNNqGcY3q4BrBmxg9
+      - 1ydIkwY1tXxmZ1B0drCnlFvukU4Bb9sjx
+      - 1Ac6CXlY30HnvPw4Od8TqRvdoigtZIMav
+
+  - id: javascript/ui-implementation-patterns/filtering-and-pagination
+    chapter: javascript/ui-implementation-patterns
+    title: 필터와 페이지네이션
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 20
+    status: skeleton
+    tags: [javascript, filter, pagination, ui]
+    related_material_ids:
+      - 1l4lpnBwi2kODMxmlB3noONNS5sWrpENW
+      - 10kj1r4rA1hrzM6FiSYhrBh0ngLs5B8ri
+      - 1cvet9qugHhHJ2kmbqkCnHGGDG4H9wn-M
+      - 1Lz4__eRVWJtXdl_VJHXUNDIhzLtCmHHk
+
+  - id: javascript/ui-implementation-patterns/skeleton-ui-and-number-animation
+    chapter: javascript/ui-implementation-patterns
+    title: 스켈레톤 UI와 숫자 카운트업
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 30
+    status: skeleton
+    tags: [javascript, skeleton-ui, animation, loading, ui]
+    related_material_ids:
+      - 1U9d8s6WjpbDQbaRyBE7NhogK_Awqx2EcRy9G67K03yg
+      - 1CXptlO7i4Wo7UGRnrEjDBIpBIGtYRkPJ
+      - 193zXkSjbvBwZi-XCQqvREZbrkFXZhy62
+      - 14tzeASyfnNoqN0Swk4OVs3PJoPQG4Vm9
+      - 1hKwoevx3RAkAFw47SP_bcmkfjGZjhzZd
+      - 1Th4fzRJ6eOYhBOYM2mQSs3_pvZ7UBncC
+
+  - id: javascript/ui-implementation-patterns/file-preview-and-drag-drop
+    chapter: javascript/ui-implementation-patterns
+    title: 파일 미리보기와 드래그&드롭
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 40
+    status: skeleton
+    tags: [javascript, file, drag-drop, preview, ui]
+    related_material_ids:
+      - 1VEJLbuN5OQrHfq3EkQeuGdYDl711wDYf
+      - 1rRAtQa5zw7U4v4DORf58-iQtrmDEy3iz
+
+  - id: javascript/ui-implementation-patterns/banners-and-effects
+    chapter: javascript/ui-implementation-patterns
+    title: 배너·메뉴 hover·커스텀 커서
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 50
+    status: skeleton
+    tags: [javascript, banner, hover, cursor, ui]
+    related_material_ids:
+      - 1ydIkwY1tXxmZ1B0drCnlFvukU4Bb9sjx
+      - 1UA5i_5w9nz2we1EOl0juhqCwdlsxfvk2
+      - 19mP18ldFS7_FSzgFZtbH72nZTl033mD2
+
+  - id: javascript/ui-implementation-patterns/calendar-grid
+    chapter: javascript/ui-implementation-patterns
+    title: 달력 그리드 만들기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 60
+    status: skeleton
+    tags: [javascript, calendar, date, grid, ui]
+    related_material_ids:
+      - 1CIn7DIpQ75B75uQE0mCGTevqzKfWYGul
+
+  # ── jquery ──────────────────────────────────────────────────────────────
+  - id: javascript/jquery/jquery-basics
+    chapter: javascript/jquery
+    title: jQuery 기초
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [jquery, dom, legacy]
+    related_material_ids:
+      - 1z1ZazOejwksm81nP5m5b2zdEQcRaN1Ei
+      - 0B0HRSf3dPjJidHpZaU9jUS1qTm8
+      - 1eNRD5Jtxwmp_NXPEXMHGA49DtRYt-jPRYfeBU_xyO10
+      - 1dThjd-2mJtkqHzUtuVP0tDN_voqzbN3m7JdTT_0acTw
+
+  - id: javascript/jquery/jquery-vs-vanilla
+    chapter: javascript/jquery
+    title: jQuery와 순수 JS 비교
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [jquery, vanilla-js, comparison]
+    related_material_ids:
+      - 1R-LC_LxenaZj4eZ7IK61vAQAhOJE_GHCVAAyN8QtWic
+
+  - id: javascript/jquery/jquery-hover-and-animation
+    chapter: javascript/jquery
+    title: jQuery hover·이벤트·애니메이션
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 30
+    status: skeleton
+    tags: [jquery, hover, animation, event]
+    related_material_ids:
+      - 0B0HRSf3dPjJiSmlFbDlaQnBxQzQ
+      - 1T_9Ofx3Ea4c3kwcm632fmXAmIrw8U49Y
+
+  - id: javascript/jquery/scroll-libraries
+    chapter: javascript/jquery
+    title: 스크롤 라이브러리 (ScrollMagic·wow.js·fullPage.js)
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 40
+    status: skeleton
+    tags: [jquery, scroll, scrollmagic, wowjs, fullpage, animation]
+    related_material_ids:
+      - 1Syu2Owv5OR0McZaobXkcWR8yoinxNXPU
+      - 1wARJa31byezya3LvJ9vvdtubrS__cmBw
+      - 1uQpbqMcfASrCBOHjwxVAgGXCYhrrWw-o
+      - 1NopRne5Ihf1ShjufAwHS8gBFi7whlejw
+      - 10YXGXxB-VlKPzHC1qDhMg6T9PahEoWrm
+      - 1WuiU6uPBHdrEcM0RLZNxP-2Fjtd1zEyQ

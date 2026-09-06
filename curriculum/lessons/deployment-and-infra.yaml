@@ -1,0 +1,188 @@
+# Track: deployment-and-infra — Lesson 골격
+# 규격: curriculum/README.md §4
+#
+# static-hosting / ci-cd / node-app-hosting 는 실제 자료로 채운다(일부 자료는
+# react·nextjs 트랙과 공유 — related_material_ids 중복 참조는 정상).
+# containers-docker 챕터는 needs_external_research (자료 없음).
+
+lessons:
+  # ── static-hosting ────────────────────────────────────────────────────
+  - id: deployment-and-infra/static-hosting/github-pages
+    chapter: deployment-and-infra/static-hosting
+    title: GitHub Pages로 페이지 열기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [deployment, github-pages, static-hosting]
+    related_material_ids:
+      - 1UkMfeU58aX680ezoxy1aVuMdPBxZtHKFwBEsv8V7koc
+
+  # ── ci-cd-github-actions ──────────────────────────────────────────────
+  - id: deployment-and-infra/ci-cd-github-actions/first-workflow
+    chapter: deployment-and-infra/ci-cd-github-actions
+    title: 첫 GitHub Actions 워크플로
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [deployment, github-actions, ci-cd, workflow, yaml]
+    related_material_ids:
+      - 1Vy2qH2_CNLZBpmybJeCDsHHUflrl7Kt_tPdFxDKuEJQ
+      - 1m-E8FWFbhiCWekrvwVZKzvkGpkxjN3tk88Zj6-GxtHA
+
+  # ── node-app-hosting ──────────────────────────────────────────────────
+  - id: deployment-and-infra/node-app-hosting/gcp-vm-deploy
+    chapter: deployment-and-infra/node-app-hosting
+    title: GCP VM에 앱 올리기
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 10
+    status: skeleton
+    tags: [deployment, gcp, vm, nginx, systemd, infra]
+    related_material_ids:
+      - 1MjC0nvq1rc_wQbO1st7P5_mUtCaROXGelLiSNub_aC4
+      - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
+      - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
+      - 1b9CclzJ5-MUY-jv0n82pDpNyOt71isP9_B9kbG5QJJ4
+
+  - id: deployment-and-infra/node-app-hosting/platform-comparison
+    chapter: deployment-and-infra/node-app-hosting
+    title: Koyeb·Heroku·AWS 비교
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 25
+    ord: 20
+    status: skeleton
+    tags: [deployment, koyeb, heroku, aws, paas, comparison]
+    related_material_ids:
+      - 1oBYMnzeAurIBI556SN49zk9YXIX2156CEkoVcSfhQ9A
+
+  # ── containers-docker ────────────────────────────────────────────────
+  # 교육용 Docker 자료는 없음(related_material_ids: []). 전량 Docker 공식 문서 기반.
+  # 사용자의 Docker Desktop + Supabase 로컬 스택 실경험이 실전 앵커 (research/docker-and-infra.md).
+  - id: deployment-and-infra/containers-docker/images-and-containers
+    chapter: deployment-and-infra/containers-docker
+    title: 이미지와 컨테이너의 차이
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: authored
+    tags: [docker, container, image, vm, layers]
+    related_material_ids: []
+    sources:
+      - title: "What is a container?"
+        url: https://www.docker.com/resources/what-container/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "What is an image?"
+        url: https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Docker overview"
+        url: https://docs.docker.com/get-started/docker-overview/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/images-and-containers.md
+
+  - id: deployment-and-infra/containers-docker/dockerfile-and-build
+    chapter: deployment-and-infra/containers-docker
+    title: Dockerfile로 내 앱 이미지 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 20
+    status: needs_external_research
+    tags: [docker, dockerfile, build, image, dockerignore]
+    related_material_ids: []
+    sources:
+      - title: "Writing a Dockerfile"
+        url: https://docs.docker.com/get-started/docker-concepts/building-images/writing-a-dockerfile/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: deployment-and-infra/containers-docker/ports-volumes-env
+    chapter: deployment-and-infra/containers-docker
+    title: 컨테이너 다루기 — 포트·볼륨·환경변수
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 30
+    status: needs_external_research
+    tags: [docker, ports, volumes, bind-mount, environment-variables]
+    related_material_ids: []
+    sources:
+      - title: "Publishing ports"
+        url: https://docs.docker.com/get-started/docker-concepts/running-containers/publishing-ports/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Persisting container data"
+        url: https://docs.docker.com/get-started/docker-concepts/running-containers/persisting-container-data/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: deployment-and-infra/containers-docker/compose
+    chapter: deployment-and-infra/containers-docker
+    title: Docker Compose로 멀티 컨테이너
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 55
+    ord: 40
+    status: needs_external_research
+    tags: [docker, compose, multi-container, networking, dns]
+    related_material_ids: []
+    sources:
+      - title: "Multi-container applications"
+        url: https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Docker Compose: features and uses"
+        url: https://docs.docker.com/compose/intro/features-uses/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: deployment-and-infra/containers-docker/dev-vs-prod-multistage
+    chapter: deployment-and-infra/containers-docker
+    title: 개발 이미지 vs 프로덕션 이미지 — 멀티스테이지 빌드
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 50
+    status: needs_external_research
+    tags: [docker, multi-stage-build, production, image-size]
+    related_material_ids: []
+    sources:
+      - title: "Multi-stage builds"
+        url: https://docs.docker.com/build/building/multi-stage/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: deployment-and-infra/containers-docker/logs-and-debugging
+    chapter: deployment-and-infra/containers-docker
+    title: 컨테이너 로그와 디버깅
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 60
+    status: needs_external_research
+    tags: [docker, logs, exec, debugging, stdout]
+    related_material_ids: []
+    sources:
+      - title: "docker container logs (CLI reference)"
+        url: https://docs.docker.com/reference/cli/docker/container/logs/
+        publisher: "Docker, Inc."
+        checked_at: 2026-09-06
+        source_type: official_docs

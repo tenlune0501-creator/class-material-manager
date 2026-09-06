@@ -1,0 +1,248 @@
+# Track: data-and-backend — Lesson 골격
+# 규격: curriculum/README.md §4
+#
+# 이 트랙은 강사 자료가 얕다. data-modeling / baas 챕터만 실제 자료로 채우고,
+# nodejs-server / relational-database-operations 챕터는 needs_external_research
+# (자료 없음 — 승인된 조사 단계에서 공식 문서로 채운다. 지금 지어내지 않는다).
+
+lessons:
+  # ── data-modeling ─────────────────────────────────────────────────────
+  - id: data-and-backend/data-modeling/erd
+    chapter: data-and-backend/data-modeling
+    title: ERD 제작하기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 45
+    ord: 10
+    status: skeleton
+    tags: [database, erd, modeling, entity-relationship]
+    related_material_ids:
+      - 1gmX8yMuc3IJPkYjkzUoOHjboPirybRBDMjeK3LuxKWQ
+
+  - id: data-and-backend/data-modeling/normalization
+    chapter: data-and-backend/data-modeling
+    title: 정규화
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 20
+    status: skeleton
+    tags: [database, normalization, 1nf, 2nf, 3nf]
+    related_material_ids:
+      - 14E6y0TieVisd_jpln3_F9wwbmdR4LKka7XJ05KZJ1zo
+
+  - id: data-and-backend/data-modeling/relational-vs-nonrelational
+    chapter: data-and-backend/data-modeling
+    title: 관계형과 비관계형의 차이
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 30
+    ord: 30
+    status: skeleton
+    tags: [database, sql, nosql, comparison]
+    related_material_ids:
+      - 1egvVi-6Dp33Klw1WXYLqNCKJQS9JDKu02orlbjwmUmA
+
+  - id: data-and-backend/data-modeling/sql-essentials
+    chapter: data-and-backend/data-modeling
+    title: SQL 핵심
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 40
+    status: skeleton
+    tags: [database, sql, select, join, crud]
+    related_material_ids:
+      - 1Hn4jKnNU0sURe1TUOIE_ESNK3Kr6nMH-TcsJbEQ35Wk
+
+  # ── backend-integration ───────────────────────────────────────────────
+  - id: data-and-backend/backend-integration/frontend-to-webserver-db
+    chapter: data-and-backend/backend-integration
+    title: 프론트엔드에서 웹서버·DB에 붙기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 10
+    status: skeleton
+    tags: [backend, integration, rest, fetch, database]
+    related_material_ids:
+      - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
+      - 1pVRYcYZM4XyofD3QoUm-NCuI0nfU4a-IXDig_vOW3lQ
+
+  # ── baas-supabase-firebase ────────────────────────────────────────────
+  - id: data-and-backend/baas-supabase-firebase/firebase-vs-supabase
+    chapter: data-and-backend/baas-supabase-firebase
+    title: Firebase와 Supabase 비교
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: skeleton
+    tags: [baas, firebase, supabase, comparison]
+    related_material_ids:
+      - 1lihKRwRC3KHP4RXBvzGiuIG7bLEJRkgCilkk1LBSZPo
+
+  - id: data-and-backend/baas-supabase-firebase/supabase-in-a-real-project
+    chapter: data-and-backend/baas-supabase-firebase
+    title: 실제 프로젝트에서 Supabase 쓰기
+    mastery: practical
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: skeleton
+    tags: [supabase, ssr, auth, postgrest, rls, database]
+    related_material_ids:
+      - 1NFB5KVAZTGy2GEmVAD80IGTl2xC5wpFh8kiGrPETHzY
+    project_links:
+      - unit: momentalk/supabase-ssr-client
+        note: 쿠키 어댑터로 서버에서 세션을 읽는 createServerClient
+      - unit: momentalk/community-crud-embed
+        note: PostgREST embed 조인으로 게시판 조회를 한 번에
+
+  # ── nodejs-server ─────────────────────────────────────────────────────
+  # 재검토 결과(research/backend-and-database.md): 기존 자료가 "없음"이 아니다.
+  # react/board-crud-app 에 매핑된 강사 문서 다수가 실제로 Express + MySQL REST 서버를
+  # 처음부터 만드는 실습이다(dual-map — 같은 자료를 "서버 관점"으로도 참조; README §1 loose ref 허용).
+  # 개념 레이어(런타임/이벤트루프, 내장 http, 에러 처리)만 외부 공식 문서로 채우면 된다.
+  - id: data-and-backend/nodejs-server/node-runtime-and-event-loop
+    chapter: data-and-backend/nodejs-server
+    title: Node 런타임과 이벤트 루프
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: needs_external_research
+    tags: [nodejs, event-loop, non-blocking-io, runtime]
+    related_material_ids: []
+
+  - id: data-and-backend/nodejs-server/builtin-http-server
+    chapter: data-and-backend/nodejs-server
+    title: 내장 http 모듈로 서버 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 60
+    ord: 20
+    status: authored
+    tags: [nodejs, http, server, request-response, rest]
+    related_material_ids:
+      - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
+      - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
+    sources:
+      - title: "Overview of HTTP"
+        url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+        publisher: "Mozilla (MDN)"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "HTTP request methods"
+        url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+        publisher: "Mozilla (MDN)"
+        checked_at: 2026-09-06
+        source_type: official_docs
+      - title: "Anatomy of an HTTP Transaction"
+        url: https://nodejs.org/learn/http/anatomy-of-an-http-transaction
+        publisher: "OpenJS Foundation"
+        checked_at: 2026-09-06
+        source_type: official_docs
+    body_path: authored/data-and-backend/nodejs-server/builtin-http-server.md
+
+  - id: data-and-backend/nodejs-server/express-rest-api
+    chapter: data-and-backend/nodejs-server
+    title: Express로 REST API 서버 만들기
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 70
+    ord: 30
+    status: skeleton
+    tags: [nodejs, express, rest-api, crud, backend]
+    related_material_ids:
+      - 1k0hObTy4naQwvnx-jVg_J2pwtj3tNwFoIgMQ3UTmjSI
+      - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
+      - 1peKntI-8PW-rTz3_YEqlvQ5o9WgWOPbcL0-13fyerVE
+      - 1KeXe0iqOamu8O2Sy37-3aTCvuKgjtanc0sHFfEOLCqQ
+      - 1bos2ISUIaSOOV4QvfS6odYxRW65jUoxfdsOVetOaQMQ
+    sources:
+      - title: "Express — Basic routing"
+        url: https://expressjs.com/en/starter/basic-routing.html
+        publisher: "OpenJS Foundation"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: data-and-backend/nodejs-server/routing-and-modules
+    chapter: data-and-backend/nodejs-server
+    title: 라우팅 심화와 모듈 분리
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 40
+    status: skeleton
+    tags: [nodejs, express, router, modules, project-structure]
+    related_material_ids:
+      - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
+    sources:
+      - title: "Express Guide — Routing"
+        url: https://expressjs.com/en/guide/routing.html
+        publisher: "OpenJS Foundation"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: data-and-backend/nodejs-server/middleware
+    chapter: data-and-backend/nodejs-server
+    title: 미들웨어와 바디 파싱
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 50
+    status: skeleton
+    tags: [nodejs, express, middleware, body-parser, cors]
+    related_material_ids:
+      - 1peKntI-8PW-rTz3_YEqlvQ5o9WgWOPbcL0-13fyerVE
+      - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
+      - 1AkBUevgwRooF_sqef8D80r2tGnx4Swm1LwWWzgAVWCk
+    sources:
+      - title: "Express Guide — Using middleware"
+        url: https://expressjs.com/en/guide/using-middleware.html
+        publisher: "OpenJS Foundation"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: data-and-backend/nodejs-server/error-handling
+    chapter: data-and-backend/nodejs-server
+    title: 에러 처리 미들웨어
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 60
+    status: needs_external_research
+    tags: [nodejs, express, error-handling, middleware]
+    related_material_ids: []
+    sources:
+      - title: "Express Guide — Error Handling"
+        url: https://expressjs.com/en/guide/error-handling.html
+        publisher: "OpenJS Foundation"
+        checked_at: 2026-09-06
+        source_type: official_docs
+
+  - id: data-and-backend/nodejs-server/config-and-structure
+    chapter: data-and-backend/nodejs-server
+    title: 환경설정과 프로젝트 구조
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 70
+    status: skeleton
+    tags: [nodejs, config, environment-variables, project-structure, layering]
+    related_material_ids:
+      - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
+      - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
+
+  # ── relational-database-operations (needs_external_research) ───────────
+  - id: data-and-backend/relational-database-operations/schema-and-migrations
+    chapter: data-and-backend/relational-database-operations
+    title: 스키마 설계와 마이그레이션 실무
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 90
+    ord: 10
+    status: needs_external_research
+    tags: [database, postgres, migration, schema, transactions]
+    related_material_ids: []

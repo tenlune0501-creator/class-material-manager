@@ -1,0 +1,476 @@
+# CMM 학습 커리큘럼 — Track / Chapter 골격
+# 규격: curriculum/README.md §3
+#
+# 학습 순서 원칙 (강사 파일 순서가 아니라 실제 학습 순서):
+#   design-and-planning / tooling-and-collaboration 은 코드 트랙과 병행(먼저 시작).
+#   web-foundations → javascript → react → typescript → nextjs 가 주 흐름.
+#   data-and-backend / deployment-and-infra 는 nextjs 이후 통합 단계.
+#   ai-engineering / coding-test 는 대부분 needs_external_research (자료 없음).
+
+tracks:
+  # ────────────────────────────────────────────────────────────────────────
+  - id: design-and-planning
+    title: 디자인·기획 기초
+    summary: 화면을 만들기 전에 하는 일 — UI 디자인 원칙, Figma, 정보구조, 레퍼런스 분석, 시안을 코드로 옮기기.
+    kind: curriculum
+    ord: 5
+    status: active
+    chapters:
+      - id: design-and-planning/ui-design-foundations
+        title: UI 디자인 기초
+        summary: 타이포그래피·대비·여백·폼 디자인, 디자인 토큰(variable), 오토레이아웃 사고.
+        ord: 10
+        status: active
+      - id: design-and-planning/figma
+        title: Figma
+        summary: Figma 기본 조작, 플러그인, MCP 연동.
+        ord: 20
+        status: active
+      - id: design-and-planning/planning-and-ia
+        title: 기획과 정보구조
+        summary: 정보구조(IA), 레퍼런스 조사·분석, 스토리보드, 홈페이지 개설 절차.
+        ord: 30
+        status: active
+      - id: design-and-planning/design-to-code
+        title: 시안을 코드로
+        summary: 디자인 참조 코딩, 상세페이지 연결, 정렬/필터/장바구니 같은 화면 패턴을 시안에서 코드로.
+        ord: 40
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: tooling-and-collaboration
+    title: 개발 도구와 협업
+    summary: Git/GitHub, 커밋·브랜치, README, 다이어그램, 에디터 세팅 — 코드 트랙과 병행해 일찍 익힌다.
+    kind: curriculum
+    ord: 15
+    status: active
+    chapters:
+      - id: tooling-and-collaboration/git-basics
+        title: Git 기초
+        summary: 버전 관리 개념, add/commit/branch/merge, 자주 만나는 에러 대처.
+        ord: 10
+        status: active
+      - id: tooling-and-collaboration/github-workflow
+        title: GitHub 워크플로
+        summary: GitHub Desktop, 원격 저장소, GitHub Pages 로 페이지 열기, README 작성법.
+        ord: 20
+        status: active
+      - id: tooling-and-collaboration/diagrams-and-docs
+        title: 다이어그램과 문서화
+        summary: 흐름도·구조도 그리기, 문서로 남기기.
+        ord: 30
+        status: active
+      - id: tooling-and-collaboration/editor-setup
+        title: 에디터·패키지 도구
+        summary: VS Code 세팅, npm 기본.
+        ord: 40
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: web-foundations
+    title: 웹 프론트엔드 토대 (HTML·CSS)
+    summary: 문서 구조와 스타일. 시맨틱 마크업, 박스모델, Flexbox/Grid 레이아웃, CSS3 효과, 전처리기, 반응형, 웹표준·접근성.
+    kind: curriculum
+    ord: 20
+    status: active
+    chapters:
+      - id: web-foundations/html-structure
+        title: HTML 문서 구조
+        summary: 시맨틱 태그, 하이퍼링크, 폼 양식, 멀티미디어, 마크업 코딩 컨벤션, 특수문자.
+        ord: 10
+        status: active
+      - id: web-foundations/css-fundamentals
+        title: CSS 기초
+        summary: 선택자, 박스모델, 포지셔닝, 배경·스프라이트.
+        ord: 20
+        status: active
+      - id: web-foundations/css-layout-flexbox
+        title: Flexbox 레이아웃
+        summary: 1차원 레이아웃 — 축, 정렬, 분배, 실전 내비게이션.
+        ord: 30
+        status: active
+      - id: web-foundations/css-layout-grid
+        title: CSS Grid 레이아웃
+        summary: 2차원 레이아웃 — 트랙, fr, 영역 이름, auto-flow, 카드 UI.
+        ord: 40
+        status: active
+      - id: web-foundations/css-text-and-effects
+        title: CSS3 텍스트와 효과
+        summary: 확장된 텍스트·단락 효과, transition/hover, 애니메이션, 카드 뒤집기 같은 기법.
+        ord: 50
+        status: active
+      - id: web-foundations/css-preprocessors-and-frameworks
+        title: 전처리기와 프레임워크
+        summary: Sass, LESS, Tailwind CSS.
+        ord: 60
+        status: active
+      - id: web-foundations/responsive-and-modern-css
+        title: 반응형과 최신 CSS
+        summary: 반응형 레이아웃·비디오, Container Queries, Logical Properties.
+        ord: 70
+        status: active
+      - id: web-foundations/web-standards-and-accessibility
+        title: 웹표준과 접근성
+        summary: 웹접근성 체크리스트, 문서 로드 순서, 타이포그래피 요약.
+        ord: 80
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: javascript
+    title: JavaScript
+    summary: 언어 기본기부터 DOM·이벤트, 비동기·HTTP, 브라우저 저장소, 외부 API, UI 구현 패턴, jQuery까지.
+    kind: curriculum
+    ord: 30
+    status: active
+    chapters:
+      - id: javascript/language-basics
+        title: 언어 기본
+        summary: 필수 암기, 자료형, 변수와 형 변환, 조건문, 배열과 반복문, 함수.
+        ord: 10
+        status: active
+      - id: javascript/functions-and-scope
+        title: 함수와 스코프
+        summary: 함수 심화, 스코프와 클로저, 콜백, 지연 실행.
+        ord: 20
+        status: active
+      - id: javascript/objects-and-builtins
+        title: 객체와 내장 객체
+        summary: 객체 다루기, 배열 메서드, Array/Object/Math/JSON/String 내장 객체.
+        ord: 30
+        status: active
+      - id: javascript/classes-and-modules
+        title: 클래스와 모듈
+        summary: class 문법, ES 모듈(import/export), 모듈 활용, npm 기초.
+        ord: 40
+        status: active
+      - id: javascript/dom-and-events
+        title: DOM과 이벤트
+        summary: 요소 선택·조작, 이벤트 등록과 위임 — 미니 실습 코드로 익힌다.
+        ord: 50
+        status: active
+      - id: javascript/async-and-http
+        title: 비동기와 HTTP
+        summary: HTTP(S) 개념, 콜백/Promise/async·await, fetch 와 Ajax.
+        ord: 60
+        status: active
+      - id: javascript/browser-apis-and-storage
+        title: 브라우저 API와 저장소
+        summary: 쿠키, localStorage, 타이머(setTimeout/setInterval).
+        ord: 70
+        status: active
+      - id: javascript/external-apis
+        title: 외부 API 사용
+        summary: 지도 API, 기상청·공공데이터 날씨 API, Chart.js 로 시각화.
+        ord: 80
+        status: active
+      - id: javascript/ui-implementation-patterns
+        title: UI 구현 패턴
+        summary: 슬라이드쇼, 필터, 슬라이더, 스켈레톤 UI, 숫자 애니메이션, 페이지네이션, 드래그&드롭 미리보기 등 실전 미니 구현.
+        ord: 90
+        status: active
+      - id: javascript/jquery
+        title: jQuery
+        summary: jQuery 기초, 순수 JS와 비교, 스크롤 라이브러리(scrollMagic/wow.js/fullpage.js).
+        ord: 100
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: react
+    title: React
+    summary: 컴포넌트·props·상태·이벤트에서 훅, 라우팅, 데이터 패칭, 상태 관리, CRUD 앱, Firebase 연동, 최적화, 배포까지.
+    kind: curriculum
+    ord: 40
+    status: active
+    chapters:
+      - id: react/setup-and-jsx
+        title: 개발환경과 JSX
+        summary: Vite + React 세팅, 퍼블리셔가 React를 배우는 이유, JSX 문법과 HTML 차이.
+        ord: 10
+        status: active
+      - id: react/components-and-props
+        title: 컴포넌트와 props
+        summary: 컴포넌트 만들기·파일 분리, props 로 데이터 전달.
+        ord: 20
+        status: active
+      - id: react/state-and-events
+        title: 상태와 이벤트
+        summary: useState 로 변하는 값 관리, 이벤트 핸들링으로 상태 바꾸기.
+        ord: 30
+        status: active
+      - id: react/rendering-logic
+        title: 렌더링 로직
+        summary: 조건부 렌더링, 리스트 렌더링과 key.
+        ord: 40
+        status: active
+      - id: react/hooks-effect-and-lifecycle
+        title: useEffect와 생명주기
+        summary: 라이프사이클 개념, useEffect, 함수형과 클래스형 컴포넌트 비교.
+        ord: 50
+        status: active
+      - id: react/hooks-ref-memo-callback
+        title: useRef·useMemo·useCallback
+        summary: 리렌더 없이 값 들고 있기(useRef), 계산·함수 재사용(useMemo/useCallback).
+        ord: 60
+        status: active
+      - id: react/custom-hooks
+        title: 커스텀 훅
+        summary: 반복되는 상태 로직을 훅으로 추출하기.
+        ord: 70
+        status: active
+      - id: react/styling-in-react
+        title: React에서 스타일링
+        summary: CSS 적용 방식, 이미지·아이콘 불러오기.
+        ord: 80
+        status: active
+      - id: react/routing
+        title: 라우팅
+        summary: React Router DOM, 라우터로 페이지 분리.
+        ord: 90
+        status: active
+      - id: react/data-fetching
+        title: 데이터 패칭
+        summary: React에서 Ajax/fetch로 서버 데이터 연동.
+        ord: 100
+        status: active
+      - id: react/state-management
+        title: 상태 관리
+        summary: Context API, Redux, 프로젝트에 Redux 도입하기.
+        ord: 110
+        status: active
+      - id: react/board-crud-app
+        title: 게시판 CRUD 앱
+        summary: 목록·상세·쓰기·수정·삭제를 갖춘 게시판을 React로 만든다(외부 DB 연동 포함).
+        ord: 120
+        status: active
+      - id: react/firebase-integration
+        title: Firebase 연동
+        summary: Firebase 설정, Firestore 연동, Auth(이메일·소셜 로그인/로그아웃), 실시간 업데이트.
+        ord: 130
+        status: active
+      - id: react/optimization-and-refactoring
+        title: 최적화와 리팩토링
+        summary: 불필요한 렌더 줄이기, 컴포넌트 구조 정리.
+        ord: 140
+        status: active
+      - id: react/testing
+        title: 테스트
+        summary: React에서 TDD 실습.
+        ord: 150
+        status: active
+      - id: react/seo-and-rendering
+        title: 렌더링 방식과 SEO
+        summary: CSR과 SSR 차이, React 앱의 SEO.
+        ord: 160
+        status: active
+      - id: react/ui-libraries
+        title: UI 라이브러리
+        summary: 데이트피커, 스와이퍼, Chart.js 를 React에서 쓰기.
+        ord: 170
+        status: active
+      - id: react/missions
+        title: 미션
+        summary: 강사 제공 종합 미션(basic mission, mission 7·8)으로 배운 것을 조립한다.
+        ord: 180
+        status: active
+      - id: react/portfolio-project
+        title: 포트폴리오 프로젝트
+        summary: 프로필 편집·타임라인·페이지네이션을 갖춘 포트폴리오를 만들고 배포한다.
+        ord: 190
+        status: active
+      - id: react/react-deployment
+        title: React 앱 배포
+        summary: GitHub Actions 자동 배포, GCP VM에 직접 올리기.
+        ord: 200
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: typescript
+    title: TypeScript
+    summary: 타입 추론, 인터페이스, 함수 타입, 유니언·타입가드, 제네릭, 클래스, 모듈, 유틸리티 타입, 실전 프로젝트.
+    kind: curriculum
+    ord: 50
+    status: active
+    chapters:
+      - id: typescript/setup-and-basic-types
+        title: 개발환경과 기본 타입
+        summary: TypeScript 소개·환경 설정, 기본 타입과 타입 추론.
+        ord: 10
+        status: active
+      - id: typescript/objects-interfaces-aliases
+        title: 객체·인터페이스·타입 별칭
+        summary: 객체 타입, interface, type 별칭.
+        ord: 20
+        status: active
+      - id: typescript/functions-unions-guards
+        title: 함수 타입과 유니언
+        summary: 함수 타입, 유니언 타입과 타입 가드.
+        ord: 30
+        status: active
+      - id: typescript/generics
+        title: 제네릭
+        summary: 타입을 매개변수로 받기.
+        ord: 40
+        status: active
+      - id: typescript/classes-and-modules
+        title: 클래스와 모듈
+        summary: 클래스와 접근 제한자, 모듈과 네임스페이스.
+        ord: 50
+        status: active
+      - id: typescript/advanced-and-utility-types
+        title: 유틸리티·고급 타입
+        summary: Partial/Pick/Record 등 유틸리티 타입과 고급 타입.
+        ord: 60
+        status: active
+      - id: typescript/typescript-in-practice
+        title: 실전 TypeScript
+        summary: 실전 프로젝트 1, TS로 만든 Todo, React + TypeScript.
+        ord: 70
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: nextjs
+    title: Next.js
+    summary: App/Pages 앱 생성, 라우팅·레이아웃, 정적 자원·CSS, JSON 백엔드·캐시, 게시판 CRUD, 환경변수와 배포.
+    kind: curriculum
+    ord: 60
+    status: active
+    chapters:
+      - id: nextjs/app-setup
+        title: 앱 생성과 구조
+        summary: create-next-app, 샘플 앱 구조 파악.
+        ord: 10
+        status: active
+      - id: nextjs/routing-and-layout
+        title: 라우팅과 레이아웃
+        summary: layout & page 뼈대, 파일 기반 라우팅, SPA 이동.
+        ord: 20
+        status: active
+      - id: nextjs/assets-and-styling
+        title: 정적 자원과 스타일
+        summary: public 폴더, Next.js에서 CSS 적용.
+        ord: 30
+        status: active
+      - id: nextjs/data-and-backend
+        title: 데이터와 백엔드
+        summary: JSON 데이터를 백엔드처럼 쓰기, 캐시 동작.
+        ord: 40
+        status: active
+      - id: nextjs/board-crud
+        title: 게시판 CRUD
+        summary: 글 목록·읽기·생성·수정·삭제.
+        ord: 50
+        status: active
+      - id: nextjs/env-and-deployment
+        title: 환경변수와 배포
+        summary: 빌드와 배포, 환경변수 마무리.
+        ord: 60
+        status: active
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: data-and-backend
+    title: 데이터와 백엔드 기초
+    summary: ERD·정규화·SQL 개념, 관계형/비관계형, BaaS(Supabase·Firebase). Node.js 서버와 실제 관계형 DB 운영은 자료 없음(외부 조사 필요).
+    kind: curriculum
+    ord: 70
+    status: active
+    chapters:
+      - id: data-and-backend/data-modeling
+        title: 데이터 모델링
+        summary: ERD 제작, 정규화, 관계형과 비관계형 차이, SQL 핵심.
+        ord: 10
+        status: active
+      - id: data-and-backend/backend-integration
+        title: 백엔드 연동 패턴
+        summary: 프론트에서 웹서버·DB에 붙는 기본 흐름(React/Next.js 자료에서 다룬 범위).
+        ord: 20
+        status: active
+      - id: data-and-backend/baas-supabase-firebase
+        title: BaaS — Supabase와 Firebase
+        summary: Firebase와 Supabase 비교, 프로젝트 이관, 실제 프로젝트(Momentalk)의 Supabase 사용.
+        ord: 30
+        status: active
+      - id: data-and-backend/nodejs-server
+        title: Node.js 서버
+        summary: Express 등으로 직접 API 서버 만들기.
+        ord: 40
+        status: needs_external_research
+      - id: data-and-backend/relational-database-operations
+        title: 관계형 DB 운영
+        summary: 스키마 설계·마이그레이션·쿼리 최적화·트랜잭션 실무.
+        ord: 50
+        status: needs_external_research
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: deployment-and-infra
+    title: 배포와 인프라
+    summary: 정적 호스팅, GitHub Actions CI/CD, GCP VM 배포, 플랫폼 비교. Docker/컨테이너는 자료 없음(외부 조사 필요).
+    kind: curriculum
+    ord: 80
+    status: active
+    chapters:
+      - id: deployment-and-infra/static-hosting
+        title: 정적 호스팅
+        summary: GitHub Pages로 페이지 열기, 홈페이지 개설 절차.
+        ord: 10
+        status: active
+      - id: deployment-and-infra/ci-cd-github-actions
+        title: CI/CD — GitHub Actions
+        summary: push 하면 자동 빌드·배포되게 만들기.
+        ord: 20
+        status: active
+      - id: deployment-and-infra/node-app-hosting
+        title: Node 앱 호스팅
+        summary: GCP VM 생성·웹서버 설치·서비스 등록·클라이언트 연결, Koyeb/Heroku/AWS 비교.
+        ord: 30
+        status: active
+      - id: deployment-and-infra/containers-docker
+        title: 컨테이너 — Docker
+        summary: 이미지·컨테이너·Compose, 배포 파이프라인에서의 컨테이너.
+        ord: 40
+        status: needs_external_research
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: ai-engineering
+    title: AI 엔지니어링
+    summary: 프론트엔드에서 생성형 AI API 붙이기(자료 일부 존재). LLM 앱 설계·RAG·에이전트·평가는 자료 없음(외부 조사 필요).
+    kind: curriculum
+    ord: 90
+    status: needs_external_research
+    chapters:
+      - id: ai-engineering/generative-ai-in-frontend
+        title: 프론트엔드의 생성형 AI
+        summary: OpenAI 이미지 생성 API, alan API 를 React 앱에 붙이기.
+        ord: 10
+        status: active
+      - id: ai-engineering/llm-app-fundamentals
+        title: LLM 앱 기초
+        summary: 프롬프트·토큰·컨텍스트·스트리밍, 모델 호출 설계.
+        ord: 20
+        status: needs_external_research
+      - id: ai-engineering/rag-and-agents
+        title: RAG와 에이전트
+        summary: 임베딩·검색 증강 생성, 도구 사용 에이전트 루프.
+        ord: 30
+        status: needs_external_research
+      - id: ai-engineering/prompt-and-evaluation
+        title: 프롬프트와 평가
+        summary: 프롬프트 설계 패턴, 출력 평가·회귀 테스트.
+        ord: 40
+        status: needs_external_research
+
+  # ────────────────────────────────────────────────────────────────────────
+  - id: coding-test
+    title: 코딩테스트
+    summary: 자료구조·알고리즘 문제 풀이 트랙. 보유 수업자료 없음 — 로드맵은 외부 공식 교육자료(MIT OCW 6.006 등)로 설계. 저장 문제는 CMM 자작(generated_minimal), 외부 문제는 제목+URL 링크만.
+    kind: coding_test
+    ord: 100
+    status: needs_external_research
+    chapters:
+      # 전체 로드맵(5 Chapter / 15 개념 Lesson / 예제 문제)은 research/evaluation-and-coding-test.md
+      # PART 2 에 설계돼 있다. 이번 라운드는 첫 Chapter(foundations)만 skeleton 으로 반영하고
+      # big-o-notation 을 대표 집필했다. 나머지 4개 Chapter 는 승인 후 같은 설계로 추가한다.
+      - id: coding-test/foundations
+        title: 기초 — 접근법과 복잡도
+        summary: 문제를 읽고 접근하는 방법, Big-O 표기법과 복잡도 분석.
+        ord: 10
+        status: active
