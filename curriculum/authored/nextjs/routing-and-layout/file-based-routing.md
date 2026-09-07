@@ -11,6 +11,9 @@ related_material_ids:
 prerequisites:
   - nextjs/routing-and-layout/layout-and-page
   - react/routing/react-router-dom
+project_links:
+  - unit: momentalk/app-router-page-metadata
+    note: 폴더 = 경로, page.jsx(서버 컴포넌트)가 export const metadata 로 head 를 채우는 실제 진입 파일
 code_examples:
   - slug: folders
     title: 폴더 = URL

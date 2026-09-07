@@ -214,7 +214,7 @@ projects:
         concepts: [frontmatter, YAML 파싱, 순수 함수, 재사용 모듈]
         related_material_ids:
           - 1YU1DAaCW_rVa9ycfG8lJQi0k5jUvLDuUQRTYaiVGwK0
-        example_ids: []
+        example_ids: [cmm-split-frontmatter]
         ord: 30
 
       - id: class-material-manager/postgrest-sync
@@ -302,7 +302,7 @@ projects:
         summary: assets/css/tenlune.css. 35개 @media 쿼리(400~1040px)와 rem/em/clamp() 기반으로 그리드가 모바일에서 1열로 정확히 붕괴하고 가로 스크롤을 유발할 고정 너비가 없다.
         concepts: [반응형 레이아웃, 미디어 쿼리, clamp/rem/em, 그리드 붕괴, 가로 스크롤 방지]
         related_material_ids: []
-        example_ids: []
+        example_ids: [tenlune-css-design-tokens]
         ord: 20
 
       - id: tenlune/rule-engine-quote-tool
@@ -366,7 +366,7 @@ projects:
         summary: src/repositories/. marketing-repository.ts 포트 인터페이스 하나에 in-memory-marketing-repository(테스트·모의용)와 supabase-marketing-repository(+supabase-mapping.ts, PostgREST)가 같은 계약을 구현. 호출부는 어느 어댑터인지 모른다.
         concepts: [포트-어댑터 패턴, 인터페이스에 의존, 테스트 더블, Node 에서 Supabase 접근, 매핑 계층]
         related_material_ids: []
-        example_ids: []
+        example_ids: [tma-repository-port]
         ord: 30
 
       - id: tenlune-marketing-agent/agent-decision-core
@@ -429,7 +429,7 @@ projects:
         summary: src/domain/scoring.ts + delivery-model.ts. 납품형 프로젝트인지 먼저 가르고, HIGH/CONDITIONAL/LOW 키워드 매칭으로 0~100 점수와 recommend/review/hold 판정을 이유·주의와 함께 낸다. LLM 없이 순수 규칙.
         concepts: [규칙 기반 점수화, 키워드 가중치, 결과 등급화, 판정에 근거 첨부]
         related_material_ids: []
-        example_ids: []
+        example_ids: [toa-rule-based-scoring]
         ord: 30
 
       - id: tenlune-operations-agent/estimation-and-risk-modules

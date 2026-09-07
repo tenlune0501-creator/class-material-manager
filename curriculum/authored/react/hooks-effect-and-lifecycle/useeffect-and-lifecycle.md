@@ -18,6 +18,8 @@ prerequisites:
 project_links:
   - unit: momentalk/use-focus-trap-hook
     note: useEffect 정리(cleanup) 함수로 이벤트 리스너를 해제하는 실제 예
+  - unit: momentalk/random-pick-game-logic
+    note: setTimeout 을 여러 개 예약하고 반환 함수에서 전부 clearTimeout, Supabase 조회 effect 의 alive 가드
 code_examples:
   - slug: effect-basic
     title: useEffect — 렌더 "이후" 외부와 동기화

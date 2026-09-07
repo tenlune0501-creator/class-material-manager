@@ -27,6 +27,9 @@ prerequisites:
   - data-and-backend/nodejs-server/builtin-http-server
   - data-and-backend/data-modeling/sql-essentials
   - data-and-backend/backend-integration/frontend-to-webserver-db
+project_links:
+  - unit: momentalk/password-route-handler
+    note: Next Route Handler(POST /api/auth/password) — 서버가 입력을 다시 검증하고 단계별로 401/403/400/500 반환
 code_examples:
   - slug: setup
     title: 프로젝트 준비

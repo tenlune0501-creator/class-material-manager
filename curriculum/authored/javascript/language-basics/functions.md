@@ -11,6 +11,9 @@ related_material_ids:
   - 12W77c-tGjeY_8kAFSi59nwWsfuFwPoCh              # javascript_final_v202605.zip
 sources:
   - reference_slug: javascript/Function
+project_links:
+  - unit: momentalk/hangul-chosung-util
+    note: 초성 추출을 부수효과 없는 순수 함수로 — 입력만으로 출력이 정해져 그대로 테스트 가능
 code_examples:
   - slug: function-forms
     title: 함수 선언 3가지

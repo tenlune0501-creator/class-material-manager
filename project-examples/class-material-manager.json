@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "project": "class-material-manager",
+  "repo_url": "https://github.com/tenlune0501-creator/class-material-manager",
+  "repo_ref": "f21ec89fa604d2ba02a6606bb8045612b8a358a5",
+  "note": "이 저장소(class-material-manager)의 학습용 코드 발췌. 고정 커밋에서 라인 범위만 잘라 왔으며 수정하지 않았습니다. 단일 개인 프로젝트이므로 작성자 주석은 두지 않습니다.",
+  "examples": [
+    {
+      "id": "cmm-split-frontmatter",
+      "project": "class-material-manager",
+      "repo_url": "https://github.com/tenlune0501-creator/class-material-manager",
+      "repo_ref": "f21ec89fa604d2ba02a6606bb8045612b8a358a5",
+      "title": "splitFrontmatter — .md 앞머리 --- 블록만 떼기",
+      "summary": "`.md` 파일 맨 앞의 frontmatter 블록을 본문과 분리하는 순수 함수. 닫는 구분자는 2번째 줄부터 처음 만나는 `---` 하나뿐이라 본문 중간의 수평선은 건드리지 않는다. 파일 시스템·전역 상태에 의존하지 않아 그대로 단위 테스트가 되고, CLI 파이프라인과 sync-curriculum, 뷰어가 같은 규칙으로 frontmatter를 나눈다. Unit class-material-manager/frontmatter-parsing 참고.",
+      "subject": "typescript",
+      "concepts": [
+        "순수 함수",
+        "문자열 처리",
+        "frontmatter",
+        "재사용 모듈"
+      ],
+      "file_path": "src/sync/frontmatter.ts",
+      "file_url": "https://github.com/tenlune0501-creator/class-material-manager/blob/f21ec89fa604d2ba02a6606bb8045612b8a358a5/src/sync/frontmatter.ts",
+      "language": "ts",
+      "code": "export function splitFrontmatter(raw: string): SplitResult {\n  const text = raw.replace(/^﻿/, \"\");\n  if (!text.startsWith(\"---\")) return { frontmatter: \"\", body: text };\n\n  const lines = text.split(\"\\n\");\n  // lines[0] 이 \"---\". 닫는 \"---\" 를 1번 줄부터 찾습니다.\n  let close = -1;\n  for (let i = 1; i < lines.length; i++) {\n    if ((lines[i] ?? \"\").trim() === \"---\") {\n      close = i;\n      break;\n    }\n  }\n  if (close === -1) return { frontmatter: \"\", body: text };\n\n  const frontmatter = lines.slice(1, close).join(\"\\n\");\n  // 닫는 구분자 다음 줄부터가 본문. 바로 뒤 빈 줄 하나는 흡수합니다.\n  let bodyStart = close + 1;\n  if (lines[bodyStart] === \"\") bodyStart += 1;\n  const body = lines.slice(bodyStart).join(\"\\n\");\n  return { frontmatter, body };\n}",
+      "line_start": 25,
+      "line_end": 46,
+      "related_material_ids": [],
+      "authorship_note": null,
+      "ord": 10
+    }
+  ]
+}

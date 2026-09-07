@@ -21,6 +21,9 @@ sources:
 prerequisites:
   - ai-engineering/llm-app-fundamentals/prompts-tokens-context
   - typescript/objects-interfaces-and-type-aliases/objects-interface-type-alias
+project_links:
+  - unit: tenlune/hybrid-llm-quote-explanation
+    note: "서버가 항상 `{ explanation: string | null }` 형태로 응답 — 실패·키 없음이면 null, 프런트는 있을 때만 렌더"
 code_examples:
   - slug: problem
     title: 자유 텍스트 파싱의 문제

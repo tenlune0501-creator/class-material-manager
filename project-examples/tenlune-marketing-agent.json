@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "project": "tenlune-marketing-agent",
+  "repo_url": "https://github.com/tenlune0501-creator/tenlune-marketing-agent",
+  "repo_ref": "a84cae21e8897cfd0e9d46a4cf002f6ec74432fd",
+  "note": "Tenlune Marketing Agent 저장소의 학습용 코드 발췌. 커밋된 HEAD 고정이며 수정하지 않았습니다(개발 중 기능은 제외). 이민호의 1인 프로젝트입니다.",
+  "examples": [
+    {
+      "id": "tma-repository-port",
+      "project": "tenlune-marketing-agent",
+      "repo_url": "https://github.com/tenlune0501-creator/tenlune-marketing-agent",
+      "repo_ref": "a84cae21e8897cfd0e9d46a4cf002f6ec74432fd",
+      "title": "MarketingRepository — 포트 인터페이스 하나",
+      "summary": "마케팅 운영 상태를 저장/조회하는 계약. 인메모리 어댑터(테스트·모의)와 Supabase 어댑터가 이 인터페이스 하나를 똑같이 구현하고, 에이전트 생성자는 구체 클래스가 아니라 이 타입에 의존한다. 저장소 구현을 파일→Supabase→다른 DB로 바꿔도 에이전트 코드는 그대로다. Unit tenlune-marketing-agent/repository-port-and-adapters 참고.",
+      "subject": "typescript",
+      "concepts": [
+        "포트-어댑터 패턴",
+        "인터페이스에 의존",
+        "테스트 더블"
+      ],
+      "file_path": "src/repositories/marketing-repository.ts",
+      "file_url": "https://github.com/tenlune0501-creator/tenlune-marketing-agent/blob/a84cae21e8897cfd0e9d46a4cf002f6ec74432fd/src/repositories/marketing-repository.ts",
+      "language": "ts",
+      "code": "import type {\n  AgentDecision,\n  Approval,\n  Campaign,\n  ChannelRule,\n  ContentVariant,\n  MarketingState,\n  MarketingTask,\n  PublishingRecord\n} from \"../domain/types.js\";\n\nexport interface MarketingRepository {\n  getState(): MarketingState;\n  listChannels(): ChannelRule[];\n  listTasks(): MarketingTask[];\n  listVariants(): ContentVariant[];\n  listApprovals(): Approval[];\n  listPublishingRecords(): PublishingRecord[];\n  listCampaigns(): Campaign[];\n  saveChannel(channel: ChannelRule): void;\n  saveTask(task: MarketingTask): void;\n  saveVariant(variant: ContentVariant): void;\n  saveApproval(approval: Approval): void;\n  savePublishingRecord(record: PublishingRecord): void;\n  saveDecision(decision: AgentDecision): void;\n  listDecisions(): AgentDecision[];\n}",
+      "line_start": 1,
+      "line_end": 26,
+      "related_material_ids": [],
+      "authorship_note": "이민호의 1인 프로젝트입니다.",
+      "ord": 10
+    }
+  ]
+}

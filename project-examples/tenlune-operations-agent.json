@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "project": "tenlune-operations-agent",
+  "repo_url": "https://github.com/tenlune0501-creator/tenlune-operations-agent",
+  "repo_ref": "1cfef9596492b23d57329140ebb24b2c39099c15",
+  "note": "Tenlune Operations Agent 저장소의 학습용 코드 발췌. 커밋된 HEAD 고정이며 수정하지 않았습니다(개발 중 Gmail/OAuth 기능은 제외). 이민호의 1인 프로젝트입니다.",
+  "examples": [
+    {
+      "id": "toa-rule-based-scoring",
+      "project": "tenlune-operations-agent",
+      "repo_url": "https://github.com/tenlune0501-creator/tenlune-operations-agent",
+      "repo_ref": "1cfef9596492b23d57329140ebb24b2c39099c15",
+      "title": "scoreOpportunity — 규칙 기반 적합도 점수",
+      "summary": "외주 기회 하나를 받아 0~100 적합도와 recommend/review/hold 판정을 이유·주의와 함께 내는 순수 함수. 먼저 classifyDeliveryModel 로 납품형 개발 프로젝트인지 가르고(아니면 스택과 무관하게 hold), 그다음 HIGH/CONDITIONAL/LOW 키워드로 가감점한다. LLM 없이 규칙이라 같은 입력에 같은 점수가 나오고 근거를 설명할 수 있다. Unit tenlune-operations-agent/rule-based-fit-scoring 참고.",
+      "subject": "others/ai",
+      "concepts": [
+        "규칙 기반 점수화",
+        "키워드 가중치",
+        "결과 등급화",
+        "순수 함수"
+      ],
+      "file_path": "src/domain/scoring.ts",
+      "file_url": "https://github.com/tenlune0501-creator/tenlune-operations-agent/blob/1cfef9596492b23d57329140ebb24b2c39099c15/src/domain/scoring.ts",
+      "language": "ts",
+      "code": "import { classifyDeliveryModel } from \"./delivery-model.js\";\nimport type { FitScore, Opportunity, Recommendation } from \"./types.js\";\n\nconst HIGH_MATCH = [\n  \"wordpress\",\n  \"워드프레스\",\n  \"홈페이지\",\n  \"랜딩\",\n  \"반응형\",\n  \"next.js\",\n  \"nextjs\",\n  \"react\",\n  \"supabase\",\n  \"postgres\",\n  \"관리자\",\n  \"문의\",\n  \"예약\",\n  \"api\",\n  \"자동화\",\n  \"내부 업무\",\n  \"ai\"\n];\n\nconst CONDITIONAL = [\"인증\", \"회원\", \"결제\", \"데이터 이전\", \"레거시\", \"유지보수\", \"외부 api\", \"llm\"];\nconst LOW_MATCH = [\"android\", \"ios\", \"앱\", \"게임\", \"3d\", \"erp\", \"임베디드\", \"블록체인\"];\n\nexport function scoreOpportunity(opportunity: Opportunity): FitScore {\n  const delivery = classifyDeliveryModel(opportunity);\n  if (delivery.model !== \"project_delivery\") {\n    return {\n      score: delivery.model === \"unclear\" ? 45 : 25,\n      recommendation: \"hold\",\n      deliveryModel: delivery.model,\n      reasons: delivery.reasons,\n      cautions:\n        delivery.model === \"unclear\"\n          ? [\"납품형 개발 프로젝트 여부 확인 전에는 기술 적합도를 평가하지 않습니다.\"]\n          : [\"납품형 개발 프로젝트가 아니므로 기술스택과 무관하게 추천 후보에서 제외합니다.\"]\n    };\n  }",
+      "line_start": 1,
+      "line_end": 40,
+      "related_material_ids": [],
+      "authorship_note": "이민호의 1인 프로젝트입니다.",
+      "ord": 10
+    }
+  ]
+}

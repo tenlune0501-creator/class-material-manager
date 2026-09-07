@@ -11,6 +11,11 @@ related_material_ids:
   - 1w6DCrqmtw9TrG05k9LHvk1_G4FcY96Nd              # typscript_basic_final.zip
 prerequisites:
   - typescript/advanced-and-utility-types/utility-and-advanced-types
+project_links:
+  - unit: tenlune-marketing-agent/repository-port-and-adapters
+    note: 포트 인터페이스 하나에 인메모리·Supabase 두 어댑터 — 빌드 없는 TS 실전 프로젝트의 계층 구조
+  - unit: tenlune-operations-agent/cli-command-dispatch
+    note: process.argv 로 서브커맨드를 분기하는 CLI 진입점 (이 저장소 src/index.ts 와 같은 발상)
 code_examples:
   - slug: domain-types
     title: 도메인 타입부터 (판별 유니언 + Result)

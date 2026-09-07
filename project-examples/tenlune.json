@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "project": "tenlune",
+  "repo_url": "https://github.com/tenlune0501-creator/tenlune",
+  "repo_ref": "9673971dfa79c2bd1c9013a628470eb4e400d365",
+  "note": "운영 중인 Tenlune 사이트 저장소의 학습용 코드 발췌. 고정 커밋 원문이며 수정하지 않았습니다. 라이브 사이트가 콘텐츠 SoT, 이 저장소가 테마/스니펫 코드 정본입니다. API 키 등 민감정보는 저장소에 없습니다.",
+  "examples": [
+    {
+      "id": "tenlune-css-design-tokens",
+      "project": "tenlune",
+      "repo_url": "https://github.com/tenlune0501-creator/tenlune",
+      "repo_ref": "9673971dfa79c2bd1c9013a628470eb4e400d365",
+      "title": "반응형 CSS 시스템 — theme.json 토큰을 CSS 변수로",
+      "summary": "FSE 블록 테마 레이아웃 CSS 머리 부분. 색·폰트·스페이싱을 --tl-* CSS 변수로 잡되 값은 전부 theme.json 이 생성한 --wp--preset--* 를 다시 가리킨다 — 색 리터럴을 새로 쓰지 않아 값의 단일 소스가 theme.json 하나다. 아래로 이어지는 35개 @media 쿼리와 rem/clamp() 로 그리드가 모바일에서 1열로 붕괴하고 가로 스크롤이 없다. Unit tenlune/responsive-css-system 참고.",
+      "subject": "css",
+      "concepts": [
+        "디자인 토큰",
+        "CSS 변수",
+        "반응형 레이아웃",
+        "단일 소스 원칙"
+      ],
+      "file_path": "wp-content/themes/tenlune/assets/css/tenlune.css",
+      "file_url": "https://github.com/tenlune0501-creator/tenlune/blob/9673971dfa79c2bd1c9013a628470eb4e400d365/wp-content/themes/tenlune/assets/css/tenlune.css",
+      "language": "css",
+      "code": "/* ============================================================\n   Tenlune — 레이아웃 CSS\n   theme.json 으로 표현되지 않는 부분만 담습니다.\n\n   토큰은 전부 theme.json 의 preset 변수를 다시 가리킵니다.\n   색을 바꿀 일이 생기면 theme.json 만 고치면 됩니다. 이 파일에는\n   색 리터럴을 새로 쓰지 않습니다. (작업물 임시 색면 두 개만 예외이며,\n   실제 이미지가 들어가는 순간 삭제합니다.)\n\n   기준: tenlune-home-final.html (Dark 최종안 · 2026-08-24)\n   ============================================================ */\n\n:root {\n\t--tl-bg:        var(--wp--preset--color--base);\n\t--tl-surface:   var(--wp--preset--color--surface);\n\t--tl-surface-2: var(--wp--preset--color--surface-alt);\n\t--tl-shot-bg:   var(--wp--preset--color--work-frame);\n\t--tl-line:      var(--wp--preset--color--line);\n\t--tl-line-2:    var(--wp--preset--color--line-strong);\n\t--tl-faint:     var(--wp--preset--color--text-faint);\n\t--tl-muted:     var(--wp--preset--color--text-muted);\n\t--tl-text-2:    var(--wp--preset--color--text-second);\n\t--tl-text:      var(--wp--preset--color--contrast);\n\t--tl-text-hi:   var(--wp--preset--color--contrast-hi);\n\n\t--tl-f-disp: var(--wp--preset--font-family--display);\n\t--tl-f-body: var(--wp--preset--font-family--body);\n\t--tl-f-mono: var(--wp--preset--font-family--mono);\n\n\t--tl-s-1: var(--wp--preset--spacing--10);\n\t--tl-s-2: var(--wp--preset--spacing--20);\n\t--tl-s-3: var(--wp--preset--spacing--30);\n\t--tl-s-4: var(--wp--preset--spacing--40);\n\t--tl-s-5: var(--wp--preset--spacing--50);\n\t--tl-s-6: var(--wp--preset--spacing--60);\n\t--tl-s-7: var(--wp--preset--spacing--70);\n\t--tl-s-8: var(--wp--preset--spacing--80);\n\n\t--tl-max: 1180px;\n\t--tl-pad: 1.5rem;\n}\n",
+      "line_start": 1,
+      "line_end": 42,
+      "related_material_ids": [],
+      "authorship_note": "Tenlune 은 이민호(저장소 소유자)의 1인 프로젝트입니다.",
+      "ord": 10
+    }
+  ]
+}

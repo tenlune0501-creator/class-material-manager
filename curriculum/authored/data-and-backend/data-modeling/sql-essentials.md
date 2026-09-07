@@ -16,6 +16,9 @@ sources:
     source_type: official_docs
 prerequisites:
   - data-and-backend/data-modeling/erd
+project_links:
+  - unit: momentalk/community-crud-embed
+    note: PostgREST embed 조인이 SQL JOIN 으로 번역되는 실제 예 — N+1 을 피하는 게시판 조회
 code_examples:
   - slug: ddl
     title: 테이블 만들기 (DDL)
