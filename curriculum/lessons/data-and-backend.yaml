@@ -1,9 +1,9 @@
 # Track: data-and-backend — Lesson 골격
 # 규격: curriculum/README.md §4
 #
-# 이 트랙은 강사 자료가 얕다. data-modeling / baas 챕터만 실제 자료로 채우고,
-# nodejs-server / relational-database-operations 챕터는 needs_external_research
-# (자료 없음 — 승인된 조사 단계에서 공식 문서로 채운다. 지금 지어내지 않는다).
+# 이 트랙은 강사 자료가 얕다. data-modeling / baas 챕터는 실제 자료로 채웠고,
+# nodejs-server / relational-database-operations 챕터는 승인된 조사 단계에서
+# 공식 문서(PostgreSQL / node-postgres / Supabase 등)를 근거로 집필해 채웠다.
 
 lessons:
   # ── data-modeling ─────────────────────────────────────────────────────
@@ -248,14 +248,126 @@ lessons:
       - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
     body_path: authored/data-and-backend/nodejs-server/config-and-structure.md
 
-  # ── relational-database-operations (needs_external_research) ───────────
-  - id: data-and-backend/relational-database-operations/schema-and-migrations
+  # ── relational-database-operations ───────────────────────────────────
+  - id: data-and-backend/relational-database-operations/postgres-basics-and-dialect
     chapter: data-and-backend/relational-database-operations
-    title: 스키마 설계와 마이그레이션 실무
+    title: PostgreSQL 기초 — psql과 MySQL과의 차이
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 35
+    ord: 10
+    status: authored
+    tags: [database, postgres, psql, mysql-migration, dialect]
+    related_material_ids: []
+    sources:
+      - title: "PostgreSQL Documentation — The SQL Language"
+        url: https://www.postgresql.org/docs/current/tutorial-sql.html
+        publisher: "PostgreSQL Global Development Group"
+        checked_at: 2026-09-07
+        source_type: official_docs
+      - title: "node-postgres — Queries"
+        url: https://node-postgres.com/features/queries
+        publisher: "Brian Carlson (node-postgres)"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/postgres-basics-and-dialect.md
+
+  - id: data-and-backend/relational-database-operations/constraints-and-referential-integrity
+    chapter: data-and-backend/relational-database-operations
+    title: 제약과 참조 무결성
     mastery: required
     lesson_kind: lesson
-    estimated_minutes: 90
-    ord: 10
-    status: needs_external_research
-    tags: [database, postgres, migration, schema, transactions]
+    estimated_minutes: 45
+    ord: 20
+    status: authored
+    tags: [database, postgres, constraints, foreign-key, referential-integrity]
     related_material_ids: []
+    sources:
+      - title: "PostgreSQL Documentation — 5.4. Constraints"
+        url: https://www.postgresql.org/docs/current/ddl-constraints.html
+        publisher: "PostgreSQL Global Development Group"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/constraints-and-referential-integrity.md
+
+  - id: data-and-backend/relational-database-operations/indexes
+    chapter: data-and-backend/relational-database-operations
+    title: 인덱스 — 언제 만들고 언제 만들지 않나
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 30
+    status: authored
+    tags: [database, postgres, index, b-tree, performance]
+    related_material_ids: []
+    sources:
+      - title: "PostgreSQL Documentation — Chapter 11. Indexes"
+        url: https://www.postgresql.org/docs/current/indexes-intro.html
+        publisher: "PostgreSQL Global Development Group"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/indexes.md
+
+  - id: data-and-backend/relational-database-operations/reading-query-plans
+    chapter: data-and-backend/relational-database-operations
+    title: 쿼리 플랜 읽기 — EXPLAIN
+    mastery: understand
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 40
+    status: authored
+    tags: [database, postgres, explain, query-plan, performance]
+    related_material_ids: []
+    sources:
+      - title: "PostgreSQL Documentation — 14.1. Using EXPLAIN"
+        url: https://www.postgresql.org/docs/current/using-explain.html
+        publisher: "PostgreSQL Global Development Group"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/reading-query-plans.md
+
+  - id: data-and-backend/relational-database-operations/transactions
+    chapter: data-and-backend/relational-database-operations
+    title: 트랜잭션 — 전부 성공 아니면 전부 취소
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 40
+    ord: 50
+    status: authored
+    tags: [database, postgres, transaction, atomicity, node-postgres]
+    related_material_ids: []
+    sources:
+      - title: "PostgreSQL Documentation — 3.4. Transactions"
+        url: https://www.postgresql.org/docs/current/tutorial-transactions.html
+        publisher: "PostgreSQL Global Development Group"
+        checked_at: 2026-09-07
+        source_type: official_docs
+      - title: "node-postgres — Transactions"
+        url: https://node-postgres.com/features/transactions
+        publisher: "Brian Carlson (node-postgres)"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/transactions.md
+
+  - id: data-and-backend/relational-database-operations/schema-and-migrations
+    chapter: data-and-backend/relational-database-operations
+    title: 스키마 마이그레이션 실무
+    mastery: required
+    lesson_kind: lesson
+    estimated_minutes: 50
+    ord: 60
+    status: authored
+    tags: [database, postgres, migration, supabase, cli]
+    related_material_ids: []
+    sources:
+      - title: "Supabase Docs — Database Migrations"
+        url: https://supabase.com/docs/guides/deployment/database-migrations
+        publisher: "Supabase"
+        checked_at: 2026-09-07
+        source_type: official_docs
+      - title: "Supabase CLI Reference — supabase migration / supabase db"
+        url: https://supabase.com/docs/reference/cli/supabase-migration-new
+        publisher: "Supabase"
+        checked_at: 2026-09-07
+        source_type: official_docs
+    body_path: authored/data-and-backend/relational-database-operations/schema-and-migrations.md

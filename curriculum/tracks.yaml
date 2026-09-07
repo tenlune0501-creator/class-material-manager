@@ -396,9 +396,9 @@ tracks:
         status: needs_external_research
       - id: data-and-backend/relational-database-operations
         title: 관계형 DB 운영
-        summary: 스키마 설계·마이그레이션·쿼리 최적화·트랜잭션 실무.
+        summary: PostgreSQL 방언·제약과 참조 무결성·인덱스·쿼리 플랜·트랜잭션·스키마 마이그레이션 실무.
         ord: 50
-        status: needs_external_research
+        status: active
 
   # ────────────────────────────────────────────────────────────────────────
   - id: deployment-and-infra
