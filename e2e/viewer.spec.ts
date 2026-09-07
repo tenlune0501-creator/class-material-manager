@@ -83,6 +83,8 @@ test.describe("화면이 뜬다", () => {
   });
 
   for (const [name, path] of [
+    ["커리큘럼", "/curriculum"],
+    ["실전 프로젝트 학습", "/projects"],
     ["통합 학습자료", "/learn"],
     ["수업 방식 점검", "/compare"],
     ["다시 공부하기", "/study"],
@@ -190,6 +192,75 @@ test.describe("눌러서 옮겨 간다", () => {
 
     await exampleLink.click();
     await expect(page).toHaveURL(/\/examples\//);
+  });
+});
+
+test.describe("커리큘럼 · 실전 프로젝트 학습을 오간다", () => {
+  test("Track → Chapter → Lesson → 관련 Unit 으로 이어진다", async ({ page }) => {
+    const errors = watchErrors(page);
+
+    await page.goto("/curriculum");
+    await settled(page);
+    await expect(page.locator("h1")).toHaveCount(1);
+
+    const track = page.locator('a[href^="/curriculum/"]').first();
+    if ((await track.count()) === 0) test.skip(true, "아직 커리큘럼 projection 이 없어 건너뜁니다");
+    await track.click();
+    await expect(page).toHaveURL(/\/curriculum\/.+/);
+    await expect(page.locator("h1")).toHaveCount(1);
+
+    const lesson = page.locator('a[href^="/lesson/"]').first();
+    await expect(lesson).toBeVisible();
+    await lesson.click();
+    await expect(page).toHaveURL(/\/lesson\/.+/);
+    await expect(page.locator("h1")).toHaveCount(1);
+    // 본문 섹션이 렌더된다 (overline 라벨이 최소 하나)
+    await expect(page.locator(".MuiTypography-overline").first()).toBeVisible();
+
+    // 이 Lesson 에 연결된 Unit 이 있으면 눌러 이동한다
+    const unitLink = page.locator('a[href^="/unit/"]').first();
+    if ((await unitLink.count()) > 0) {
+      await unitLink.click();
+      await expect(page).toHaveURL(/\/unit\/.+/);
+      await expect(page.locator("h1")).toHaveCount(1);
+    }
+
+    expect(errors, `브라우저 오류: ${errors.join(" | ")}`).toEqual([]);
+  });
+
+  test("Project → Unit → 관련 Lesson 으로 역방향 이동한다", async ({ page }) => {
+    const errors = watchErrors(page);
+
+    await page.goto("/projects");
+    await settled(page);
+    await expect(page.locator("h1")).toHaveCount(1);
+
+    const project = page.locator('a[href^="/projects/"]').first();
+    if ((await project.count()) === 0) test.skip(true, "아직 projection 이 없어 건너뜁니다");
+    await project.click();
+    await expect(page).toHaveURL(/\/projects\/.+/);
+
+    const unit = page.locator('a[href^="/unit/"]').first();
+    await expect(unit).toBeVisible();
+    await unit.click();
+    await expect(page).toHaveURL(/\/unit\/.+/);
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator(".MuiTypography-overline").first()).toBeVisible();
+
+    // Unit 에 연결된 Lesson 이 있으면 눌러 이동한다
+    const lessonLink = page.locator('a[href^="/lesson/"]').first();
+    if ((await lessonLink.count()) > 0) {
+      await lessonLink.click();
+      await expect(page).toHaveURL(/\/lesson\/.+/);
+      await expect(page.locator("h1")).toHaveCount(1);
+    }
+
+    expect(errors, `브라우저 오류: ${errors.join(" | ")}`).toEqual([]);
+  });
+
+  test("없는 Lesson · Unit 주소는 404 를 보여준다", async ({ page }) => {
+    expect((await page.goto("/lesson/없는/레슨/주소"))?.status()).toBe(404);
+    expect((await page.goto("/unit/없는프로젝트/없는유닛"))?.status()).toBe(404);
   });
 });
 

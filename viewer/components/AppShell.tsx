@@ -205,6 +205,38 @@ export function AppShell({
       <List dense sx={{ pt: 1 }}>
         <ListItemButton
           component={NextLink}
+          href="/curriculum"
+          selected={pathname === "/curriculum" || pathname.startsWith("/curriculum/") || pathname.startsWith("/lesson/")}
+          onClick={() => setOpen(false)}
+        >
+          <ListItemText
+            primary="🗺️ 커리큘럼"
+            secondary="Track → Chapter → Lesson"
+            slotProps={{
+              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
+              secondary: { sx: { fontSize: "0.7rem" } },
+            }}
+          />
+        </ListItemButton>
+
+        <ListItemButton
+          component={NextLink}
+          href="/projects"
+          selected={pathname === "/projects" || pathname.startsWith("/projects/") || pathname.startsWith("/unit/")}
+          onClick={() => setOpen(false)}
+        >
+          <ListItemText
+            primary="🏗️ 실전 프로젝트 학습"
+            secondary="Project → Unit → 관련 Lesson"
+            slotProps={{
+              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
+              secondary: { sx: { fontSize: "0.7rem" } },
+            }}
+          />
+        </ListItemButton>
+
+        <ListItemButton
+          component={NextLink}
           href="/learn"
           selected={pathname === "/learn"}
           onClick={() => setOpen(false)}
