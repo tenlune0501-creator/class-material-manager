@@ -18,6 +18,11 @@ sources:
     publisher: "OpenAI"
     checked_at: 2026-09-06
     source_type: official_docs
+project_links:
+  - unit: tenlune-marketing-agent/agent-decision-core
+    note: decideNextAction() 이 상태를 보고 다음 행동을 규칙으로 고르는 실제 에이전트 결정 루프
+  - unit: tenlune-operations-agent/rule-based-fit-scoring
+    note: LLM 없이 규칙만으로 적합도를 점수화하고 근거를 붙이는 에이전트 판단 모듈
 prerequisites:
   - ai-engineering/llm-app-fundamentals/tool-calling
   - ai-engineering/rag-and-agents/retrieval-augmented-generation

@@ -8,6 +8,9 @@ estimated_minutes: 45
 tags: [css, responsive, media-query]
 related_material_ids:
   - 1jC3cwTiy_a0rMUdAPu2JXjSF-RPmZ9bx        # responsive_video_base.zip
+project_links:
+  - unit: tenlune/responsive-css-system
+    note: 운영 사이트의 실제 반응형 CSS — 35개 미디어 쿼리와 clamp/rem 로 그리드가 모바일 1열로 붕괴, 가로 스크롤 없음
 prerequisites:
   - web-foundations/css-layout-flexbox/flexbox-core
   - web-foundations/css-layout-grid/grid-core

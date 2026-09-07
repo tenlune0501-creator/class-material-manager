@@ -24,6 +24,8 @@ project_links:
     note: 쿠키 어댑터로 서버에서 세션을 읽는 createServerClient
   - unit: momentalk/community-crud-embed
     note: PostgREST embed 조인으로 게시판 조회를 한 번에
+  - unit: tenlune-marketing-agent/repository-port-and-adapters
+    note: Node/TS 에서 같은 리포지토리 계약을 인메모리와 Supabase(PostgREST) 두 어댑터로 구현
 prerequisites:
   - data-and-backend/baas-supabase-firebase/firebase-vs-supabase
   - nextjs/routing-and-layout/layout-and-page

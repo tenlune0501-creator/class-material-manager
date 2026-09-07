@@ -54,6 +54,10 @@ import {
   printProjectExamplesReport,
   syncProjectExamples,
 } from "./sync/project-examples-runner.ts";
+import {
+  printCurriculumSyncReport,
+  syncCurriculum,
+} from "./sync/curriculum/sync-curriculum-runner.ts";
 import { runAutoRefresh } from "./refresh/auto-refresh.ts";
 import * as log from "./utils/logger.ts";
 
@@ -1156,6 +1160,32 @@ async function runSyncProjectExamples(): Promise<void> {
 }
 
 /**
+ * sync-curriculum 명령 — Git canonical curriculum(`curriculum/`) 과 실전 프로젝트 학습
+ * (`project-learning/`) 을 Supabase 의 11개 projection 테이블(learning_tracks / learning_chapters /
+ * learning_lessons / lesson_sections / lesson_code_examples / lesson_problem / learning_projects /
+ * project_learning_units / project_unit_sections / project_unit_examples / lesson_project_links)로
+ * upsert합니다.
+ *
+ * **material 파이프라인과 완전히 분리됩니다.** refresh / ci-refresh / sync-supabase / verifySupabase
+ * 어디에도 포함되지 않으며, 기존 material 계열 7개 테이블·refresh_state·user_learning·auth 를
+ * 건드리지 않습니다. canonical 파일을 고친 뒤 사람이 직접 실행합니다. upsert 전용(DELETE 없음) —
+ * canonical 에서 사라진 행은 stale 로 보고만 하고 자동 삭제하지 않습니다.
+ *
+ * `--dry-run` 이면 DB write 없이 canonical 카운트·대상 테이블·예상 범위·stale·대상 project 만
+ * 출력합니다.
+ */
+async function runSyncCurriculum(args: string[]): Promise<void> {
+  const dryRun = args.includes("--dry-run");
+  log.step(dryRun ? "sync-curriculum (DRY-RUN)" : "sync-curriculum");
+  log.detail("Git canonical = 정본, Supabase = projection. upsert 전용(DELETE 없음).");
+  log.detail("material 파이프라인과 분리 — refresh / sync-supabase 와 무관합니다.");
+
+  const report = await syncCurriculum({ dryRun });
+  const hasProblem = printCurriculumSyncReport(report);
+  if (hasProblem) process.exitCode = 1;
+}
+
+/**
  * ci-refresh 명령 — 24시간 자동 갱신이 GitHub Actions에서 실제로 부르는 명령입니다.
  *
  * 사람이 직접 실행할 일은 거의 없습니다 (직접 갱신하려면 평소처럼 `npm run refresh` 를
@@ -1200,6 +1230,7 @@ function showHelp(): void {
   restore        백업으로 되돌립니다
   sync-supabase  data/ 산출물을 Supabase 7개 테이블로 올리고 대조 검증합니다
   sync-project-examples  학습용 실전 예제(project-examples/*.json)를 project_examples 테이블로 올립니다 (수업자료 파이프라인과 분리)
+  sync-curriculum  curriculum/ · project-learning/ 을 Supabase 11개 projection 테이블로 올립니다 (--dry-run 지원, material 파이프라인과 분리)
   ci-refresh     24시간 자동 갱신이 GitHub Actions에서 부르는 명령 (사람이 직접 쓸 일은 거의 없습니다)
   refresh        ★ 위 과정을 올바른 순서로 한 번에 실행합니다 (평소에는 이것만)
   help           이 도움말을 보여줍니다
@@ -1282,6 +1313,10 @@ sync-project-examples 필요 환경변수:
   sync-supabase 와 같습니다 (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
   예) node --env-file=.env.local --env-file=viewer/.env.local src/index.ts sync-project-examples
 
+sync-curriculum 필요 환경변수:
+  sync-supabase 와 같습니다 (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  예) node --env-file=.env.local --env-file=viewer/.env.local src/index.ts sync-curriculum --dry-run
+
 ci-refresh 필요 환경변수 (GitHub Actions 전용, .github/workflows/material-refresh.yml 참고):
   REFRESH_CLAIM_TOKEN            Vercel이 claim에 성공했을 때 발급한 토큰
   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   sync-supabase 와 같습니다
@@ -1350,6 +1385,9 @@ async function main(): Promise<void> {
       break;
     case "sync-project-examples":
       await runSyncProjectExamples();
+      break;
+    case "sync-curriculum":
+      await runSyncCurriculum(process.argv.slice(3));
       break;
     case "ci-refresh":
       await runCiRefresh();

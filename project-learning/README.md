@@ -5,7 +5,9 @@
 
 DB(Schema v2.1)의 `learning_projects` / `project_learning_units` /
 `project_unit_sections` / `project_unit_examples` / `lesson_project_links` 가 여기서 파생된다.
-향후 `sync-curriculum` CLI가 함께 처리한다(커리큘럼과 같은 격리 파이프라인).
+`sync-curriculum` CLI(`src/sync/curriculum/`)가 `curriculum/` 과 함께 이 파일들을 읽어
+projection 한다 — `node src/index.ts sync-curriculum [--dry-run]`. 커리큘럼과 같은 격리
+파이프라인이며 material 계열 테이블은 건드리지 않는다.
 
 ---
 
@@ -31,14 +33,24 @@ Unit 본문 파일 규격은 `curriculum/authored/**/*.md`(README §5)와 **동�
 |---|---|---|---|
 | `momentalk` | 오르미 FE 13기 3차 팀 프로젝트(TEAM MOSAIC). React + Next.js App Router + MUI + Supabase | 외부 저장소 `minho0391/est-fe-3rd-project`, 고정 커밋 `004b4e856f95892d44759b8936e1e797c7216dc9` | 이미 `project_examples` 11행으로 발췌·수집됨 (`project-examples/momentalk.json`). Unit 은 그 11개 예제를 그대로 감싼다 |
 | `class-material-manager` | 이 저장소 자체. TypeScript/Node 데이터 파이프라인 + Next.js 16 뷰어 + Supabase 인증·DB | 이 저장소 `src/`, `viewer/` | 코드 직접 확인. `PROJECT_CONTEXT.md`에 구현 사실 기록됨 |
+| `tenlune` | 운영 중인 1인 웹 제작 사업 사이트(WordPress). 라이브가 콘텐츠 SoT, git 은 FSE 블록 테마·커스텀 플러그인·WPCode 스니펫 코드 정본 | `tenlune0501-creator/tenlune` `9673971` (`wp-content/themes/tenlune/`, `snippets/`) | 코드 직접 확인. 프론트엔드와 연결되는 부분(반응형 CSS, 디자인 토큰, 규칙 기반 견적, 규칙+LLM 하이브리드)만 최소 Unit. WordPress/PHP 고유 부분 제외 |
+| `tenlune-marketing-agent` | Tenlune 마케팅 운영 Codex 에이전트 코어 (TypeScript/Node) | `tenlune0501-creator/tenlune-marketing-agent` `a84cae2` (`src/`) | 코드 직접 확인. 커밋된 아키텍처 코어(도메인 유니온·포트/어댑터·결정 코어·품질 게이트·발행 워크플로)만 Unit. 기능은 개발 중이라 repo_ref 를 커밋 HEAD 로 고정 |
+| `tenlune-operations-agent` | Tenlune 외주 기회 발견·검토 CLI 에이전트 v1 (TypeScript/Node) | `tenlune0501-creator/tenlune-operations-agent` `1cfef95` (`src/`) | 코드 직접 확인. 커밋된 코어(CLI 디스패치·규칙 점수·견적/리스크 순수 함수·로컬 JSON 리포지토리)만 Unit |
 
-### 포함하지 않은 접근 가능 프로젝트 (판단 근거)
+### 2026-09-07 재평가
 
-- `Tenlune` — WordPress 테마/사이트(`wp-content/`, 빌드 산출물). JS 프레임워크 코드베이스가
-  아니라 이 프론트엔드 커리큘럼의 RE 단위로 부적합.
-- `tenlune-marketing-agent` / `tenlune-operations-agent` / `tenlune-instagram-creative` —
-  Node/TS 백엔드 에이전트. 프론트엔드 학습 흐름과 접점이 적어 이번 골격에서 제외
-  (TypeScript 트랙 심화 시 재검토 가능).
+과거에는 Project Learning 이 프론트엔드 중심 골격이라 Tenlune 과 Codex 에이전트들을 제외했다.
+193 authored Lesson(TypeScript / Data·Backend / AI Engineering / web-foundations 등 포함) 기준으로
+다시 평가해 위 3개를 추가했다. 판정 요지:
+
+- `tenlune` — **B(등록 + 최소 Unit)**. 운영 중인 상용 사이트라 기능이 계속 바뀌므로 안정적으로
+  검증되는 부분만 Unit 으로. WordPress/PHP 고유 구조는 현재 트랙과 접점이 없어 제외.
+- `tenlune-marketing-agent` / `tenlune-operations-agent` — **B**. TypeScript/AI Engineering/
+  Data·Backend 와 명확히 연결(도메인 모델링, 포트-어댑터, 에이전트 판단 루프, 규칙 엔진, CLI 구조).
+  미커밋 변경이 많아 repo_ref 는 커밋된 HEAD, Unit 은 커밋된 아키텍처 코어만.
+- `tenlune-instagram-creative` — **C(제외)**. 아직 git 저장소가 아니어서 고정 커밋을 참조할 수
+  없고(Unit/example 모델이 이에 의존), 현재 11개 트랙과의 학습 접점이 가장 얇다(sharp/ffmpeg
+  결정적 렌더링). 저장소가 생기면 재평가.
 
 **없는 프로젝트를 만들어 넣지 않는다.** 위 2개 외에는 이번 단계에서 Unit 을 만들지 않는다.
 
@@ -89,8 +101,13 @@ projects:
 
 ---
 
-## 5. 이번 골격에 포함되지 않은 것
+## 5. 아직 포함되지 않은 것
 
 - 모든 Unit 본문 — 다음 단계에서 대표 Lesson 집필과 함께 배치로.
-- `class-material-manager` 코드 발췌의 `project_examples` 수집.
-- DB 반영, 뷰어 변경.
+- `class-material-manager` · `tenlune` · `tenlune-marketing-agent` · `tenlune-operations-agent`
+  코드 발췌의 `project_examples` 수집 (현재 이 4개 Project 의 Unit 은 `example_ids: []`).
+- `tenlune-instagram-creative` — 아직 git 저장소가 아니어서(고정 커밋 참조 불가) 이번 확장에서
+  제외. 저장소가 생기면 재평가.
+- 뷰어 변경.
+
+`sync-curriculum` 구현·최초 Supabase projection 은 2026-09-07 완료 (`src/sync/curriculum/`).

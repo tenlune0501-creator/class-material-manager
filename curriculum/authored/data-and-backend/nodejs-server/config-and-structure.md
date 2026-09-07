@@ -15,6 +15,9 @@ sources:
     publisher: "OpenJS Foundation"
     checked_at: 2026-09-07
     source_type: official_docs
+project_links:
+  - unit: tenlune-operations-agent/cli-command-dispatch
+    note: src/cli.ts 가 argv 를 파싱해 서브커맨드로 분기하고 도메인·connector·repository 계층을 조립하는 실제 진입점
 prerequisites:
   - data-and-backend/nodejs-server/routing-and-modules
 code_examples:

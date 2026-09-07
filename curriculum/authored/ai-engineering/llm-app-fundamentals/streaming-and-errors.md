@@ -23,6 +23,9 @@ sources:
     publisher: "Anthropic"
     checked_at: 2026-09-06
     source_type: official_docs
+project_links:
+  - unit: tenlune/hybrid-llm-quote-explanation
+    note: LLM 호출 실패·타임아웃·레이트리밋이면 {explanation:null} 을 반환하고 .catch 로 조용히 무시 — 규칙 기반 결과는 그대로 유지하는 graceful degradation
 prerequisites:
   - ai-engineering/llm-app-fundamentals/prompts-tokens-context
 code_examples:

@@ -5,9 +5,12 @@ DB(Schema v2.1)의 `learning_tracks` / `learning_chapters` / `learning_lessons` 
 `lesson_sections` / `lesson_code_examples` / `lesson_problem` 은 **여기서 파생**되며,
 반대 방향(=DB를 직접 고쳐 커리큘럼을 바꾸는 것)은 하지 않는다.
 
-향후 `sync-curriculum` CLI(별도 파이프라인, upsert-only)가 이 파일들을 읽어 위 6개
-테이블에 반영한다. 기존 `refresh` / `ci-refresh` / `sync-runner` / `verify` 파이프라인과는
-분리된다 (`project_examples` 가 별도 CLI로 분리돼 있는 것과 같은 격리 원칙).
+`sync-curriculum` CLI(별도 파이프라인, upsert-only)가 이 파일들과 `project-learning/` 를
+읽어 11개 projection 테이블(위 6개 + `learning_projects` / `project_learning_units` /
+`project_unit_sections` / `project_unit_examples` / `lesson_project_links`)에 반영한다.
+`node src/index.ts sync-curriculum [--dry-run]` 으로 사람이 직접 실행한다. 기존 `refresh` /
+`ci-refresh` / `sync-runner` / `verify` 파이프라인과는 분리된다 (`project_examples` 가 별도
+CLI로 분리돼 있는 것과 같은 격리 원칙). 구현: `src/sync/curriculum/`.
 
 ---
 
@@ -279,7 +282,7 @@ lesson_kind, estimated_minutes, tags, related_material_ids, sources, project_lin
 
 ## 6. DB Schema v2.1 로의 결정적 매핑
 
-`sync-curriculum` 이 수행할 매핑(이번 단계에서 구현하지 않음, 계약만 고정):
+`sync-curriculum`(`src/sync/curriculum/`)이 수행하는 매핑:
 
 | Source of Truth | → DB 테이블 | 비고 |
 |---|---|---|
@@ -289,9 +292,18 @@ lesson_kind, estimated_minutes, tags, related_material_ids, sources, project_lin
 | frontmatter `code_examples[]` | `lesson_code_examples` | id=`<lesson-id>#<slug>`. `source_type != user_project` → `code` 필수. `user_project` → `project_example_id` 또는 `code` 중 하나 |
 | 본문 `<!-- section: -->` 블록 | `lesson_sections` | id=`<lesson-id>#<type>-<ord>`, ord=본문 등장 순서(0부터), is_optional=`optional` 플래그, code_example_ids=블록 안 `{{code:}}` 들 |
 | `lesson_kind: problem` 인 lesson 의 추가 필드 | `lesson_problem` | statement/constraints/hints/solutions/test_cases 등. 별도 frontmatter 키 `problem:` 로 표현 (코딩테스트 트랙에서 정의 예정) |
-| `project_links[]` | `lesson_project_links` | (lesson_id, unit_id). 양방향 검증은 `project-learning/projects.yaml` 의 `related_lessons` 와 대조 |
+| frontmatter(없으면 yaml) `project_links[]` | `lesson_project_links` | (lesson_id, unit_id), relation_note=`note`, ord=등장 순서. `unit` 은 `projects.yaml` 의 Unit id 여야 한다(단방향 — 역참조는 두지 않음) |
+| `projects.yaml` 각 project | `learning_projects` | id, title, summary, repo_url, repo_ref, stack, ord |
+| `projects.yaml` 각 unit | `project_learning_units` | id, project_id(=id 앞 1세그먼트), title, summary, feature_area, unit_kind, concepts, related_material_ids, ord |
+| unit `example_ids[]` | `project_unit_examples` | (unit_id, example_id) loose ref → `project_examples.id`. ord=등장 순서 |
+| `project-learning/authored/**` 본문 섹션 | `project_unit_sections` | `lesson_sections` 와 동일 규격 (골격 단계에서는 0개) |
 
-`content_hash` 는 전부 `sync-curriculum` 이 계산한다. Source of Truth 에는 쓰지 않는다.
+`content_hash` 는 전부 `sync-curriculum` 이 계산한다(정규화 직렬화의 sha256 hex — 객체 키는
+정렬, 배열 순서는 보존). Source of Truth 에는 쓰지 않는다. 복합키 링크 테이블
+(`project_unit_examples` / `lesson_project_links`)은 스키마에 `content_hash` 컬럼이 없다.
+
+upsert 전용이다. canonical 에서 사라진 행은 DB 에 stale 로 남고 `sync-curriculum` 이 그 사실을
+보고만 한다(자동 DELETE 없음 — service_role 에 DELETE 권한 자체가 없다).
 
 ---
 
@@ -300,4 +312,5 @@ lesson_kind, estimated_minutes, tags, related_material_ids, sources, project_lin
 - Lesson 본문(대표 1개 제외) — 다음 단계에서 배치로 집필.
 - `needs_external_research` 로 표시된 영역(Node.js 서버, 실제 관계형 DB 운영, Docker/컨테이너,
   LLM 앱/RAG/에이전트/평가, 코딩테스트 문제) — 자료가 없어 지어내지 않음. 승인된 조사 단계에서 채움.
-- DB 반영(`sync-curriculum` 구현·실행), 뷰어 변경, `USE_CMM_FOR_STUDY.md`.
+- 뷰어 변경, `USE_CMM_FOR_STUDY.md`.
+  (`sync-curriculum` 구현·최초 projection 은 2026-09-07 완료 — `src/sync/curriculum/`.)

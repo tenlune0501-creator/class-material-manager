@@ -8,6 +8,9 @@ estimated_minutes: 45
 tags: [typescript, union, narrowing, type-guard, discriminated-union]
 related_material_ids:
   - 1DreidRVMMRlnSW8bZ1GpF3zSnl1Zdd2uddwcARh2eog   # 05. 유니언 타입과 타입 가드
+project_links:
+  - unit: tenlune-marketing-agent/domain-model-string-unions
+    note: ChannelId·TaskStatus 등을 문자열 리터럴 유니온으로 두고 판별 유니온으로 상태를 제약한 실제 도메인 모델
 prerequisites:
   - typescript/functions-unions-guards/function-types
 code_examples:

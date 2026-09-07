@@ -266,3 +266,188 @@ projects:
           - 14E6y0TieVisd_jpln3_F9wwbmdR4LKka7XJ05KZJ1zo
         example_ids: []
         ord: 70
+
+  # ══════════════════════════════════════════════════════════════════════
+  # 2026-09-07 확장: 193-Lesson curriculum 전체 기준 재평가로 추가.
+  # Tenlune(운영 중인 상용 사이트) + 두 Codex 에이전트(TypeScript/Node). Unit 본문은
+  # 아직 0개(다음 단계 배치 집필). example_ids 는 class-material-manager 와 같은 후속
+  # 과제로 비워 둔다(project_examples 발췌 미수집).
+  - id: tenlune
+    title: Tenlune
+    summary: >-
+      실제 운영 중인 1인 웹 제작 사업 사이트(WordPress, cafe24). 라이브 사이트가 콘텐츠
+      Source of Truth 이고, 이 git 저장소는 FSE 블록 테마·커스텀 플러그인(CPT case)·
+      WPCode 스니펫 사본의 정본이다. 아래 Unit 은 프론트엔드 커리큘럼과 실제로 연결되는
+      부분(반응형 CSS 시스템, 디자인 토큰, 규칙 기반 견적 도구, 규칙+LLM 하이브리드 설명)만
+      최소로 감싼다. WordPress/PHP 고유 부분은 현재 트랙과 접점이 없어 제외.
+    repo_url: https://github.com/tenlune0501-creator/tenlune
+    repo_ref: 9673971dfa79c2bd1c9013a628470eb4e400d365
+    stack: [wordpress, php, javascript, css]
+    ord: 30
+    units:
+      - id: tenlune/overview
+        title: 프로젝트 개요 — 테마·플러그인·스니펫 3층
+        unit_kind: overview
+        feature_area: 전체
+        summary: FSE 블록 테마(templates/ parts/ patterns/) + 커스텀 플러그인 tenlune-content(CPT case, OG/canonical, AI 견적 REST) + WPCode 스니펫(견적 JS/CSS). 라이브가 콘텐츠 SoT, git 은 코드 정본.
+        concepts: [WordPress FSE 블록 테마, 커스텀 플러그인, CPT, 코드 정본과 콘텐츠 SoT 분리]
+        related_material_ids: []
+        example_ids: []
+        ord: 10
+
+      - id: tenlune/responsive-css-system
+        title: 반응형 CSS 시스템 — 브레이크포인트와 유동 단위
+        unit_kind: feature
+        feature_area: 스타일링
+        summary: assets/css/tenlune.css. 35개 @media 쿼리(400~1040px)와 rem/em/clamp() 기반으로 그리드가 모바일에서 1열로 정확히 붕괴하고 가로 스크롤을 유발할 고정 너비가 없다.
+        concepts: [반응형 레이아웃, 미디어 쿼리, clamp/rem/em, 그리드 붕괴, 가로 스크롤 방지]
+        related_material_ids: []
+        example_ids: []
+        ord: 20
+
+      - id: tenlune/rule-engine-quote-tool
+        title: 규칙 기반 견적 도구 — 단일 가격 소스
+        unit_kind: feature
+        feature_area: 견적 도구
+        summary: snippets/quote-tool-v2.js. PRICING 객체 하나가 선택지 표시·계산·설명의 유일한 소스. 순수 규칙 계산이고 /services/ 와 /contact/ 두 모드가 같은 계산 로직을 공유(모드에 따라 CTA vs textarea 기록만 다름).
+        concepts: [단일 소스 원칙, 순수 계산 함수, DOM 조건부 렌더링, 폼 연동, 재사용]
+        related_material_ids: []
+        example_ids: []
+        ord: 30
+
+      - id: tenlune/hybrid-llm-quote-explanation
+        title: 규칙 + LLM 하이브리드 — 설명만 LLM, 숫자는 규칙
+        unit_kind: infra
+        feature_area: AI 견적
+        summary: plugin includes/ai-quote.php + quote-tool-v2.js. 가격·기간 숫자는 규칙 엔진이 유일하게 정하고 LLM 은 그 숫자를 사실로 받아 설명만 생성(프롬프트 강제). 키 없음·실패·타임아웃·레이트리밋이면 {explanation:null} 200 반환, 프런트는 .catch 로 조용히 무시하고 규칙 결과는 그대로. provider 레지스트리(OpenRouter/Groq, OpenAI 호환 스키마).
+        concepts: [규칙 엔진과 LLM 역할 분리, graceful degradation, 프롬프트로 출력 제약, provider 추상화, same-origin·rate-limit 방어]
+        related_material_ids: []
+        example_ids: []
+        ord: 40
+
+  # ══════════════════════════════════════════════════════════════════════
+  - id: tenlune-marketing-agent
+    title: Tenlune Marketing Agent
+    summary: >-
+      Tenlune 마케팅 운영을 위한 Codex 중심 에이전트 코어(TypeScript/Node, 런타임
+      프레임워크 없음). 도메인 모델 + 리포지토리 어댑터(인메모리 / Supabase) + 다음 행동
+      결정 코어 + 품질 게이트 + 다채널 발행 워크플로. 외부 LLM provider 연결이나 실제 채널
+      발행은 명시적 승인 없이는 하지 않는다. repo_ref 는 커밋된 HEAD 로 고정하고 Unit 은
+      커밋된 아키텍처 코어만 다룬다(기능은 아직 개발 중).
+    repo_url: https://github.com/tenlune0501-creator/tenlune-marketing-agent
+    repo_ref: a84cae21e8897cfd0e9d46a4cf002f6ec74432fd
+    stack: [typescript, nodejs, supabase]
+    ord: 40
+    units:
+      - id: tenlune-marketing-agent/overview
+        title: 프로젝트 개요 — 에이전트 코어 구조
+        unit_kind: overview
+        feature_area: 전체
+        summary: src/ 구조 — domain(모델) / repositories(포트 + 인메모리·Supabase 어댑터) / agent(결정 코어·품질 게이트·발행 워크플로·connector) / scenarios(모의 흐름). 빌드 없이 Node 24 타입 스트리핑으로 실행, node:test 로 시나리오 검증.
+        concepts: [계층 분리, 포트-어댑터, 에이전트 루프, 승인 경계, 모의 시나리오 테스트]
+        related_material_ids: []
+        example_ids: []
+        ord: 10
+
+      - id: tenlune-marketing-agent/domain-model-string-unions
+        title: 도메인 모델 — 문자열 리터럴 유니온과 interface
+        unit_kind: data_model
+        feature_area: 도메인 모델
+        summary: src/domain/types.ts. ChannelId·ChannelPurpose·TaskStatus·DecisionType 등을 문자열 리터럴 유니온으로, 상태 엔티티(ChannelRule·MarketingTask·ContentVariant…)를 interface 로 모델링. 잘못된 값이 컴파일 단계에서 걸린다.
+        concepts: [문자열 리터럴 유니온, 판별 유니온, interface 모델링, 타입으로 상태 제약]
+        related_material_ids: []
+        example_ids: []
+        ord: 20
+
+      - id: tenlune-marketing-agent/repository-port-and-adapters
+        title: 리포지토리 포트와 어댑터 — 인메모리 ↔ Supabase
+        unit_kind: infra
+        feature_area: 데이터 저장
+        summary: src/repositories/. marketing-repository.ts 포트 인터페이스 하나에 in-memory-marketing-repository(테스트·모의용)와 supabase-marketing-repository(+supabase-mapping.ts, PostgREST)가 같은 계약을 구현. 호출부는 어느 어댑터인지 모른다.
+        concepts: [포트-어댑터 패턴, 인터페이스에 의존, 테스트 더블, Node 에서 Supabase 접근, 매핑 계층]
+        related_material_ids: []
+        example_ids: []
+        ord: 30
+
+      - id: tenlune-marketing-agent/agent-decision-core
+        title: 에이전트 결정 코어 — 다음 행동 고르기
+        unit_kind: feature
+        feature_area: 에이전트 코어
+        summary: src/agent/marketing-agent.ts. decideNextAction() 이 현재 상태(활성 / 종료 태스크, 준비된 variant 유무)를 보고 다음 행동(variant 준비·리뷰 요청·발행 등)을 규칙으로 결정하고 결정 로그를 남긴다. content-adapter·quality-gate 를 주입받는다.
+        concepts: [상태 기반 결정, 규칙 우선순위, 의존성 주입, 결정 로깅, 최근 중복 회피]
+        related_material_ids: []
+        example_ids: []
+        ord: 40
+
+      - id: tenlune-marketing-agent/publishing-workflow-connectors
+        title: 발행 워크플로 — connector 추상화
+        unit_kind: feature
+        feature_area: 발행
+        summary: src/agent/publishing-workflow.ts + publisher-connector.ts 인터페이스 + wordpress-publisher-connector.ts / manual-publisher-connector.ts. 승인된 variant 를 채널별 connector 로 넘기고 automatic/assisted/disabled 모드별 결과(published/failed/assisted_ready/blocked)를 집계.
+        concepts: [전략 패턴(connector), 워크플로 오케스트레이션, 부분 실패 집계, 채널별 발행 모드]
+        related_material_ids: []
+        example_ids: []
+        ord: 50
+
+  # ══════════════════════════════════════════════════════════════════════
+  - id: tenlune-operations-agent
+    title: Tenlune Operations Agent
+    summary: >-
+      외주 기회 발견·검토·승인 게이트 초안까지 담당하는 CLI 우선 v1 에이전트
+      (TypeScript/Node). Wishket 공개 목록 read-only 수집 → 적합도 점수 → 견적·기간·리스크
+      분석 → 지원/견적 초안. v1 은 실제 지원 제출·견적 전송·고객 메시지를 전부 차단하며
+      submit 명령은 의도적으로 비활성. repo_ref 는 커밋된 HEAD 로 고정.
+    repo_url: https://github.com/tenlune0501-creator/tenlune-operations-agent
+    repo_ref: 1cfef9596492b23d57329140ebb24b2c39099c15
+    stack: [typescript, nodejs]
+    ord: 50
+    units:
+      - id: tenlune-operations-agent/overview
+        title: 프로젝트 개요 — CLI 우선 v1 에이전트
+        unit_kind: overview
+        feature_area: 전체
+        summary: src/ 구조 — cli.ts(진입) / agent / connectors(wishket-public·soomgo-assisted·sample) / domain(순수 규칙 모듈) / repositories(로컬 JSON). 상태 모델 discovered→analyzed→…→won/lost, v1 은 submitted 로 자동 이동 없음.
+        concepts: [CLI 우선 설계, 승인 게이트, 상태 머신, 순수 도메인 모듈 분리]
+        related_material_ids: []
+        example_ids: []
+        ord: 10
+
+      - id: tenlune-operations-agent/cli-command-dispatch
+        title: CLI 명령 디스패치 — argv 파싱과 서브커맨드
+        unit_kind: infra
+        feature_area: CLI
+        summary: src/cli.ts. process.argv.slice(2) 에서 command + 옵션(--source --limit --id)을 읽어 scan/list/review/draft/import/mail-scan/submit 로 분기. submit 은 항상 차단 메시지로 종료(승인 경계).
+        concepts: [argv 파싱, 서브커맨드 스위치, 옵션 리더, 승인 경계를 코드로]
+        related_material_ids: []
+        example_ids: []
+        ord: 20
+
+      - id: tenlune-operations-agent/rule-based-fit-scoring
+        title: 규칙 기반 적합도 점수 — 0~100
+        unit_kind: feature
+        feature_area: 적합도 분석
+        summary: src/domain/scoring.ts + delivery-model.ts. 납품형 프로젝트인지 먼저 가르고, HIGH/CONDITIONAL/LOW 키워드 매칭으로 0~100 점수와 recommend/review/hold 판정을 이유·주의와 함께 낸다. LLM 없이 순수 규칙.
+        concepts: [규칙 기반 점수화, 키워드 가중치, 결과 등급화, 판정에 근거 첨부]
+        related_material_ids: []
+        example_ids: []
+        ord: 30
+
+      - id: tenlune-operations-agent/estimation-and-risk-modules
+        title: 견적·기간·리스크 — 순수 함수 도메인 모듈
+        unit_kind: feature
+        feature_area: 견적/리스크
+        summary: src/domain/pricing.ts(요건 기반 내부 범위 → 플랫폼 예산 보정) · duration.ts(가시 범위 기반 영업일 범위) · risk.ts(LOW/MEDIUM/HIGH 체크리스트). 입력만으로 결정되는 부수효과 없는 함수라 단위 테스트가 쉽다.
+        concepts: [순수 함수, 입력→출력 결정성, 테스트 용이성, 도메인 규칙 분리]
+        related_material_ids: []
+        example_ids: []
+        ord: 40
+
+      - id: tenlune-operations-agent/local-json-repository
+        title: 로컬 JSON 리포지토리 — 파일 기반 상태
+        unit_kind: data_model
+        feature_area: 로컬 저장
+        summary: src/repositories/local-json-repository.ts. data/operations-state.json 을 읽어 상태를 담고, platform+externalId 자연키로 중복을 막으며, getState() 는 structuredClone 으로 불변 사본을 돌려준다. operations-repository.ts 인터페이스 구현.
+        concepts: [파일 기반 영속화, 자연키 중복 방지, 불변 반환(structuredClone), 리포지토리 인터페이스]
+        related_material_ids: []
+        example_ids: []
+        ord: 50
