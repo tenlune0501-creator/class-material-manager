@@ -14,10 +14,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [deployment, github-pages, static-hosting]
     related_material_ids:
       - 1UkMfeU58aX680ezoxy1aVuMdPBxZtHKFwBEsv8V7koc
+    body_path: authored/deployment-and-infra/static-hosting/github-pages.md
 
   # ── ci-cd-github-actions ──────────────────────────────────────────────
   - id: deployment-and-infra/ci-cd-github-actions/first-workflow
@@ -27,11 +28,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [deployment, github-actions, ci-cd, workflow, yaml]
     related_material_ids:
       - 1Vy2qH2_CNLZBpmybJeCDsHHUflrl7Kt_tPdFxDKuEJQ
       - 1m-E8FWFbhiCWekrvwVZKzvkGpkxjN3tk88Zj6-GxtHA
+    body_path: authored/deployment-and-infra/ci-cd-github-actions/first-workflow.md
 
   # ── node-app-hosting ──────────────────────────────────────────────────
   - id: deployment-and-infra/node-app-hosting/gcp-vm-deploy
@@ -41,13 +43,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 70
     ord: 10
-    status: skeleton
+    status: authored
     tags: [deployment, gcp, vm, nginx, systemd, infra]
     related_material_ids:
       - 1MjC0nvq1rc_wQbO1st7P5_mUtCaROXGelLiSNub_aC4
       - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
       - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
       - 1b9CclzJ5-MUY-jv0n82pDpNyOt71isP9_B9kbG5QJJ4
+    body_path: authored/deployment-and-infra/node-app-hosting/gcp-vm-deploy.md
 
   - id: deployment-and-infra/node-app-hosting/platform-comparison
     chapter: deployment-and-infra/node-app-hosting
@@ -56,10 +59,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 20
-    status: skeleton
+    status: authored
     tags: [deployment, koyeb, heroku, aws, paas, comparison]
     related_material_ids:
       - 1oBYMnzeAurIBI556SN49zk9YXIX2156CEkoVcSfhQ9A
+    body_path: authored/deployment-and-infra/node-app-hosting/platform-comparison.md
 
   # ── containers-docker ────────────────────────────────────────────────
   # 교육용 Docker 자료는 없음(related_material_ids: []). 전량 Docker 공식 문서 기반.
@@ -99,7 +103,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: needs_external_research
+    status: authored
     tags: [docker, dockerfile, build, image, dockerignore]
     related_material_ids: []
     sources:
@@ -108,6 +112,7 @@ lessons:
         publisher: "Docker, Inc."
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/dockerfile-and-build.md
 
   - id: deployment-and-infra/containers-docker/ports-volumes-env
     chapter: deployment-and-infra/containers-docker
@@ -116,7 +121,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 30
-    status: needs_external_research
+    status: authored
     tags: [docker, ports, volumes, bind-mount, environment-variables]
     related_material_ids: []
     sources:
@@ -130,6 +135,7 @@ lessons:
         publisher: "Docker, Inc."
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/ports-volumes-env.md
 
   - id: deployment-and-infra/containers-docker/compose
     chapter: deployment-and-infra/containers-docker
@@ -138,7 +144,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 40
-    status: needs_external_research
+    status: authored
     tags: [docker, compose, multi-container, networking, dns]
     related_material_ids: []
     sources:
@@ -152,6 +158,7 @@ lessons:
         publisher: "Docker, Inc."
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/compose.md
 
   - id: deployment-and-infra/containers-docker/dev-vs-prod-multistage
     chapter: deployment-and-infra/containers-docker
@@ -160,7 +167,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 50
-    status: needs_external_research
+    status: authored
     tags: [docker, multi-stage-build, production, image-size]
     related_material_ids: []
     sources:
@@ -169,6 +176,7 @@ lessons:
         publisher: "Docker, Inc."
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/dev-vs-prod-multistage.md
 
   - id: deployment-and-infra/containers-docker/logs-and-debugging
     chapter: deployment-and-infra/containers-docker
@@ -177,7 +185,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 60
-    status: needs_external_research
+    status: authored
     tags: [docker, logs, exec, debugging, stdout]
     related_material_ids: []
     sources:
@@ -186,3 +194,4 @@ lessons:
         publisher: "Docker, Inc."
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/deployment-and-infra/containers-docker/logs-and-debugging.md

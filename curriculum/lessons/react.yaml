@@ -301,12 +301,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, react-router, practice, mission]
     related_material_ids:
       - 1QY0VqaDsQsLBtctH7PwB1SGWGhpj1n3GUXtJmvbOiy0
       - 1nL6ZmqlkdfHgneWfSILL6V89jeajAbPRhlkwxrqiEHI
       - 1ob-o3WlDEiyF_udGfhA4MQTB_fG8UP8f
+    body_path: authored/react/routing/router-mission.md
 
   # ── data-fetching ──────────────────────────────────────────────────────
   - id: react/data-fetching/fetching-in-react
@@ -366,7 +367,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, board, list, crud, practice]
     related_material_ids:
       - 15h7tMuI67jHapvXEW9Fug4g6lArnNgVq9BqEoNPaImo
@@ -377,6 +378,7 @@ lessons:
       - 1bJ9rmZ7rUcYcFU8QimOKRWbXAphew2TP
       - 1a3QZKQlOnWb4T5UB4uwgClajgsDRHSE6
       - 1I1pWDuAZ2_LrkA5NG-dgtfekAY9cnKwpBr4oNTRLxTU
+    body_path: authored/react/board-crud-app/board-ui-and-list.md
 
   - id: react/board-crud-app/create-update-delete
     chapter: react/board-crud-app
@@ -385,7 +387,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 70
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, crud, form, mutation, practice]
     related_material_ids:
       - 1peKntI-8PW-rTz3_YEqlvQ5o9WgWOPbcL0-13fyerVE
@@ -394,6 +396,7 @@ lessons:
       - 1bos2ISUIaSOOV4QvfS6odYxRW65jUoxfdsOVetOaQMQ
       - 1rsBbWw5onKYlPIrqH_o1gtVUq5wQPK9anoD1R6d4mwM
       - 1kCaN-DWCp2QUo2Bq3yn4AQiDH8_tp--k8Gf6KUtScO0
+    body_path: authored/react/board-crud-app/create-update-delete.md
 
   - id: react/board-crud-app/board-with-firestore
     chapter: react/board-crud-app
@@ -402,7 +405,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 80
     ord: 30
-    status: skeleton
+    status: authored
     tags: [react, firestore, crud, realtime, database, practice]
     related_material_ids:
       - 10tvGjA_zcG_nB0TbtKX3Y2E2HrQ-rC-ZrSp4Qk1XQ18
@@ -410,6 +413,7 @@ lessons:
       - 1jaw2HQSehc14S_tBh2JMjhN-tqUXjx-H67YJV1vTheM
       - 1be3S2o6brQ_5_Riwe1l5CdQP7A2Ocz3NRAtPjJyFfXM
       - 1ZnXC7D8AGkocyuI9ORQczsy_PCGj1RqggM9plKCq_JU
+    body_path: authored/react/board-crud-app/board-with-firestore.md
 
   - id: react/board-crud-app/file-upload
     chapter: react/board-crud-app
@@ -418,13 +422,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 55
     ord: 40
-    status: skeleton
+    status: authored
     tags: [react, file-upload, storage, practice]
     related_material_ids:
       - 1AkBUevgwRooF_sqef8D80r2tGnx4Swm1LwWWzgAVWCk
       - 1xOMXJxTmpgkoVd8UDm9xWu_UP2HWI5SdpLxc8SjSLPU
       - 104xxvLKOsWPr6n93ncFBxTlmPSBoampNCZC54UANcuA
       - 17bLGPEf8dAeyKc2hXPdsCuswVb-mBqb_
+    body_path: authored/react/board-crud-app/file-upload.md
 
   # ── firebase-integration ───────────────────────────────────────────────
   - id: react/firebase-integration/setup-and-firestore
@@ -434,11 +439,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, firebase, firestore, baas, setup]
     related_material_ids:
       - 1bavjSi0xWx-Kgks4at7mCi4fJuyPoNaeJKqQJLcYy7o
       - 1-4o3Z2qGu6vB4aeqUdKuJS0itmC72w1LMZ-N1jJ2QK0
+    body_path: authored/react/firebase-integration/setup-and-firestore.md
 
   - id: react/firebase-integration/auth-email-and-social
     chapter: react/firebase-integration
@@ -447,13 +453,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 70
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, firebase, auth, oauth, login, logout]
     related_material_ids:
       - 1n7X2GMDnGnzKD4MKqSIG6cc-qFRxPKvDBupYQwgzPxY
       - 1_YT0-5KoVzW2_Xm1uDPzKYNrnO35VEpRhPsKCGD6z8I
       - 1WMmAYKcERJ0YfJR4Hxpp181m28O9-SuycckMF6XcwHE
       - 1xVNkx0zawoduCMk0Qgs4pMgKKEyIlJFQ-hDxnC6qJoc
+    body_path: authored/react/firebase-integration/auth-email-and-social.md
 
   # ── optimization-and-refactoring ───────────────────────────────────────
   - id: react/optimization-and-refactoring/reducing-rerenders
@@ -463,12 +470,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, performance, memo, optimization]
     related_material_ids:
       - 1Y_4ajA89SNegKtIZX6lLczA3_JUfz3jUuA0QHBak3M0
     sources:
       - reference_slug: react/memo
+    body_path: authored/react/optimization-and-refactoring/reducing-rerenders.md
 
   - id: react/optimization-and-refactoring/refactoring-components
     chapter: react/optimization-and-refactoring
@@ -477,10 +485,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, refactoring, structure]
     related_material_ids:
       - 1RTWGlU0b_R-ueTd4c8U7pPdGLBvLkIpQkowKWBHktUw
+    body_path: authored/react/optimization-and-refactoring/refactoring-components.md
 
   # ── testing ────────────────────────────────────────────────────────────
   - id: react/testing/tdd-practice
@@ -490,10 +499,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
-    tags: [react, tdd, testing, jest, react-testing-library]
+    status: authored
+    tags: [react, tdd, testing, vitest, react-testing-library]
     related_material_ids:
       - 1Jg_F1mqoikOOqE4gFXJS1cysZRjaDFPA_-s11vtKczE
+    body_path: authored/react/testing/tdd-practice.md
 
   # ── seo-and-rendering ──────────────────────────────────────────────────
   - id: react/seo-and-rendering/csr-vs-ssr
@@ -503,10 +513,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, csr, ssr, rendering, nextjs-intro]
     related_material_ids:
       - 1PCcfvs93XEb4lqKh-V9Z7hA4D7b5cc9TXERLFm4t7z8
+    body_path: authored/react/seo-and-rendering/csr-vs-ssr.md
 
   - id: react/seo-and-rendering/react-seo
     chapter: react/seo-and-rendering
@@ -515,10 +526,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, seo, meta, ssr]
     related_material_ids:
       - 1thbu8MKlX-u3gKdNzThlKF-56w2e3qyo-TAdipGI38I
+    body_path: authored/react/seo-and-rendering/react-seo.md
 
   # ── ui-libraries ──────────────────────────────────────────────────────
   - id: react/ui-libraries/datepicker-and-swiper
@@ -528,12 +540,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, datepicker, swiper, ui-library]
     related_material_ids:
       - 1BhV087Hh_BZm26KqfboEHRd09WvswkeHz_jzwhjjeBg
       - 1cqIEN2t9v8bmvgjb8fh74Bx6fCIgBoyIkIRo2U6Oql4
       - 1k80DnPEL_7Tdlx6oC59yARGTHsf3DKL1
+    body_path: authored/react/ui-libraries/datepicker-and-swiper.md
 
   - id: react/ui-libraries/chartjs-in-react
     chapter: react/ui-libraries
@@ -542,10 +555,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, chartjs, visualization]
     related_material_ids:
       - 17Pfk5sLLHCsAHo_6609VTXRxP1PpE6Nx6u-SNdjwJKI
+    body_path: authored/react/ui-libraries/chartjs-in-react.md
 
   # ── missions ──────────────────────────────────────────────────────────
   - id: react/missions/react-basic-mission
@@ -555,12 +569,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 120
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, mission, capstone, practice]
     related_material_ids:
       - 17skefIHLsgs97Y3R7mdzKWb8vG2dVvWA4AuNWH_0sTQ
       - 1gZHjfRVNSgQjcQQ4LCYRcuBM7weDZDi8QmPsN6kd8f0
       - 1FovqWYuEFX5HFt9Zj2PbI9j5-ZaPRvhRn_ckotLXOuQ
+    body_path: authored/react/missions/react-basic-mission.md
 
   - id: react/missions/portfolio-next-project
     chapter: react/missions
@@ -569,7 +584,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 240
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, nextjs, mission, portfolio, capstone, auth, crud]
     related_material_ids:
       - 1Xl9WGO67SFyXSnNxNuAWeloqs23fkzViiaqHHHrhqOI
@@ -587,6 +602,7 @@ lessons:
       - 1vmABcUPCl1j2O4ScZgSTaERTnaxh3if20cP_jpbM_c8
       - 19Jx0c6_Z1ZGTR9GFK6fJVDX0ZpraOcjLyRFQoVlRMGA
       - 1cusGghzQ5ROMXbXEgouHJ3sG1DKqdit5
+    body_path: authored/react/missions/portfolio-next-project.md
 
   - id: react/missions/react-basic-mission-8
     chapter: react/missions
@@ -595,13 +611,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 180
     ord: 30
-    status: skeleton
+    status: authored
     tags: [react, mission, capstone, practice]
     related_material_ids:
       - 1gDF0BVE4sFtEwJXjGCl93p10zXlHvzXOM7hA87zNAJM
       - 1O9496od15d2eFjx_LgdRDaRqvfZ0gITm1K_xaBQz80c
       - 1Jyha-NxLXz6teWjNaRdzfdG9P1QPswwioZDYdTMnhGs
       - 1AQdGoQUUcuoUgfiKXTNvtzNf_j3jFRpZ
+    body_path: authored/react/missions/react-basic-mission-8.md
 
   # ── portfolio-project ──────────────────────────────────────────────────
   - id: react/portfolio-project/profile-edit-and-timeline
@@ -611,13 +628,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 90
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, portfolio, profile, timeline, practice]
     related_material_ids:
       - 1iObU3n2lHX823U9Om2tZqUiOzHbWE602t_wIdCtJnro
       - 1LyfAMLdaVHcEcFLbvFBAKyJav0AXm_8UzzzB7oDpsaA
       - 18-i6VFtzV-14OLI8Yi7_KrF3PFsfej-j-dLsleoSgvE
       - 1PUjS-7voqhcPnI1v8bh7lzD-trTZhUuN
+    body_path: authored/react/portfolio-project/profile-edit-and-timeline.md
 
   - id: react/portfolio-project/pagination-and-deploy
     chapter: react/portfolio-project
@@ -626,12 +644,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, pagination, deploy, portfolio, practice]
     related_material_ids:
       - 1j8lcOvnP0GZfOFV-uRzCa7Wwjq5qjfadhnGUPZF5rUQ
       - 1IeehQhjAszfx3WusWYochDLtZHGh6YQnrflz3s77axU
       - 1hiK1TGrT9IEVLiTy5mBPs3c6e_3bSqOx
+    body_path: authored/react/portfolio-project/pagination-and-deploy.md
 
   # ── react-deployment ──────────────────────────────────────────────────
   - id: react/react-deployment/deploy-with-github-actions
@@ -641,13 +660,14 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [react, deploy, github-actions, ci-cd]
     related_material_ids:
       - 1m-E8FWFbhiCWekrvwVZKzvkGpkxjN3tk88Zj6-GxtHA
       - 1Vy2qH2_CNLZBpmybJeCDsHHUflrl7Kt_tPdFxDKuEJQ
       - 1to7zF_68YLwOp-C0D8kYIT07XbxxGL5KOtiZCAHYnxo
       - 1bPuO0PdIH9jPgvRFADOR-_mPcbdrP2KVpOH25Dgg5Qo
+    body_path: authored/react/react-deployment/deploy-with-github-actions.md
 
   - id: react/react-deployment/deploy-to-gcp-vm
     chapter: react/react-deployment
@@ -656,10 +676,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 20
-    status: skeleton
+    status: authored
     tags: [react, deploy, gcp, vm, nginx, infra]
     related_material_ids:
       - 1MjC0nvq1rc_wQbO1st7P5_mUtCaROXGelLiSNub_aC4
       - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
       - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
       - 1b9CclzJ5-MUY-jv0n82pDpNyOt71isP9_B9kbG5QJJ4
+    body_path: authored/react/react-deployment/deploy-to-gcp-vm.md

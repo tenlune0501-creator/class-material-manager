@@ -14,10 +14,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [database, erd, modeling, entity-relationship]
     related_material_ids:
       - 1gmX8yMuc3IJPkYjkzUoOHjboPirybRBDMjeK3LuxKWQ
+    body_path: authored/data-and-backend/data-modeling/erd.md
 
   - id: data-and-backend/data-modeling/normalization
     chapter: data-and-backend/data-modeling
@@ -26,10 +27,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: skeleton
+    status: authored
     tags: [database, normalization, 1nf, 2nf, 3nf]
     related_material_ids:
       - 14E6y0TieVisd_jpln3_F9wwbmdR4LKka7XJ05KZJ1zo
+    body_path: authored/data-and-backend/data-modeling/normalization.md
 
   - id: data-and-backend/data-modeling/relational-vs-nonrelational
     chapter: data-and-backend/data-modeling
@@ -38,10 +40,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 30
-    status: skeleton
+    status: authored
     tags: [database, sql, nosql, comparison]
     related_material_ids:
       - 1egvVi-6Dp33Klw1WXYLqNCKJQS9JDKu02orlbjwmUmA
+    body_path: authored/data-and-backend/data-modeling/relational-vs-nonrelational.md
 
   - id: data-and-backend/data-modeling/sql-essentials
     chapter: data-and-backend/data-modeling
@@ -50,10 +53,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 40
-    status: skeleton
+    status: authored
     tags: [database, sql, select, join, crud]
     related_material_ids:
       - 1Hn4jKnNU0sURe1TUOIE_ESNK3Kr6nMH-TcsJbEQ35Wk
+    body_path: authored/data-and-backend/data-modeling/sql-essentials.md
 
   # ── backend-integration ───────────────────────────────────────────────
   - id: data-and-backend/backend-integration/frontend-to-webserver-db
@@ -63,11 +67,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 10
-    status: skeleton
+    status: authored
     tags: [backend, integration, rest, fetch, database]
     related_material_ids:
       - 1a63pT8qv_jVoOdSsM4audNDYIQj4CWa7DA0IMt7AAwM
       - 1pVRYcYZM4XyofD3QoUm-NCuI0nfU4a-IXDig_vOW3lQ
+    body_path: authored/data-and-backend/backend-integration/frontend-to-webserver-db.md
 
   # ── baas-supabase-firebase ────────────────────────────────────────────
   - id: data-and-backend/baas-supabase-firebase/firebase-vs-supabase
@@ -77,10 +82,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: skeleton
+    status: authored
     tags: [baas, firebase, supabase, comparison]
     related_material_ids:
       - 1lihKRwRC3KHP4RXBvzGiuIG7bLEJRkgCilkk1LBSZPo
+    body_path: authored/data-and-backend/baas-supabase-firebase/firebase-vs-supabase.md
 
   - id: data-and-backend/baas-supabase-firebase/supabase-in-a-real-project
     chapter: data-and-backend/baas-supabase-firebase
@@ -89,7 +95,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 20
-    status: skeleton
+    status: authored
     tags: [supabase, ssr, auth, postgrest, rls, database]
     related_material_ids:
       - 1NFB5KVAZTGy2GEmVAD80IGTl2xC5wpFh8kiGrPETHzY
@@ -98,6 +104,7 @@ lessons:
         note: 쿠키 어댑터로 서버에서 세션을 읽는 createServerClient
       - unit: momentalk/community-crud-embed
         note: PostgREST embed 조인으로 게시판 조회를 한 번에
+    body_path: authored/data-and-backend/baas-supabase-firebase/supabase-in-a-real-project.md
 
   # ── nodejs-server ─────────────────────────────────────────────────────
   # 재검토 결과(research/backend-and-database.md): 기존 자료가 "없음"이 아니다.
@@ -111,9 +118,10 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 10
-    status: needs_external_research
+    status: authored
     tags: [nodejs, event-loop, non-blocking-io, runtime]
     related_material_ids: []
+    body_path: authored/data-and-backend/nodejs-server/node-runtime-and-event-loop.md
 
   - id: data-and-backend/nodejs-server/builtin-http-server
     chapter: data-and-backend/nodejs-server
@@ -152,7 +160,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 70
     ord: 30
-    status: skeleton
+    status: authored
     tags: [nodejs, express, rest-api, crud, backend]
     related_material_ids:
       - 1k0hObTy4naQwvnx-jVg_J2pwtj3tNwFoIgMQ3UTmjSI
@@ -166,6 +174,7 @@ lessons:
         publisher: "OpenJS Foundation"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/data-and-backend/nodejs-server/express-rest-api.md
 
   - id: data-and-backend/nodejs-server/routing-and-modules
     chapter: data-and-backend/nodejs-server
@@ -174,7 +183,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 40
-    status: skeleton
+    status: authored
     tags: [nodejs, express, router, modules, project-structure]
     related_material_ids:
       - 1CvaWGWqZBZGzsCgcT35oWZoK6uIV7JrXFgjI3lCYRX8
@@ -184,6 +193,7 @@ lessons:
         publisher: "OpenJS Foundation"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/data-and-backend/nodejs-server/routing-and-modules.md
 
   - id: data-and-backend/nodejs-server/middleware
     chapter: data-and-backend/nodejs-server
@@ -192,7 +202,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 50
-    status: skeleton
+    status: authored
     tags: [nodejs, express, middleware, body-parser, cors]
     related_material_ids:
       - 1peKntI-8PW-rTz3_YEqlvQ5o9WgWOPbcL0-13fyerVE
@@ -204,6 +214,7 @@ lessons:
         publisher: "OpenJS Foundation"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/data-and-backend/nodejs-server/middleware.md
 
   - id: data-and-backend/nodejs-server/error-handling
     chapter: data-and-backend/nodejs-server
@@ -212,7 +223,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 35
     ord: 60
-    status: needs_external_research
+    status: authored
     tags: [nodejs, express, error-handling, middleware]
     related_material_ids: []
     sources:
@@ -221,6 +232,7 @@ lessons:
         publisher: "OpenJS Foundation"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/data-and-backend/nodejs-server/error-handling.md
 
   - id: data-and-backend/nodejs-server/config-and-structure
     chapter: data-and-backend/nodejs-server
@@ -229,11 +241,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 70
-    status: skeleton
+    status: authored
     tags: [nodejs, config, environment-variables, project-structure, layering]
     related_material_ids:
       - 1E235IuK9vwVtt6ZSdY88IBAdS63mZwJfzGHh_PQs8jI
       - 1bKTN0FWrRaGDZ33mLDZm_JiMJzHIWGHNeIEU35_v8Ig
+    body_path: authored/data-and-backend/nodejs-server/config-and-structure.md
 
   # ── relational-database-operations (needs_external_research) ───────────
   - id: data-and-backend/relational-database-operations/schema-and-migrations

@@ -19,12 +19,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 60
     ord: 10
-    status: skeleton
+    status: authored
     tags: [ai, openai, image-generation, react, api-key]
     related_material_ids:
       - 10fqbfUnvErZI2L0-iL5rbUwfGLhxq6TNa1bBmPewq-k
       - 1f1uVS9cRS0sGrJv9NUSdBZTwTjSJHMGh
       - 16n0hgBx0COr3XsZGxa4FQSeZRpGLGO96
+    body_path: authored/ai-engineering/generative-ai-in-frontend/openai-image-generation.md
 
   - id: ai-engineering/generative-ai-in-frontend/generative-ai-react-app
     chapter: ai-engineering/generative-ai-in-frontend
@@ -33,10 +34,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: skeleton
+    status: authored
     tags: [ai, generative-ai, react, integration]
     related_material_ids:
       - 1G-txw9xv7fa5BMU2lE7yLk5GcTSLlN46zjol5S3rKLE
+    body_path: authored/ai-engineering/generative-ai-in-frontend/generative-ai-react-app.md
 
   - id: ai-engineering/generative-ai-in-frontend/alan-api
     chapter: ai-engineering/generative-ai-in-frontend
@@ -45,10 +47,11 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 30
     ord: 30
-    status: skeleton
+    status: authored
     tags: [ai, alan-api, integration]
     related_material_ids:
       - 1JkD6XwOOUHfmil1eLM3CTGGbpbgMZI-M9j-sIfnFp9M
+    body_path: authored/ai-engineering/generative-ai-in-frontend/alan-api.md
 
   # ── llm-app-fundamentals ─────────────────────────────────────────────
   # 자료 없음. OpenAI/Anthropic/HF 공식 문서 기반 (research/ai-engineering.md).
@@ -90,7 +93,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: needs_external_research
+    status: authored
     tags: [ai, llm, structured-outputs, json-schema]
     related_material_ids: []
     sources:
@@ -99,6 +102,7 @@ lessons:
         publisher: "OpenAI"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/llm-app-fundamentals/structured-outputs.md
 
   - id: ai-engineering/llm-app-fundamentals/tool-calling
     chapter: ai-engineering/llm-app-fundamentals
@@ -107,7 +111,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 30
-    status: needs_external_research
+    status: authored
     tags: [ai, llm, tool-use, function-calling]
     related_material_ids: []
     sources:
@@ -121,6 +125,7 @@ lessons:
         publisher: "OpenAI"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/llm-app-fundamentals/tool-calling.md
 
   - id: ai-engineering/llm-app-fundamentals/streaming-and-errors
     chapter: ai-engineering/llm-app-fundamentals
@@ -129,7 +134,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 40
-    status: needs_external_research
+    status: authored
     tags: [ai, llm, streaming, sse, retries, rate-limit, cost]
     related_material_ids: []
     sources:
@@ -143,6 +148,7 @@ lessons:
         publisher: "Anthropic"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/llm-app-fundamentals/streaming-and-errors.md
 
   # ── rag-and-agents (needs_external_research) ──────────────────────────
   # PARTIAL: RAG 절반은 공식 문서로 커버, 에이전트 절반은 개념 수준.
@@ -154,7 +160,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: needs_external_research
+    status: authored
     tags: [ai, embeddings, similarity, vector-search]
     related_material_ids: []
     sources:
@@ -168,6 +174,7 @@ lessons:
         publisher: "Anthropic"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/rag-and-agents/embeddings-and-semantic-search.md
 
   - id: ai-engineering/rag-and-agents/retrieval-augmented-generation
     chapter: ai-engineering/rag-and-agents
@@ -176,7 +183,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: needs_external_research
+    status: authored
     tags: [ai, rag, retrieval, chunking, grounding, citation]
     related_material_ids: []
     sources:
@@ -195,6 +202,7 @@ lessons:
         publisher: "Anthropic"
         checked_at: 2026-09-06
         source_type: official_guide
+    body_path: authored/ai-engineering/rag-and-agents/retrieval-augmented-generation.md
 
   - id: ai-engineering/rag-and-agents/agents-intro
     chapter: ai-engineering/rag-and-agents
@@ -203,7 +211,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: needs_external_research
+    status: authored
     tags: [ai, agents, agent-loop, tools, workflow]
     related_material_ids: []
     sources:
@@ -217,6 +225,7 @@ lessons:
         publisher: "OpenAI"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/rag-and-agents/agents-intro.md
 
   # ── prompt-and-evaluation ────────────────────────────────────────────
   # 자료 없음. Anthropic/OpenAI 공식 문서 + promptfoo/HF Evaluate (research/evaluation-and-coding-test.md).
@@ -258,7 +267,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 40
     ord: 20
-    status: needs_external_research
+    status: authored
     tags: [ai, prompt-engineering, few-shot, structured-output, context-design]
     related_material_ids: []
     sources:
@@ -267,6 +276,7 @@ lessons:
         publisher: "Anthropic"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/prompt-and-evaluation/structured-and-fewshot.md
 
   - id: ai-engineering/prompt-and-evaluation/defining-success-and-evals
     chapter: ai-engineering/prompt-and-evaluation
@@ -275,7 +285,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: needs_external_research
+    status: authored
     tags: [ai, evaluation, success-criteria, eval-set, metrics]
     related_material_ids: []
     sources:
@@ -289,6 +299,7 @@ lessons:
         publisher: "OpenAI"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/prompt-and-evaluation/defining-success-and-evals.md
 
   - id: ai-engineering/prompt-and-evaluation/evaluating-llm-output
     chapter: ai-engineering/prompt-and-evaluation
@@ -297,7 +308,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 40
-    status: needs_external_research
+    status: authored
     tags: [ai, evaluation, llm-as-judge, grading, deterministic]
     related_material_ids: []
     sources:
@@ -311,6 +322,7 @@ lessons:
         publisher: "Hugging Face"
         checked_at: 2026-09-06
         source_type: official_docs
+    body_path: authored/ai-engineering/prompt-and-evaluation/evaluating-llm-output.md
 
   - id: ai-engineering/prompt-and-evaluation/regression-and-failure-analysis
     chapter: ai-engineering/prompt-and-evaluation
@@ -319,7 +331,7 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 50
-    status: needs_external_research
+    status: authored
     tags: [ai, evaluation, regression, hallucination, failure-analysis]
     related_material_ids: []
     sources:
@@ -333,3 +345,4 @@ lessons:
         publisher: "promptfoo"
         checked_at: 2026-09-06
         source_type: community_reference
+    body_path: authored/ai-engineering/prompt-and-evaluation/regression-and-failure-analysis.md

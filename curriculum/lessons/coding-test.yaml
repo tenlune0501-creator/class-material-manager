@@ -18,9 +18,10 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 25
     ord: 10
-    status: needs_external_research
+    status: authored
     tags: [coding-test, problem-solving, approach]
     related_material_ids: []
+    body_path: authored/coding-test/foundations/problem-solving-approach.md
 
   - id: coding-test/foundations/big-o-notation
     chapter: coding-test/foundations

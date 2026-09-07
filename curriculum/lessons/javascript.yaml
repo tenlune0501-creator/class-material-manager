@@ -335,11 +335,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 10
-    status: skeleton
+    status: authored
     tags: [javascript, map, api, geolocation]
     related_material_ids:
       - 1p-9VZXmvak564yNKRy_a4Hxds09brFhFUf_hg2azQII
       - 1fWq89qe3p3OveESC8EuOX57X3XYd9Qp3
+    body_path: authored/javascript/external-apis/map-api.md
 
   - id: javascript/external-apis/weather-api
     chapter: javascript/external-apis
@@ -348,12 +349,13 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 50
     ord: 20
-    status: skeleton
+    status: authored
     tags: [javascript, weather, api, public-data]
     related_material_ids:
       - 1KulC-xgMNEzQBPH7piSFCpTE_tEryIPzlZ-ioBnawK8
       - 1ImZMs1l7VZ33ZUplGFP_VofjyrWrDgi_tw_kvacsf8k
       - 1j43M8gac2zVaF-eiQQ3_YHy_3q3Z7aPHOLMLEZsjomU
+    body_path: authored/javascript/external-apis/weather-api.md
 
   - id: javascript/external-apis/chartjs
     chapter: javascript/external-apis
@@ -362,11 +364,12 @@ lessons:
     lesson_kind: lesson
     estimated_minutes: 45
     ord: 30
-    status: skeleton
+    status: authored
     tags: [javascript, chartjs, visualization, chart]
     related_material_ids:
       - 1CXsWroXCl9PJUygoTIIrWFZenRq4W83k
       - 1ze4bEucBoRWPCSoqcvau97Og64GwjLBXfFK9RyJzsGo
+    body_path: authored/javascript/external-apis/chartjs.md
 
   # ── ui-implementation-patterns ──────────────────────────────────────────
   - id: javascript/ui-implementation-patterns/slideshows-and-sliders
