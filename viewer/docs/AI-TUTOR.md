@@ -173,6 +173,130 @@ Docker를 권장하지만, 실제로는 **한국어만 쓰면 굳이 Docker 없�
   session/progress·AI API·사용자별 동적 데이터를 stale 캐시하지 않음).
 - 전체 오프라인 기능은 범위 밖 — 오프라인 폴백 페이지도 만들지 않았다.
 
+## CMM Tutor 원클릭 launcher (Windows, 2026-09-12 완료)
+
+바탕화면의 `CMM Tutor` 아이콘 하나로 "MeloTTS 준비 → Production CMM을 독립 앱 창으로
+실행"까지 하기 위한 것이다. **AI Tutor 기능 자체를 바꾸지 않는다** — Groq
+Provider·context builder·session/progress·MeloTTS 자체 구현은 전혀 손대지 않았다.
+Electron/Tauri/설치형 앱을 새로 만들지 않고 기존 3가지(Production Vercel, 로컬
+MeloTTS, OS 브라우저의 app 모드)를 그대로 이어 붙이기만 한다.
+
+### 파일 구성
+
+```
+CMMTutor.cmd                        바탕화면 바로가기의 target(더블클릭 진입점)
+CMMTutor-stop.cmd                   launcher가 시작한 MeloTTS만 안전하게 종료
+cmm-tutor.ico                       바로가기 아이콘(기존 PWA icon-192.png를 ICO로 감싼 것)
+scripts/
+  cmm-tutor-launcher.ps1            실제 로직 — MeloTTS 확인/시작 → /health 대기 → 앱 창 실행
+  cmm-tutor-stop.ps1                launcher-started MeloTTS만 종료(프로세스 트리 인식)
+  install-cmm-shortcut.ps1          바탕화면 바로가기 생성(npm run cmm-install-shortcut)
+  generate-launcher-icon.mjs        cmm-tutor.ico 생성 스크립트(1회성, 재실행 가능)
+```
+
+`.cmd` 파일은 `%~dp0`(자기 자신의 위치)를 기준으로 `.ps1`을 호출한다 — 저장소를
+어디에 두거나 경로에 공백이 있어도 그대로 동작한다(절대경로를 하드코딩하지 않음).
+
+### 실행 흐름 (`scripts/cmm-tutor-launcher.ps1`)
+
+1. `http://127.0.0.1:8787/health` 로 MeloTTS 상태 확인.
+   - `{"status":"ok","language":"KR"}` 를 돌려주면 **그대로 재사용**(중복 실행 안 함).
+   - 응답이 없는데 8787을 다른 프로세스가 쓰고 있으면(`Get-NetTCPConnection`) 그
+     프로세스를 임의로 종료하지 않고, PID를 알려준 뒤 즉시 중단한다.
+   - 8787이 완전히 비어 있으면 `local-services/melotts/.venv/Scripts/python.exe
+     server.py` 를 새로 실행한다. **기존 venv를 그대로 쓴다** — 새 Python 환경을
+     만들거나 `pip install`을 다시 하지 않는다. venv 자체가 없으면(설치 전) 설치를
+     대신 진행하지 않고 README 안내로 넘기며, 음성 없이 텍스트 Tutor로 계속한다.
+2. 최대 120초, 2초 간격으로 `/health` 를 다시 확인(bounded retry). 준비되기 전에는
+   브라우저를 열지 않는다. 시간 안에 준비되지 않아도(첫 실행 모델 다운로드가 오래
+   걸리는 경우 등) 텍스트 Tutor는 쓸 수 있으므로 계속 진행한다.
+3. Chrome → Edge 순서로 설치 여부를 확인해(레지스트리 `App Paths` 우선, 표준 설치
+   경로가 다음 순위) `--app=https://class-material-manager-dusky.vercel.app/tutor`
+   로 독립 앱 창을 연다. 둘 다 없으면 시스템 기본 브라우저로 일반 탭으로 연다.
+
+### MeloTTS 자동 시작 — 기존 환경만 재사용
+
+- 새 Python 환경을 만들지 않는다. `local-services/melotts/.venv`가 이미 있어야 하고,
+  없으면 launcher가 설치를 대신하지 않는다(`README.md`의 `./setup.ps1`을 사용자가
+  직접 실행해야 함 — 이번 launcher 작업으로 그 설치 스크립트를 건드리지 않았다).
+- **실제 구성 확인 결과**: 이 환경의 Python 3.10 venv는 `.venv\Scripts\python.exe`가
+  실제 인터프리터(`...\Python310\python.exe`)를 **자식 프로세스로 재실행**하고,
+  포트 8787을 실제로 리스닝하는 것은 그 자식 쪽이다. `Start-Process`가 돌려주는
+  PID(부모)와 포트를 실제로 쓰는 PID(자식)가 다를 수 있다는 뜻이라, 종료 스크립트는
+  **프로세스 트리**(부모 + 모든 자손) 단위로 확인·종료하도록 만들었다(아래 참고).
+- loopback(127.0.0.1)만 쓴다 — launcher 코드 어디에도 `0.0.0.0`을 지시하지 않는다.
+  CORS·`/synthesize`·기존 Windows 패치(`overlay/`, `winshim/`)는 전혀 건드리지 않았다.
+
+### 포트 8787 충돌 처리
+
+`Get-NetTCPConnection -LocalPort 8787 -State Listen` 으로 소유 PID를 확인한다.
+`/health`가 CMM MeloTTS로 확인되지 않는데 그 포트를 누가 쓰고 있으면, PID를 화면에
+보여주고 **launcher는 즉시 중단한다** — 강제 종료하지 않는다. 사용자가 작업
+관리자에서 직접 확인한 뒤 다시 실행하면 된다.
+
+### 앱 종료 정책 (선택한 방식과 이유)
+
+브라우저 app 모드 창이 실제로 "닫혔는지"를 감지하는 것은 신뢰성 있게 구현하기
+어렵다(Chrome이 여러 프로세스로 쪼개져 있고, 이미 떠 있는 Chrome 인스턴스가 있으면
+새 요청은 그 인스턴스로 흡수돼 launcher 프로세스 자체는 바로 끝난다). 그래서 **오탐
+종료보다 안전을 선택**했다:
+
+- launcher는 앱 창이 닫히는 시점을 감지하지 않는다.
+- launcher가 이번 실행에서 새로 MeloTTS를 시작했으면 그 PID(정확히는 프로세스
+  트리 루트 PID)를 `local-services/melotts/.launcher-started.pid` 에 기록한다
+  (git에 커밋되지 않음).
+- 사용자가 끄고 싶으면 **`CMMTutor-stop.cmd`를 직접 실행**한다.
+  `cmm-tutor-stop.ps1`은 마커 PID(와 그 프로세스 트리) 가 **지금도 python
+  프로세스이고 지금도 실제로 8787을 리스닝 중일 때만** 종료한다. 마커가 없거나
+  (재사용 중이었음), PID가 이미 사라졌거나, 다른 프로세스로 바뀐 것으로 보이면
+  아무 것도 종료하지 않고 이유를 설명한다 — pre-existing MeloTTS(사용자가 따로
+  실행해 둔 것)를 launcher가 실수로 끄는 사고를 원천적으로 막기 위한 설계다.
+
+### 바탕화면 바로가기
+
+```
+npm run cmm-install-shortcut
+```
+
+`scripts/install-cmm-shortcut.ps1`이 `[Environment]::GetFolderPath("Desktop")`로
+바탕화면 경로를 찾아(OneDrive로 리디렉션된 바탕화면도 정확히 찾는다) `CMM
+Tutor.lnk`를 만든다. Target은 `CMMTutor.cmd`, Working Directory는 저장소 루트,
+아이콘은 `cmm-tutor.ico`(기존 PWA 아이콘 재사용, 새 디자인 없음). **이미 같은 이름의
+바로가기가 있으면 덮어쓰지 않고 그대로 둔다** — 덮어쓰려면 `-Force`:
+
+```
+powershell -File scripts/install-cmm-shortcut.ps1 -Force
+```
+
+관리자 권한이 필요 없다(바탕화면 바로가기 생성은 항상 일반 사용자 권한으로 가능).
+시작 메뉴 바로가기는 이번 범위에 포함하지 않았다(선택 사항으로 명시된 대로).
+
+### 문제 해결
+
+| 증상 | 원인/조치 |
+|---|---|
+| "포트 8787을 다른 프로그램이 사용 중" 이라며 중단됨 | 작업 관리자에서 해당 PID 확인. CMM MeloTTS가 아니면 그 프로그램을 직접 정리한 뒤 재실행 |
+| MeloTTS 준비 대기가 120초를 넘김 | 첫 실행의 한국어 모델 다운로드일 수 있음 — 텍스트 Tutor로 우선 쓰고, 잠시 후 음성 스위치를 다시 켜본다 |
+| 앱 창이 로그인 화면으로 뜸 | 정상 — Production 로그인 세션이 그 브라우저 프로필에 없는 것뿐. 로그인하면 그 뒤로는 유지된다(기존 auth 흐름 그대로) |
+| `CMMTutor-stop.cmd`가 "종료하지 않습니다"라고만 함 | 정상 — launcher가 시작한 MeloTTS가 아니거나(원래 실행 중이었음) 이미 꺼져 있다는 뜻. pre-existing MeloTTS는 의도적으로 건드리지 않는다 |
+| 바로가기를 다시 만들고 싶음 | 바탕화면의 `CMM Tutor.lnk`를 직접 지우거나 `-Force`로 재실행 |
+| launcher/바로가기를 완전히 없애고 싶음 | 바탕화면의 `CMM Tutor.lnk`를 지우고, 저장소의 `CMMTutor.cmd`/`CMMTutor-stop.cmd`/`cmm-tutor.ico`/`scripts/cmm-tutor-*.ps1`/`scripts/install-cmm-shortcut.ps1`을 지우면 된다 — MeloTTS·AI Tutor 본체·Production 배포에는 아무 영향 없다(완전히 독립적인 파일들) |
+| 실행 시 콘솔 창에 한글이 깨져 보임 | 발생하지 않아야 한다 — `.ps1` 파일이 UTF-8 BOM으로 저장돼 있어야 Windows PowerShell 5.1이 올바르게 읽는다. 직접 수정했다면 저장 시 인코딩을 "UTF-8 with BOM"으로 유지할 것 |
+
+### Production CMM + 로컬 TTS 구조 (다시 정리)
+
+launcher는 이 구조를 바꾸지 않는다 — 이어 붙이기만 한다.
+
+```
+Windows 바탕화면 아이콘
+  └─ CMMTutor.cmd → cmm-tutor-launcher.ps1
+       ├─ (필요시) local-services/melotts 시작 → http://127.0.0.1:8787
+       └─ Chrome/Edge --app= 로 https://class-material-manager-dusky.vercel.app/tutor 실행
+            └─ 브라우저 안에서 CMM(Vercel)이 그대로 로드됨
+                 ├─ 텍스트 대화 → Vercel 서버 → Groq
+                 └─ 음성 재생   → 브라우저가 직접 http://127.0.0.1:8787 호출
+```
+
 ## 알려진 한계 / 다음 단계
 
 - **project_unit 세션 UI 없음** — `user_project_progress`/`lib/tutor/session.ts`가 이미
@@ -188,6 +312,14 @@ Docker를 권장하지만, 실제로는 **한국어만 쓰면 굳이 Docker 없�
 - **마크다운 → TTS 변환 시 손실** — `stripMarkdownForSpeech`가 `**bold**`/`` `code` ``/
   헤더를 제거하고 읽으므로, 코드 블록 전체는 음성으로 아예 생략된다(화면에는 그대로
   보인다). 코드를 소리내 읽어주는 기능은 범위 밖.
+- **launcher를 반복 실행하면 앱 창이 하나씩 늘어난다** — 같은 URL의 기존 app 창을
+  재사용/포커스하는 기능은 의도적으로 만들지 않았다(Chrome/Edge 창 열거는 복잡도
+  대비 이득이 적어 단순하게 두기로 함, "CMM Tutor 원클릭 launcher" 절 참고).
+- **로그인 세션이 없으면 `/tutor`가 아니라 홈(`/`)으로 착지한다** — 기존
+  `lib/supabase/proxy.ts`가 로그인 성공 후 항상 `/`로 보내고 원래 요청 경로로
+  돌아가지 않는다(이 동작은 기존 auth 흐름이라 이번 launcher 작업에서 바꾸지
+  않았다). 로그인 후 사이드바의 "AI Tutor"를 한 번 더 눌러야 한다. 세션이 살아
+  있는 일반적인 경우(로그인 뒤 매일 실행)에는 영향 없음.
 
 ## Groq 실사용(live) 검증 (2026-09-11 완료)
 

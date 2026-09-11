@@ -1,4 +1,4 @@
-# CMM MeloTTS 로컬 컴패니언 — 최초 1회 설치 스크립트 (Windows PowerShell).
+﻿# CMM MeloTTS 로컬 컴패니언 — 최초 1회 설치 스크립트 (Windows PowerShell).
 #
 # 이 스크립트가 하는 일:
 #   1) MeloTTS 원본을 고정 커밋(vendor/)으로 clone (이미 있으면 건너뜀)

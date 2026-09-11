@@ -17,7 +17,8 @@
     "sync-curriculum": "node src/index.ts sync-curriculum",
     "backup": "node src/index.ts backup",
     "restore": "node src/index.ts restore",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "cmm-install-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-cmm-shortcut.ps1"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",

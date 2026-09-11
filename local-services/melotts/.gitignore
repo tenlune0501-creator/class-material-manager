@@ -10,3 +10,7 @@ __pycache__/
 
 # 로컬 테스트 산출물
 *.log
+
+# CMMTutor.cmd launcher가 자기가 시작한 MeloTTS PID를 기록하는 런타임 마커.
+# (scripts/cmm-tutor-launcher.ps1 / cmm-tutor-stop.ps1 참고 — 커밋 대상 아님)
+.launcher-started.pid
