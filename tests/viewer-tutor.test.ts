@@ -27,6 +27,7 @@ const tutorMigration = await readFile(
 const manifest = await readFile("viewer/public/manifest.webmanifest", "utf8");
 const sw = await readFile("viewer/public/sw.js", "utf8");
 const tutorApp = await readFile("viewer/components/tutor/TutorApp.tsx", "utf8");
+const proxySrc = await readFile("viewer/proxy.ts", "utf8");
 
 describe("Groq Provider 경계", () => {
   it("LLM/STT 모두 GROQ_API_KEY 를 생성자로만 받는다 (프로세스 환경변수 직접 참조는 팩토리에서만)", () => {
@@ -172,6 +173,19 @@ describe("PWA", () => {
     assert.equal(parsed.start_url, "/tutor");
     assert.equal(parsed.display, "standalone");
     assert.ok(parsed.icons.length >= 3);
+  });
+
+  it("manifest/sw/아이콘은 로그인 미들웨어를 거치지 않는다 (Production에서 실제로 /login 307을 받던 버그 수정)", () => {
+    for (const file of [
+      "manifest.webmanifest",
+      "sw.js",
+      "icon-192.png",
+      "icon-512.png",
+      "icon-512-maskable.png",
+      "apple-touch-icon.png",
+    ]) {
+      assert.ok(proxySrc.includes(file), `proxy matcher가 ${file}을 제외해야 한다`);
+    }
   });
 
   it("Service Worker는 페이지 내비게이션과 /api/** 를 캐시하지 않는다", () => {

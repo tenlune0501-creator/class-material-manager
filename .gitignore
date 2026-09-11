@@ -42,3 +42,6 @@ e2e/.auth/
 
 # 대체된 v1 디자인 시안 (검토용 PNG · 현재 기준안은 design-mockups-v2/)
 /design-mockups/
+
+.vercel
+.env*

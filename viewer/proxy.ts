@@ -20,6 +20,12 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // 정적 파일(_next/static, _next/image, favicon.ico)은 로그인 여부와 상관없이 그대로 내려줍니다.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // 정적 파일(_next/static, _next/image, favicon.ico)과 PWA 자산(manifest/service
+  // worker/아이콘)은 로그인 여부와 상관없이 그대로 내려줍니다. 특히 서비스 워커와
+  // manifest는 "설치 가능한 앱"을 위해 로그인 전에도(브라우저가 PWA 설치 가능 여부를
+  // 판단할 때) 반드시 200으로 받아져야 합니다 — /login으로 리다이렉트되면 매니페스트
+  // 파싱이 실패해 설치 자체가 안 됩니다.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icon-192.png|icon-512.png|icon-512-maskable.png|apple-touch-icon.png).*)",
+  ],
 };
