@@ -1,0 +1,12 @@
+# MeloTTS 원본(고정 커밋으로 clone) — setup.ps1이 재현한다. 패치는 overlay/ 에 커밋됨.
+vendor/
+
+# Python venv — setup.ps1이 재생성한다.
+.venv/
+
+__pycache__/
+*.pyc
+*.wav
+
+# 로컬 테스트 산출물
+*.log

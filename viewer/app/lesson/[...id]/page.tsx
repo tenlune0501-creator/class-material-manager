@@ -15,7 +15,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 import { Markdown } from "@/components/Markdown";
-import { NavChip, NavListItem } from "@/components/nav";
+import { NavButton, NavChip, NavListItem } from "@/components/nav";
 import { getLesson, inlineCodeRefs, SECTION_LABEL } from "@/lib/curriculum";
 import { safeHref } from "@/lib/url";
 
@@ -55,9 +55,19 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
         )}
       </Typography>
 
-      <Typography variant="h5" component="h1" sx={{ fontWeight: 700, mt: 2 }} gutterBottom>
-        {lesson.title}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2, mt: 2 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }} gutterBottom>
+          {lesson.title}
+        </Typography>
+        <NavButton
+          variant="contained"
+          size="small"
+          href={`/tutor?lessonId=${encodeURIComponent(lesson.id)}`}
+          sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
+        >
+          🎧 AI Tutor로 시작
+        </NavButton>
+      </Box>
 
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
         <Chip size="small" color="primary" label={MASTERY_LABEL[lesson.mastery] ?? lesson.mastery} />

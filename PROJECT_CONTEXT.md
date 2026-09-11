@@ -469,6 +469,35 @@ DB로 확장합니다.
 - GitHub Actions 워크플로우의 `timeout-minutes`을 늘리면 stale lock 기준(90분)도 그보다
   여유 있게 함께 늘려야, 정상 실행 중인 작업이 중간에 다른 claim에 회수당하지 않습니다.
 
+### AI Tutor (완료, 2026-09-11)
+
+CMM을 개인 AI Tutor PWA로 확장했다. 상세 아키텍처·결정 근거·한계는
+`viewer/docs/AI-TUTOR.md`가 정본이며, 여기서는 확정된 방향만 요약한다.
+
+- **스키마**: 기존 Schema v2.1 사용자 4개 테이블(`user_lesson_progress`/
+  `user_project_progress`/`user_learning_notes`/`user_review_items`, 2026-09-06 적용,
+  이번까지 뷰어가 실제로 읽고 쓴 적은 없었음)을 그대로 재사용했다. 신규 테이블은
+  세션 이력용 `tutor_sessions` 1개뿐(`20260911000000_create_tutor_sessions.sql`,
+  원격 적용·검증 완료). 기존 24개 테이블은 무변경.
+- **Provider**: LLM=Groq `qwen/qwen3.6-27b`, STT=Groq `whisper-large-v3-turbo`,
+  TTS=MeloTTS(로컬 컴패니언, `local-services/melotts/`). 셋 다 인터페이스 경계만
+  두고(`viewer/lib/tutor/providers/`) 실제 구현은 이 셋뿐 — 다른 Provider는 미구현.
+- **TTS는 브라우저가 로컬로 직접 호출**한다(서버가 대신 부르지 않음) — Vercel이
+  사용자의 localhost에 접근할 수 없기 때문. API 키가 필요 없어 안전하다.
+- **MeloTTS Windows 설치**: 공식 문서는 Docker를 권장하지만, 한국어 전용으로는
+  Docker 없이도 동작하도록 최소 패치(3개 파일, `local-services/melotts/overlay/`)로
+  실제 합성·재생까지 이 환경에서 검증했다.
+- **대화 원문은 저장하지 않는다** — 세션 종료 시 사용자가 확인·수정한 요약만
+  4개 테이블(+`tutor_sessions`)에 반영한다.
+- **다음 Lesson**은 단순 +1이 아니라 저장된 포인터 우선 + 커리큘럼 순서 재계산.
+- Codex 리뷰 없이(이번 작업은 Claude 단독) 실제 로그인 세션·실제 Supabase DB에 대고
+  전체 흐름(세션 시작 → 대화 → 종료 요약 → 저장 → 재접속 시 복원)을 agent-browser로
+  종단 간 검증했다.
+- **Groq 실사용 검증 완료(2026-09-11)** — 실제 `GROQ_API_KEY`로 Qwen/Whisper를 라이브
+  검증(`npm run test:live-groq`, 브라우저 종단 간 확인 포함). 검증 중 발견한 실제
+  버그(마크다운 백틱이 MeloTTS 합성을 깨뜨림)를 그 자리에서 수정(`stripMarkdownForSpeech`).
+  상세는 `TODO.md` "Groq 실사용(live) 검증 완료" 항목·`viewer/docs/AI-TUTOR.md`.
+
 ### AI 협업 원칙
 
 - Claude Code를 주 구현 에이전트로 사용합니다.

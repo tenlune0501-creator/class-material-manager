@@ -96,6 +96,44 @@
   * 원격 백필: `project_examples` 11행(168 kB). Vercel 배포 시 `NEXT_PUBLIC_SUPABASE_*`만
     있으면 자동으로 DB에서 읽음.
 
+### AI Tutor (2026-09-11)
+
+* [x] **AI Tutor PWA 구현** — `/tutor` 시작 화면(지난 세션·진행 중 Lesson·복습 필요·
+  다음 Lesson) → 대화(Groq Qwen, 현재 Lesson context) → 학습 종료 요약(초안 확인·수정) →
+  저장(진도/노트/복습 항목 반영) → 다음 접속 시 자동 복원까지 전체 흐름 구현.
+  상세는 `viewer/docs/AI-TUTOR.md`, 결정 요약은 `PROJECT_CONTEXT.md` "AI Tutor" 절.
+  * 신규 migration `20260911000000_create_tutor_sessions.sql` (원격 적용·RLS 검증 완료).
+    기존 24개 테이블·사용자 4개 진도 테이블 재사용, 신규 CREATE TABLE은 이거 하나.
+  * 신규 `viewer/lib/tutor/**`(providers/context/progress/session), `viewer/app/api/tutor/**`
+    (session start/message/summarize/finish/abandon, stt), `viewer/app/tutor/page.tsx`,
+    `viewer/components/tutor/TutorApp.tsx`.
+  * PWA: `viewer/public/manifest.webmanifest`·`sw.js`·아이콘 4종(`scripts/generate-pwa-icons.mjs`),
+    `viewer/app/layout.tsx`에 manifest/아이콘/themeColor/SW 등록 추가.
+  * 신규 `local-services/melotts/`(MeloTTS 한국어 TTS 로컬 컴패니언) — Windows 네이티브
+    설치 blocker 3건(Rust 필요/MSVC 필요/eunjeon Windows wheel 없음)을 실제로 우회
+    해결하고, 이 환경에서 한국어 문장 합성·재생까지 검증(Docker 불필요).
+  * 신규 테스트 `tests/viewer-tutor.test.ts`(29건) — 기존 스타일(정적 구조 검증)로
+    Provider 경계·context 길이 상한·API 인증·종료 저장 규칙·RLS·PWA·음성 UX 안전 규칙 검증.
+  * 검증: 루트 typecheck·254 tests(root)·security-check, 뷰어 typecheck·`next build`,
+    agent-browser로 실제 로그인 세션 종단 간 검증(세션 시작 → 대화 → GROQ 키 없을 때
+    graceful 오류 → 종료 요약 폼(빈 초안 폴백) → 저장 → 4개 테이블 실제 반영 확인(SQL로
+    대조) → 재접속 시 "지난 학습"·"이어서 공부하기"·"복습 필요 1건" 정확히 복원 →
+    Lesson 상세의 "AI Tutor로 시작" 버튼 → 모바일 뷰포트(390×844) 오버플로 없음).
+* [x] **Groq 실사용(live) 검증 완료 (2026-09-11)** — `GROQ_API_KEY`를 `viewer/.env.local`에
+  채운 뒤 실제 api.groq.com으로 검증. 신규 `tests/live/groq-live.test.ts`(`npm run
+  test:live-groq`, 키 없으면 자동 스킵) 4건 통과: Qwen 인증·Lesson context 반영·한국어
+  응답, Whisper 한국어 STT(TTS로 만든 실제 오디오 왕복, 원문과 완전 일치), 401 오류
+  분류. 실제 브라우저(agent-browser)로 세션 시작→텍스트 대화(Qwen이 직전 세션의
+  `user_learning_notes.confusing`를 실제로 참고해 개인화된 질문을 만듦, Lesson context가
+  실전에서 반영됨을 확인)→마이크 STT(브라우저 인증 세션으로 실제 `/api/tutor/stt`
+  호출, 원문과 정확히 일치)→학습 종료→실제 LLM 요약 초안(정확·과대평가 없음)→저장→
+  재접속 복원까지 전부 완주.
+  * **회귀 버그 발견·수정**: 실사용 중 Qwen 응답의 마크다운(백틱 `` ` ``)이 MeloTTS
+    합성을 `KeyError`로 깨뜨리는 것을 발견 — `TutorApp.tsx`에 `stripMarkdownForSpeech()`
+    추가(음성 전송 전 `**bold**`/`` `code` ``/헤더 등 제거). MeloTTS 자체 패치는
+    되돌리지 않음. 신규 정적 테스트 1건 추가(255/255 전체 통과).
+  * 남은 것: 없음 — Groq/MeloTTS 관련 검증 전부 완료.
+
 ## 다음 작업
 
 * [x] **본문·실습 코드 원문·references의 DB 이관 (방안 A)** — 로컬 구현·검증·Codex 리뷰·

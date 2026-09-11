@@ -205,6 +205,22 @@ export function AppShell({
       <List dense sx={{ pt: 1 }}>
         <ListItemButton
           component={NextLink}
+          href="/tutor"
+          selected={pathname === "/tutor"}
+          onClick={() => setOpen(false)}
+        >
+          <ListItemText
+            primary="🎧 AI Tutor"
+            secondary="지난 진도 → 이어서 음성/텍스트 과외"
+            slotProps={{
+              primary: { sx: { fontSize: "0.9rem", fontWeight: 700, color: "primary.main" } },
+              secondary: { sx: { fontSize: "0.7rem" } },
+            }}
+          />
+        </ListItemButton>
+
+        <ListItemButton
+          component={NextLink}
           href="/curriculum"
           selected={pathname === "/curriculum" || pathname.startsWith("/curriculum/") || pathname.startsWith("/lesson/")}
           onClick={() => setOpen(false)}

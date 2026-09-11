@@ -4,7 +4,7 @@
  * 여기서 과목 목록을 한 번 읽어 화면 뼈대(AppShell)에 넘겨줍니다.
  * 사이드바는 어느 페이지에서나 같아야 하므로 이 자리가 알맞습니다.
  */
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -12,11 +12,25 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 
 import { theme } from "@/lib/theme";
 import { AppShell } from "@/components/AppShell";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { getStats, getSubjects } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "수업자료 아카이브",
   description: "오르미 프론트엔드 13기 수업자료와 공식 문서 요약을 모아 읽는 곳",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "CMM Tutor" },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0d9488",
 };
 
 // 이 레이아웃은 모든 화면에서 과목·통계를 Supabase(로그인 세션 쿠키)에서 읽습니다.
@@ -32,6 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {/* 화면이 처음 그려질 때 밝게/어둡게가 깜빡이지 않도록 미리 정합니다. */}
         <InitColorSchemeScript attribute="class" />
+        <ServiceWorkerRegister />
 
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>

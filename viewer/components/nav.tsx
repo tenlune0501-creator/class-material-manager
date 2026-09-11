@@ -23,6 +23,7 @@
 import NextLink from "next/link";
 import type { ComponentProps } from "react";
 
+import Button from "@mui/material/Button";
 import CardActionArea from "@mui/material/CardActionArea";
 import Chip from "@mui/material/Chip";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -40,4 +41,9 @@ export function NavChip(props: Omit<ComponentProps<typeof Chip<typeof NextLink>>
 /** 카드 전체를 누를 수 있게 합니다. */
 export function NavCardArea(props: Omit<ComponentProps<typeof CardActionArea<typeof NextLink>>, "component">) {
   return <CardActionArea component={NextLink} {...props} />;
+}
+
+/** 다른 화면으로 이동하는 버튼(폼 제출이 아닌 링크). */
+export function NavButton(props: Omit<ComponentProps<typeof Button<typeof NextLink>>, "component">) {
+  return <Button component={NextLink} {...props} />;
 }

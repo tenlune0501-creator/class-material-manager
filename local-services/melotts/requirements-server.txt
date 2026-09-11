@@ -1,0 +1,11 @@
+# CMM 컴패니언 서버(server.py) 전용 추가 의존성.
+# MeloTTS 자체 requirements(vendor/requirements.txt, overlay로 패치됨)와 별도.
+fastapi
+uvicorn
+python-multipart
+
+# Windows에서 진짜 wheel이 있는 한국어 형태소 분석기 (winshim/eunjeon.py 가 이걸로 대체).
+python-mecab-ko
+
+# librosa==0.9.1(MeloTTS 고정 버전)이 pkg_resources를 쓴다 — setuptools 81+에서 제거됨.
+setuptools<81

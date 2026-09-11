@@ -12,6 +12,7 @@
     "extract": "node src/index.ts extract",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"tests/*.test.ts\"",
+    "test:live-groq": "node --test \"tests/live/*.test.ts\"",
     "security-check": "node src/index.ts security-check",
     "sync-curriculum": "node src/index.ts sync-curriculum",
     "backup": "node src/index.ts backup",
