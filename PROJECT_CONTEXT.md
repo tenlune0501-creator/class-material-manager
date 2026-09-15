@@ -479,7 +479,7 @@ CMM을 개인 AI Tutor PWA로 확장했다. 상세 아키텍처·결정 근거·
   이번까지 뷰어가 실제로 읽고 쓴 적은 없었음)을 그대로 재사용했다. 신규 테이블은
   세션 이력용 `tutor_sessions` 1개뿐(`20260911000000_create_tutor_sessions.sql`,
   원격 적용·검증 완료). 기존 24개 테이블은 무변경.
-- **Provider**: LLM=Groq `qwen/qwen3.6-27b`, STT=Groq `whisper-large-v3-turbo`,
+- **Provider**: LLM=Groq `qwen/qwen3.8-27b`, STT=Groq `whisper-large-v3-turbo`,
   TTS=MeloTTS(로컬 컴패니언, `local-services/melotts/`). 셋 다 인터페이스 경계만
   두고(`viewer/lib/tutor/providers/`) 실제 구현은 이 셋뿐 — 다른 Provider는 미구현.
 - **TTS는 브라우저가 로컬로 직접 호출**한다(서버가 대신 부르지 않음) — Vercel이

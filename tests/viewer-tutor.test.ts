@@ -38,7 +38,7 @@ describe("Groq Provider 경계", () => {
 
   it("모델 id를 env로 override할 수 있고, 하드코딩된 기본값이 있다", () => {
     assert.ok(groqQwen.includes("GROQ_LLM_MODEL"));
-    assert.ok(groqQwen.includes("qwen/qwen3.6-27b"), "실제 Groq 문서 기준 모델 id");
+    assert.ok(groqQwen.includes("qwen/qwen3.8-27b"), "실제 Groq 문서 기준 모델 id");
     assert.ok(groqWhisper.includes("GROQ_STT_MODEL"));
     assert.ok(groqWhisper.includes("whisper-large-v3-turbo"));
   });
@@ -206,7 +206,27 @@ describe("음성 UX 안전 규칙", () => {
   });
 
   it("voice off일 때 TTS를 호출하지 않는다", () => {
-    assert.ok(tutorApp.includes("if (!tts || !voiceOn) return;"));
+    assert.ok(tutorApp.includes("if (!tts || !voiceOnRef.current) return;"));
+  });
+
+  it("최초 Lesson 인사말도 기존 speak() 경로로 1회만 읽는다 (handleStart가 중복 호출돼도 마지막 호출만)", () => {
+    const handleStartMatch = tutorApp.match(/async function handleStart\([\s\S]*?\n  \}\n/);
+    assert.ok(handleStartMatch, "handleStart 함수를 찾을 수 없습니다");
+    const handleStartBody = handleStartMatch![0];
+
+    assert.ok(handleStartBody.includes("const callId = ++handleStartCallIdRef.current;"), "중복 호출 구분용 id");
+    assert.ok(
+      handleStartBody.includes('setMessages([{ role: "assistant", content: greeting }]);'),
+      "인사말 내용/생성 방식은 그대로",
+    );
+    assert.ok(
+      /if \(handleStartCallIdRef\.current === callId\) \{\s*void speak\(greeting\);/.test(handleStartBody),
+      "가장 마지막 handleStart 호출만 greeting을 speak()로 읽어야 한다",
+    );
+    assert.ok(
+      !/new Audio\(|MeloTTSProvider|tts\.synthesize/.test(handleStartBody),
+      "handleStart가 직접 오디오/TTS를 구현하면 안 된다 — 기존 speak() 함수만 재사용",
+    );
   });
 
   it("TTS로 보내기 전 마크다운 기호를 벗겨낸다 (Groq 실사용 검증 중 발견: 백틱이 MeloTTS 합성을 깨뜨림)", () => {

@@ -16,6 +16,8 @@ export interface LLMMessage {
 
 export interface LLMReply {
   content: string;
+  /** 기본 모델이 deprecated/removed(404)돼 후속 Qwen 모델로 1회 fallback했을 때만 채워진다. */
+  usedFallbackModel?: string;
 }
 
 export type ProviderErrorKind = "auth" | "rate_limit" | "bad_request" | "network" | "server" | "unknown";

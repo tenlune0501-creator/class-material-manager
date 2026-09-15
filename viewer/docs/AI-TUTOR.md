@@ -97,7 +97,7 @@ Piper 등)는 만들지 않았다. 복잡한 DI 프레임워크 없이 `provider
 
 | 용도 | 모델 id | 비고 |
 |---|---|---|
-| LLM | `qwen/qwen3.6-27b` | preview, tool calling 지원, 131K context, thinking/non-thinking 모드 전환 가능(`reasoning_effort`). 과외 대화는 저지연 위해 기본 `"none"` |
+| LLM | `qwen/qwen3.8-27b` | preview, tool calling 지원, 131K context, thinking/non-thinking 모드 전환 가능(`reasoning_effort`). 과외 대화는 저지연 위해 기본 `"none"` |
 | STT | `whisper-large-v3-turbo` | production, 저지연 최적화. 정확도가 더 필요하면 `GROQ_STT_MODEL=whisper-large-v3` |
 
 둘 다 `GROQ_LLM_MODEL` / `GROQ_STT_MODEL` 환경변수로 덮어쓸 수 있다(기본값은 코드에
@@ -352,7 +352,7 @@ Windows 바탕화면 아이콘
 | 변수 | 필수 여부 | 설명 |
 |---|---|---|
 | `GROQ_API_KEY` | Tutor 대화에 필수 | 없으면 Tutor가 안내만 하고 나머지 기능은 정상. **절대 커밋하지 않는다** — `viewer/.env.local`(gitignore 대상)에만 둔다 |
-| `GROQ_LLM_MODEL` | 선택 | 기본 `qwen/qwen3.6-27b`(2026-09 기준 console.groq.com/docs/models 실제 확인, preview) |
+| `GROQ_LLM_MODEL` | 선택 | 기본 `qwen/qwen3.8-27b`(2026-09 기준 console.groq.com/docs/models 실제 확인, preview) |
 | `GROQ_STT_MODEL` | 선택 | 기본 `whisper-large-v3-turbo` |
 | `NEXT_PUBLIC_MELOTTS_URL` | 선택 | 없으면 텍스트만, 음성 재생 없음. `local-services/melotts` 실행 후 `http://127.0.0.1:8787` |
 

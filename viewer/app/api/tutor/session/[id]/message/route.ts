@@ -79,7 +79,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const reply = await llm.chat(messages);
     await touchSession(sessionId);
-    return NextResponse.json({ reply: reply.content });
+    return NextResponse.json({
+      reply: reply.content,
+      ...(reply.usedFallbackModel ? { fallbackModel: reply.usedFallbackModel } : {}),
+    });
   } catch (err) {
     if (err instanceof TutorNotFoundError) {
       return NextResponse.json({ error: err.message }, { status: 404 });

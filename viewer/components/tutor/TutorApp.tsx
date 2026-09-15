@@ -136,6 +136,8 @@ export function TutorApp(props: TutorAppProps) {
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
+  const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
+
   const [draft, setDraft] = useState<Draft | null>(null);
   const [summarizeError, setSummarizeError] = useState<string | null>(null);
   const [manualNextLessonId, setManualNextLessonId] = useState<string>("");
@@ -144,6 +146,12 @@ export function TutorApp(props: TutorAppProps) {
   const recordedChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  /** voiceOn을 즉시 값으로 읽기 위한 ref — handleStart가 mount effect(스테일 클로저
+   * 가능성이 있는)에서도 불릴 수 있어, state 클로저 대신 이걸로 최신값을 본다. */
+  const voiceOnRef = useRef(voiceOn);
+  /** 이번이 "가장 최근" handleStart 호출인지 판별— Strict Mode 등으로 handleStart가
+   * 중복 호출돼도 최초 인사말이 두 번 재생되지 않게 한다(마지막 호출만 speak). */
+  const handleStartCallIdRef = useRef(0);
 
   const tts = useMemo(
     () => (props.ttsConfigured ? new MeloTTSProvider(process.env.NEXT_PUBLIC_MELOTTS_URL!) : null),
@@ -157,6 +165,10 @@ export function TutorApp(props: TutorAppProps) {
       // localStorage 접근 실패(프라이빗 모드 등) — 기본값 off 유지
     }
   }, []);
+
+  useEffect(() => {
+    voiceOnRef.current = voiceOn;
+  }, [voiceOn]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -190,7 +202,7 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   async function speak(rawText: string) {
-    if (!tts || !voiceOn) return;
+    if (!tts || !voiceOnRef.current) return;
     const text = stripMarkdownForSpeech(rawText);
     if (!text) return;
     try {
@@ -210,8 +222,10 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   async function handleStart(lesson: LessonRef) {
+    const callId = ++handleStartCallIdRef.current;
     setStarting(true);
     setError(null);
+    setFallbackNotice(null);
     try {
       const res = await fetch("/api/tutor/session/start", {
         method: "POST",
@@ -231,6 +245,11 @@ export function TutorApp(props: TutorAppProps) {
         : `안녕하세요! 오늘은 "${lesson.title}"를 같이 볼게요. 준비되면 말씀해 주세요 — 목표부터 짚어드릴까요?`;
       setMessages([{ role: "assistant", content: greeting }]);
       setView("chat");
+      // handleStart가 (Strict Mode의 mount effect 이중 호출 등으로) 중복 실행됐다면
+      // 가장 마지막 호출만 읽는다 — 기존 speak()를 그대로 재사용, 새 TTS 구현 없음.
+      if (handleStartCallIdRef.current === callId) {
+        void speak(greeting);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
     } finally {
@@ -262,6 +281,9 @@ export function TutorApp(props: TutorAppProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "응답을 받지 못했습니다.");
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      setFallbackNotice(
+        data.fallbackModel ? `기본 AI 모델을 사용할 수 없어 ${data.fallbackModel}로 임시 전환했습니다.` : null,
+      );
       void speak(data.reply);
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
@@ -481,6 +503,12 @@ export function TutorApp(props: TutorAppProps) {
       {error && (
         <Alert severity="warning" sx={{ mb: 1 }} onClose={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {fallbackNotice && (
+        <Alert severity="info" sx={{ mb: 1 }} onClose={() => setFallbackNotice(null)}>
+          {fallbackNotice}
         </Alert>
       )}
 
