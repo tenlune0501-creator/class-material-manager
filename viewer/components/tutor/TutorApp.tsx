@@ -22,12 +22,14 @@
  *
  * ■ 음성 상태 머신 (voice-state.ts)
  * recording/transcribing/speaking/sending 같은 boolean을 따로따로 두면 "speaking과
- * listening이 동시" 같은 조합이 생긴다. 대신 `VoiceState` 값 하나로 통일한다.
+ * recording이 동시" 같은 조합이 생긴다. 대신 `VoiceState` 값 하나로 통일한다.
  *
- * ■ 핸즈프리 (VAD)
- * `voiceOn`(TTS 사용 여부, 기존 설정 그대로)과 `handsFree`(자동 듣기, 새 설정 —
- * 기본 꺼짐)는 분리했다. "TTS는 듣고 싶지만 마이크가 항상 켜지는 건 싫다"는 사용자를
- * 위해서다 — handsFree는 voiceOn이 켜져 있을 때만 의미가 있다.
+ * ■ 음성 입력 = 반자동(사용자가 시작/중지를 직접 제어)
+ * 핸즈프리(VAD 기반 자동 발화 종료)는 실사용 검토 결과 채택하지 않기로 했다 — 사용자가
+ * 생각하며 말을 멈춰도(침묵 1~2초) 녹음이 끊기면 안 되기 때문이다. 그래서 발화 종료
+ * 판단은 프로그램이 하지 않는다: 🎙️ 눌러 시작 → 원하는 만큼 말하기 → ⏹ 직접 중지 →
+ * 그 구간의 오디오만 Whisper로 보낸다. TTS가 끝나도 자동으로 다시 듣지 않는다 — 다음
+ * 질문도 사용자가 마이크를 다시 눌러 시작한다.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -54,7 +56,6 @@ import { TutorSidebar } from "@/components/tutor/TutorSidebar";
 import type { LessonDetail } from "@/lib/curriculum";
 import { MeloTTSProvider } from "@/lib/tutor/providers/melotts-local";
 import { chunkTextForSpeech } from "@/lib/tutor/tts-chunking";
-import { computeRms, createSpeechActivityDetector, VAD_TICK_MS, type SpeechActivityDetector } from "@/lib/tutor/vad";
 import type { VoiceState } from "@/lib/tutor/voice-state";
 
 // ── 타입 (서버 컴포넌트가 넘겨준 초기 상태) ──────────────────────────
@@ -112,9 +113,6 @@ type View = "start" | "chat" | "summarizing" | "summarize" | "saved";
 
 const END_INTENT_PATTERN = /(오늘|여기까지|그만|끝낼래|끝낼게|마칠래|종료할래|공부\s*끝)/;
 
-/** Analyser의 FFT 크기 — 시간축 샘플 512개면 RMS 계산에 충분하고 CPU 부담도 작다. */
-const ANALYSER_FFT_SIZE = 512;
-
 function lessonLabel(lesson: LessonRef): string {
   return `${lesson.trackTitle} · ${lesson.chapterTitle} — ${lesson.title}`;
 }
@@ -137,7 +135,6 @@ export function TutorApp(props: TutorAppProps) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   const [voiceOn, setVoiceOn] = useState(false);
-  const [handsFree, setHandsFree] = useState(false);
   const [voiceState, setVoiceStateRaw] = useState<VoiceState>("idle");
 
   const [sidebarOpenDesktop, setSidebarOpenDesktop] = useState(true);
@@ -154,11 +151,9 @@ export function TutorApp(props: TutorAppProps) {
   const [summarizeError, setSummarizeError] = useState<string | null>(null);
   const [manualNextLessonId, setManualNextLessonId] = useState<string>("");
 
-  // ── ref: 최신 값을 async 콜백/VAD 루프에서 즉시 읽기 위함(state 클로저 지연 방지) ──
+  // ── ref: 최신 값을 async 콜백에서 즉시 읽기 위함(state 클로저 지연 방지) ──
   const voiceOnRef = useRef(voiceOn);
-  const handsFreeRef = useRef(handsFree);
   const voiceStateRef = useRef<VoiceState>("idle");
-  const recordingSourceRef = useRef<"manual" | "handsfree" | null>(null);
   /** 이번이 "가장 최근" handleStart 호출인지 판별— Strict Mode 등으로 handleStart가
    * 중복 호출돼도 최초 인사말이 두 번 재생되지 않게 한다(마지막 호출만 speak). */
   const handleStartCallIdRef = useRef(0);
@@ -171,14 +166,6 @@ export function TutorApp(props: TutorAppProps) {
   /** TTS "턴"이 바뀔 때마다 올라간다 — 이전 턴의 pending 합성/재생이 뒤늦게 끝나도
    * generation이 다르면 전부 무시한다(정지·새 턴 시작 시 stale 재생 방지). */
   const ttsGenerationRef = useRef(0);
-
-  // ── ref: 핸즈프리 VAD 자원 (수동 마이크와 별개 — 마이크를 계속 열어 둬야 하므로) ──
-  const handsFreeStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const vadFloatBufferRef = useRef<Float32Array<ArrayBuffer> | null>(null);
-  const vadDetectorRef = useRef<SpeechActivityDetector | null>(null);
-  const vadTimerRef = useRef<number | null>(null);
 
   const tts = useMemo(
     () => (props.ttsConfigured ? new MeloTTSProvider(process.env.NEXT_PUBLIC_MELOTTS_URL!) : null),
@@ -193,7 +180,6 @@ export function TutorApp(props: TutorAppProps) {
   useEffect(() => {
     try {
       setVoiceOn(window.localStorage.getItem("cmm-tutor-voice") === "on");
-      setHandsFree(window.localStorage.getItem("cmm-tutor-handsfree") === "on");
     } catch {
       // localStorage 접근 실패(프라이빗 모드 등) — 기본값 off 유지
     }
@@ -203,11 +189,7 @@ export function TutorApp(props: TutorAppProps) {
     voiceOnRef.current = voiceOn;
   }, [voiceOn]);
 
-  useEffect(() => {
-    handsFreeRef.current = handsFree;
-  }, [handsFree]);
-
-  // 언마운트 시 마이크/오디오/타이머를 반드시 정리한다.
+  // 언마운트 시 마이크/오디오를 반드시 정리한다.
   useEffect(() => {
     return () => cleanupVoiceResources();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -224,16 +206,8 @@ export function TutorApp(props: TutorAppProps) {
 
   // ── 음성 자원 정리 ────────────────────────────────────────────────
 
-  function pauseVadSampling() {
-    if (vadTimerRef.current !== null) {
-      window.clearTimeout(vadTimerRef.current);
-      vadTimerRef.current = null;
-    }
-  }
-
-  /** Lesson 변경/학습 종료/음성 끔/unmount — 마이크·AudioContext·타이머·오디오·큐를 전부 정리한다. */
+  /** Lesson 변경/학습 종료/음성 끔/unmount — 마이크·오디오·큐를 전부 정리한다. */
   function cleanupVoiceResources() {
-    pauseVadSampling();
     ttsGenerationRef.current += 1;
     audioRef.current?.pause();
     audioRef.current = null;
@@ -249,18 +223,6 @@ export function TutorApp(props: TutorAppProps) {
       }
     }
     mediaRecorderRef.current = null;
-    recordingSourceRef.current = null;
-    if (handsFreeStreamRef.current) {
-      handsFreeStreamRef.current.getTracks().forEach((track) => track.stop());
-      handsFreeStreamRef.current = null;
-    }
-    analyserRef.current = null;
-    vadFloatBufferRef.current = null;
-    vadDetectorRef.current = null;
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      void audioContextRef.current.close().catch(() => {});
-    }
-    audioContextRef.current = null;
     setVoiceState("idle");
   }
 
@@ -273,28 +235,8 @@ export function TutorApp(props: TutorAppProps) {
         // 무시 — 이번 세션 동안만 유지된다
       }
       if (!next) {
-        // TTS를 끄면 핸즈프리도 의미가 없다 — 듣기 루프를 멈추고 진행 중이던 재생도 멈춘다.
-        pauseVadSampling();
         stopSpeakingInternal();
         setVoiceState("idle");
-      }
-      return next;
-    });
-  }
-
-  function toggleHandsFree() {
-    setHandsFree((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem("cmm-tutor-handsfree", next ? "on" : "off");
-      } catch {
-        // 무시
-      }
-      if (next) {
-        if (voiceStateRef.current === "idle") void startHandsFreeListening();
-      } else {
-        pauseVadSampling();
-        if (voiceStateRef.current === "listening") setVoiceState("idle");
       }
       return next;
     });
@@ -312,14 +254,11 @@ export function TutorApp(props: TutorAppProps) {
     }
   }
 
-  /** Sidebar의 "정지" 버튼 — 재생 중지 후 핸즈프리 ON이면 듣기로 복귀한다. */
+  /** Sidebar의 "정지" 버튼 — 재생을 멈추고 idle로 돌아간다. 다음 질문은 사용자가
+   * 마이크를 다시 눌러 시작한다(TTS 종료 후 자동으로 다시 듣지 않는다). */
   function stopSpeaking() {
     stopSpeakingInternal();
-    if (handsFreeRef.current && voiceOnRef.current) {
-      resumeListening();
-    } else {
-      setVoiceState("idle");
-    }
+    setVoiceState("idle");
   }
 
   function playBlob(blob: Blob, gen: number): Promise<boolean> {
@@ -346,11 +285,7 @@ export function TutorApp(props: TutorAppProps) {
     }
     audioRef.current = null;
     if (ttsGenerationRef.current !== gen) return; // 이미 다음 턴/정지로 넘어감
-    if (handsFreeRef.current && voiceOnRef.current) {
-      resumeListening();
-    } else {
-      setVoiceState("idle");
-    }
+    setVoiceState("idle");
   }
 
   /**
@@ -360,7 +295,6 @@ export function TutorApp(props: TutorAppProps) {
    */
   async function speakReply(rawText: string) {
     const myGen = ++ttsGenerationRef.current;
-    pauseVadSampling(); // TTS 재생 중에는 핸즈프리 listening을 멈춘다(echo/self-loop 방지)
 
     if (!tts || !voiceOnRef.current) {
       setVoiceState("idle");
@@ -411,36 +345,6 @@ export function TutorApp(props: TutorAppProps) {
     finishSpeaking(myGen);
   }
 
-  // ── 핸즈프리 VAD: 마이크 → RMS → 발화 시작/종료 ─────────────────────
-
-  async function ensureHandsFreeMicStream(): Promise<MediaStream | null> {
-    if (handsFreeStreamRef.current?.active) return handsFreeStreamRef.current;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => {
-        track.onended = () => {
-          // 장치가 갑자기 빠지거나 브라우저가 권한을 회수한 경우 — 핸즈프리만 끄고 계속 진행한다.
-          handsFreeStreamRef.current = null;
-          if (handsFreeRef.current) {
-            setHandsFree(false);
-            try {
-              window.localStorage.setItem("cmm-tutor-handsfree", "off");
-            } catch {
-              // 무시
-            }
-            setError("마이크 연결이 끊겨 핸즈프리를 껐습니다. 텍스트/수동 마이크로 계속할 수 있습니다.");
-            setVoiceState("idle");
-          }
-        };
-      });
-      handsFreeStreamRef.current = stream;
-      return stream;
-    } catch (err) {
-      setError(classifyMicError(err));
-      return null;
-    }
-  }
-
   function classifyMicError(err: unknown): string {
     const name = err instanceof DOMException ? err.name : "";
     if (name === "NotAllowedError" || name === "PermissionDeniedError") {
@@ -452,120 +356,10 @@ export function TutorApp(props: TutorAppProps) {
     return "마이크를 사용할 수 없습니다. 텍스트로 계속 진행할 수 있습니다.";
   }
 
-  function resumeListening() {
-    if (!handsFreeRef.current || !voiceOnRef.current) {
-      setVoiceState("idle");
-      return;
-    }
-    void startHandsFreeListening();
-  }
+  // ── STT: 기존 /api/tutor/stt 재사용, 중지 시 그 구간의 오디오만 보낸다 ──
 
-  async function startHandsFreeListening() {
-    if (!handsFreeRef.current || !voiceOnRef.current) return;
-    if (voiceStateRef.current !== "idle") return;
-
-    const stream = await ensureHandsFreeMicStream();
-    if (!stream) {
-      setHandsFree(false);
-      try {
-        window.localStorage.setItem("cmm-tutor-handsfree", "off");
-      } catch {
-        // 무시
-      }
-      return;
-    }
-
-    if (!audioContextRef.current || audioContextRef.current.state === "closed") {
-      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new Ctor();
-    }
-    const audioCtx = audioContextRef.current;
-    if (audioCtx.state === "suspended") {
-      try {
-        await audioCtx.resume();
-      } catch {
-        // 무시 — 다음 사용자 상호작용에서 자동으로 풀리는 브라우저도 있다
-      }
-    }
-
-    if (!analyserRef.current) {
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = ANALYSER_FFT_SIZE;
-      source.connect(analyser);
-      analyserRef.current = analyser;
-      vadFloatBufferRef.current = new Float32Array(analyser.fftSize);
-    }
-
-    vadDetectorRef.current = createSpeechActivityDetector();
-    vadDetectorRef.current.reset(performance.now());
-    setVoiceState("listening");
-    scheduleVadTick();
-  }
-
-  function scheduleVadTick() {
-    if (vadTimerRef.current !== null) return; // 이미 돌고 있음
-
-    const tick = () => {
-      vadTimerRef.current = null;
-      const state = voiceStateRef.current;
-      if (state !== "listening" && state !== "recording") return; // 정지(다른 상태로 전이됨)
-
-      const detector = vadDetectorRef.current;
-      const analyser = analyserRef.current;
-      const buf = vadFloatBufferRef.current;
-      if (!detector || !analyser || !buf) return; // 이미 정리됨
-
-      analyser.getFloatTimeDomainData(buf);
-      const rms = computeRms(buf);
-      const transition = detector.pushSample(rms, performance.now());
-      if (transition?.type === "speech-start") {
-        void beginHandsFreeRecording();
-      } else if (transition?.type === "speech-end") {
-        endHandsFreeRecording();
-      }
-
-      const next = voiceStateRef.current;
-      if (next === "listening" || next === "recording") {
-        vadTimerRef.current = window.setTimeout(tick, VAD_TICK_MS);
-      }
-    };
-    vadTimerRef.current = window.setTimeout(tick, VAD_TICK_MS);
-  }
-
-  async function beginHandsFreeRecording() {
-    const stream = handsFreeStreamRef.current;
-    if (!stream) return;
-    try {
-      const recorder = new MediaRecorder(stream);
-      recordedChunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
-      };
-      recorder.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        void transcribeAndMaybeSend(blob, { autoSend: true });
-      };
-      mediaRecorderRef.current = recorder;
-      recordingSourceRef.current = "handsfree";
-      recorder.start();
-      setVoiceState("recording");
-    } catch {
-      setError("마이크를 사용할 수 없습니다.");
-      resumeListening();
-    }
-  }
-
-  function endHandsFreeRecording() {
-    if (recordingSourceRef.current === "handsfree" && mediaRecorderRef.current?.state === "recording") {
-      setVoiceState("transcribing");
-      mediaRecorderRef.current.stop();
-    }
-  }
-
-  // ── STT: 기존 /api/tutor/stt 재사용, 자동 전송 여부만 다르다 ────────
-
-  async function transcribeAndMaybeSend(blob: Blob, opts: { autoSend: boolean }) {
+  /** 발화 종료는 프로그램이 판단하지 않는다 — 사용자가 ⏹로 직접 중지한 구간만 전달된다. */
+  async function transcribeAndSend(blob: Blob) {
     setVoiceState("transcribing");
     try {
       const form = new FormData();
@@ -577,33 +371,27 @@ export function TutorApp(props: TutorAppProps) {
 
       if (!text) {
         // 빈 transcript/무음·잡음 — 자동 전송하지 않는다.
-        if (opts.autoSend) resumeListening();
-        else setVoiceState("idle");
+        setVoiceState("idle");
         return;
       }
 
-      if (opts.autoSend) {
-        await handleSend(text);
-      } else {
-        // 요구사항: 자동 전송 금지 — 입력창에 채워 사용자가 확인·수정 후 보내게 한다.
-        setInput((prev) => (prev ? `${prev} ${text}` : text));
-        setVoiceState("idle");
-      }
+      // 유효한 transcript는 별도 "보내기" 클릭 없이 즉시 Tutor로 보낸다.
+      await handleSend(text);
     } catch (err) {
       setError(err instanceof Error ? err.message : "음성 인식에 실패했습니다. 텍스트로 입력해 주세요.");
-      if (opts.autoSend) resumeListening();
-      else setVoiceState("idle");
+      setVoiceState("idle");
     }
   }
 
-  // ── 수동 마이크 폴백 (기존 동작 유지 — 자동 전송하지 않는다) ─────────
+  // ── 마이크: 사용자가 시작/중지를 직접 제어한다(자동 발화 종료 없음) ──
 
-  async function onManualMicClick() {
-    if (voiceStateRef.current === "recording" && recordingSourceRef.current === "manual") {
+  async function onMicClick() {
+    if (voiceStateRef.current === "recording") {
+      // 중지는 사용자만 누른다 — 침묵/시간 기반 자동 종료 코드는 없다.
       mediaRecorderRef.current?.stop();
       return;
     }
-    if (voiceStateRef.current !== "idle") return; // 핸즈프리가 이미 쓰고 있는 중 등
+    if (voiceStateRef.current !== "idle") return; // TTS 재생/응답 대기 중에는 새로 시작하지 않는다
 
     setError(null);
     try {
@@ -616,10 +404,9 @@ export function TutorApp(props: TutorAppProps) {
       recorder.onstop = () => {
         stream.getTracks().forEach((track) => track.stop());
         const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        void transcribeAndMaybeSend(blob, { autoSend: false });
+        void transcribeAndSend(blob);
       };
       mediaRecorderRef.current = recorder;
-      recordingSourceRef.current = "manual";
       recorder.start();
       setVoiceState("recording");
     } catch (err) {
@@ -630,7 +417,7 @@ export function TutorApp(props: TutorAppProps) {
   // ── Lesson 시작/대화 ─────────────────────────────────────────────
 
   async function handleStart(lesson: LessonRef) {
-    cleanupVoiceResources(); // 이전 Lesson의 VAD/TTS/마이크가 남아있지 않게 한다
+    cleanupVoiceResources(); // 이전 Lesson의 TTS/마이크가 남아있지 않게 한다
     const callId = ++handleStartCallIdRef.current;
     setStarting(true);
     setError(null);
@@ -678,7 +465,6 @@ export function TutorApp(props: TutorAppProps) {
     const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(nextMessages);
     setVoiceState("thinking");
-    pauseVadSampling();
 
     if (END_INTENT_PATTERN.test(text)) {
       setShowEndConfirm(true);
@@ -699,8 +485,7 @@ export function TutorApp(props: TutorAppProps) {
       void speakReply(data.reply);
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
-      if (handsFreeRef.current && voiceOnRef.current) resumeListening();
-      else setVoiceState("idle");
+      setVoiceState("idle");
     }
   }
 
@@ -855,23 +640,17 @@ export function TutorApp(props: TutorAppProps) {
       ttsAvailable={Boolean(tts)}
       voiceOn={voiceOn}
       onToggleVoice={toggleVoice}
-      handsFree={handsFree}
-      onToggleHandsFree={toggleHandsFree}
       onStopSpeaking={stopSpeaking}
-      onManualMicClick={() => void onManualMicClick()}
-      manualMicBusy={voiceState === "recording" && recordingSourceRef.current === "manual"}
-      micDisabled={voiceState !== "idle" && !(voiceState === "recording" && recordingSourceRef.current === "manual")}
+      onMicClick={() => void onMicClick()}
+      recording={voiceState === "recording"}
+      micDisabled={voiceState !== "idle" && voiceState !== "recording"}
       messages={messages}
       historyExpanded={historyExpanded}
       onToggleHistoryExpanded={() => setHistoryExpanded((v) => !v)}
       input={input}
       onInputChange={setInput}
       onSend={() => void handleSend()}
-      sendDisabled={
-        voiceState === "thinking" ||
-        voiceState === "transcribing" ||
-        (voiceState === "recording" && recordingSourceRef.current === "handsfree")
-      }
+      sendDisabled={voiceState === "thinking" || voiceState === "transcribing" || voiceState === "recording"}
       error={error}
       onDismissError={() => setError(null)}
       fallbackNotice={fallbackNotice}

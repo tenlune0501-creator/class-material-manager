@@ -30,7 +30,6 @@ const tutorApp = await readFile("viewer/components/tutor/TutorApp.tsx", "utf8");
 const tutorSidebar = await readFile("viewer/components/tutor/TutorSidebar.tsx", "utf8");
 const lessonContentSrc = await readFile("viewer/components/LessonContent.tsx", "utf8");
 const ttsChunking = await readFile("viewer/lib/tutor/tts-chunking.ts", "utf8");
-const vadSrc = await readFile("viewer/lib/tutor/vad.ts", "utf8");
 const voiceStateSrc = await readFile("viewer/lib/tutor/voice-state.ts", "utf8");
 const proxySrc = await readFile("viewer/proxy.ts", "utf8");
 
@@ -201,9 +200,10 @@ describe("PWA", () => {
 });
 
 describe("음성 UX 안전 규칙", () => {
-  it("STT 결과는 자동 전송하지 않고(수동 마이크) 입력창에 채워 사용자가 확인·수정한다", () => {
-    assert.ok(tutorApp.includes("setInput((prev)"));
-    assert.ok(tutorApp.includes("autoSend: false"), "수동 마이크 경로는 autoSend:false로 호출해야 한다");
+  it("STT 성공 시 별도 보내기 클릭 없이 즉시 Tutor로 자동 전송한다(빈 transcript는 전송하지 않음)", () => {
+    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(transcribeBody.includes("if (!text) {"), "빈 transcript/무음은 전송하지 않아야 한다");
+    assert.ok(transcribeBody.includes("await handleSend(text);"), "유효 transcript는 자동으로 handleSend를 호출해야 한다");
   });
 
   it("TTS 실패는 조용히 무시하고 텍스트를 유지한다 (throw하지 않음, ttsNotice로만 비차단 안내)", () => {
@@ -280,67 +280,20 @@ describe("교재 중심 레이아웃 — 기존 Lesson 렌더러 재사용", () 
   });
 });
 
-describe("핸즈프리 음성 과외", () => {
-  it("음성(TTS)과 핸즈프리(자동 듣기)는 분리된 설정이다 — 기존 voiceOn 저장 키는 그대로, 새 설정은 별도 키", () => {
-    assert.ok(tutorApp.includes('"cmm-tutor-voice"'), "기존 TTS 설정 키를 그대로 재사용해야 한다(마이그레이션 금지)");
-    assert.ok(tutorApp.includes('"cmm-tutor-handsfree"'), "핸즈프리는 새 독립 키를 써야 한다");
-    assert.ok(tutorSidebar.includes("disabled={!props.ttsAvailable || !props.voiceOn}"), "voiceOn이 꺼지면 핸즈프리도 잠긴다");
-  });
-
-  it("명시적 VoiceState로 speaking/listening/recording/transcribing/thinking이 서로 겹치지 않게 한다", () => {
-    assert.ok(voiceStateSrc.includes('"idle"') && voiceStateSrc.includes('"listening"') && voiceStateSrc.includes('"recording"'));
-    assert.ok(voiceStateSrc.includes('"transcribing"') && voiceStateSrc.includes('"thinking"') && voiceStateSrc.includes('"speaking"'));
-    assert.ok(tutorApp.includes("function setVoiceState("), "state와 ref를 한 함수로 같이 갱신해야 한다(불일치 방지)");
-  });
-
-  it("TTS 재생 중에는 VAD 샘플링을 멈추고(echo 방지), 끝나면 핸즈프리면 다시 듣기로 돌아간다", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(speakReplyBody.includes("pauseVadSampling()"), "speakReply 시작 시 VAD를 멈춰야 한다");
-    assert.ok(tutorApp.includes("function finishSpeaking"));
-    const finishBody = tutorApp.match(/function finishSpeaking\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(finishBody.includes("resumeListening()"), "재생이 끝나면 핸즈프리 조건에서 다시 듣기로 복귀해야 한다");
-  });
-
-  it("TTS 실패해도 핸즈프리 listening이 영구 정지하지 않는다", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(speakReplyBody.includes("finishSpeaking(myGen)"), "합성/재생 실패 후에도 마무리 경로(finishSpeaking)를 타야 한다");
-  });
-
-  it("발화 종료(침묵) 감지 후 자동으로 STT → 유효하면 자동 전송한다", () => {
-    assert.ok(tutorApp.includes("endHandsFreeRecording"));
-    assert.ok(tutorApp.includes("autoSend: true"));
-    const transcribeBody = tutorApp.match(/async function transcribeAndMaybeSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(transcribeBody.includes("if (!text) {"), "빈 transcript는 자동 전송하지 않는다");
-    assert.ok(transcribeBody.includes("await handleSend(text);"));
-  });
-
+describe("mic 권한/오류 처리", () => {
   it("mic 권한 거부/장치 없음도 비차단으로 안내하고 텍스트 Tutor는 계속 쓸 수 있다", () => {
     assert.ok(tutorApp.includes("NotAllowedError") && tutorApp.includes("PermissionDeniedError"));
     assert.ok(tutorApp.includes("NotFoundError"));
     assert.ok(tutorApp.includes("function classifyMicError"));
   });
 
-  it("음성/핸즈프리 OFF 시 자동 listening을 시작하지 않는다", () => {
-    assert.ok(tutorApp.includes("if (!handsFreeRef.current || !voiceOnRef.current) return;"));
-  });
-
-  it("Lesson 변경/학습 종료/unmount 시 마이크·AudioContext·타이머·오디오·큐를 정리한다(cleanup)", () => {
+  it("Lesson 변경/학습 종료/unmount 시 마이크·오디오·큐를 정리한다(cleanup)", () => {
     const cleanupBody = tutorApp.match(/function cleanupVoiceResources\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    for (const needle of [
-      "pauseVadSampling()",
-      "handsFreeStreamRef.current.getTracks().forEach",
-      "audioContextRef.current.close()",
-      "URL.revokeObjectURL",
-      "mediaRecorderRef.current = null",
-    ]) {
+    for (const needle of ["URL.revokeObjectURL", "mediaRecorderRef.current = null", "mediaRecorderRef.current.stop()"]) {
       assert.ok(cleanupBody.includes(needle), `cleanup에 ${needle}가 있어야 한다`);
     }
     assert.ok(tutorApp.includes("return () => cleanupVoiceResources();"), "unmount 시 정리해야 한다");
-    assert.ok(
-      tutorApp.match(/async function handleStart\(/) &&
-        tutorApp.match(/async function handleStart\([\s\S]{0,80}/)?.[0]?.includes("handleStart"),
-    );
-    assert.ok(/cleanupVoiceResources\(\); \/\/ 이전 Lesson/.test(tutorApp), "Lesson 재시작 시 이전 VAD/TTS를 정리해야 한다");
+    assert.ok(/cleanupVoiceResources\(\); \/\/ 이전 Lesson/.test(tutorApp), "Lesson 재시작 시 이전 TTS/마이크를 정리해야 한다");
   });
 });
 
@@ -370,24 +323,6 @@ describe("TTS chunking/prefetch — time-to-first-audio 최적화", () => {
     assert.ok(ttsChunking.includes("splitIntoSentences"));
     assert.ok(ttsChunking.includes("MIN_CHUNK_CHARS") && ttsChunking.includes("MAX_CHUNK_CHARS"));
     assert.ok(ttsChunking.includes("HARD_MAX_CHUNK_CHARS"), "너무 긴 문장은 보조 기준으로 강제 분리해야 한다");
-  });
-});
-
-describe("VAD — 무거운 라이브러리 없이 브라우저 내장 API만 사용", () => {
-  it("threshold + 지속시간(smoothing)으로 순간 피크 오작동을 막는다", () => {
-    assert.ok(vadSrc.includes("VAD_ONSET_SUSTAIN_MS"));
-    assert.ok(vadSrc.includes("VAD_SILENCE_TIMEOUT_MS"));
-  });
-
-  it("silence timeout은 1.2~1.8초 범위 안에서 상수로 분리돼 있다", () => {
-    const match = vadSrc.match(/VAD_SILENCE_TIMEOUT_MS\s*=\s*(\d+)/);
-    assert.ok(match, "VAD_SILENCE_TIMEOUT_MS 상수를 찾을 수 없습니다");
-    const ms = Number(match![1]);
-    assert.ok(ms >= 1200 && ms <= 1800, `1.2~1.8초 범위 밖: ${ms}ms`);
-  });
-
-  it("외부 VAD 라이브러리를 추가하지 않았다(브라우저 AnalyserNode만 사용)", () => {
-    assert.ok(!/@ricky0123|vad-web|onnxruntime/i.test(tutorApp + vadSrc), "무거운 VAD 라이브러리를 추가하면 안 된다");
   });
 });
 
@@ -450,56 +385,143 @@ describe("음성 state/ref 동기화 (회귀 테스트)", () => {
     assert.ok(!/setVoiceStateRaw\(/.test(tutorApp.replace(setter, "")), "setVoiceStateRaw를 직접 호출하는 곳이 없어야 한다(항상 setVoiceState 경유)");
   });
 
-  it("voiceOnRef/handsFreeRef는 각각 자기 state에만 의존하는 별도 useEffect로 동기화한다", () => {
+  it("voiceOnRef는 voiceOn state에만 의존하는 useEffect로 동기화한다", () => {
     assert.match(tutorApp, /useEffect\(\(\) => \{\s*voiceOnRef\.current = voiceOn;\s*\}, \[voiceOn\]\);/);
-    assert.match(tutorApp, /useEffect\(\(\) => \{\s*handsFreeRef\.current = handsFree;\s*\}, \[handsFree\]\);/);
+  });
+
+  it("handleSend에는 finally가 없다 — 응답 실패 처리와 TTS 시작이 서로 밟고 지나가지 않는다", () => {
+    const handleSendBody = tutorApp.match(/async function handleSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(!/\}\s*finally\s*\{/.test(handleSendBody));
   });
 });
 
-describe("handleSend/finishSpeaking listening 복귀 race 방지 (회귀 테스트)", () => {
-  it("handleSend에는 finally가 없다 — TTS 시작 전에 listening으로 먼저 복귀하는 경로가 없어야 한다", () => {
-    const handleSendBody = tutorApp.match(/async function handleSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(!/\}\s*finally\s*\{/.test(handleSendBody), "finally에서 상태를 되돌리면 speakReply보다 먼저 listening이 시작될 수 있다");
+/**
+ * 핸즈프리/VAD 기반 자동 발화 종료를 완전히 제거하고, 사용자가 마이크 시작/중지를
+ * 직접 제어하는 반자동 음성 입력으로 전환한 최종 UX를 검증한다(2026-09-15 결정).
+ */
+describe("반자동 마이크 음성 입력 (핸즈프리/VAD 제거 후 최종 UX)", () => {
+  it("A. idle에서 마이크를 누르면 recording을 시작한다", () => {
+    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(micBody.includes('if (voiceStateRef.current !== "idle") return;'), "idle이 아니면 새로 시작하지 않는다");
+    assert.ok(micBody.includes('setVoiceState("recording");'));
+    assert.ok(micBody.includes("await navigator.mediaDevices.getUserMedia"));
   });
 
-  it("handleSend 성공 경로(catch 이전)는 resumeListening을 호출하지 않는다 — speakReply의 finishSpeaking만 복귀시킨다", () => {
-    const handleSendBody = tutorApp.match(/async function handleSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    const tryBlock = handleSendBody.split("} catch")[0];
-    assert.ok(!tryBlock.includes("resumeListening("), "성공 경로에서 미리 resumeListening을 부르면 TTS 재생 전에 듣기를 시작해 버린다");
+  it("B. recording 중 마이크(중지) 버튼을 누르면 MediaRecorder.stop()만 호출한다 — 발화 종료를 프로그램이 판단하지 않는다", () => {
+    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(
+      /if \(voiceStateRef\.current === "recording"\) \{\s*\/\/[^\n]*\s*mediaRecorderRef\.current\?\.stop\(\);\s*return;\s*\}/.test(
+        micBody,
+      ),
+      "recording 중 클릭은 오직 stop()만 해야 한다",
+    );
   });
 
-  it("speakReply의 chunk 재생 루프 안에서는 resumeListening을 호출하지 않는다(재생이 다 끝난 뒤에만 복귀)", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    const loopBody = speakReplyBody.match(/for \(let i = 0[\s\S]*?\n    \}\n/)?.[0] ?? "";
-    assert.ok(loopBody.length > 0, "chunk 재생 for 루프를 찾을 수 없습니다");
-    assert.ok(!loopBody.includes("resumeListening("), "루프 안에서 재생 도중 listening을 재개하면 안 된다");
+  it("C. 중지(stop) 시 기존 /api/tutor/stt(Whisper)로 그 구간의 오디오만 보낸다", () => {
+    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(micBody.includes("recorder.onstop"));
+    assert.ok(micBody.includes("void transcribeAndSend(blob)"));
+    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(transcribeBody.includes('fetch("/api/tutor/stt"'));
   });
 
-  it("finishSpeaking은 정확히 1곳에서 resumeListening을 호출하고, handleSend는 그걸 다시 부르지 않는다", () => {
+  it("D. 유효 transcript는 별도 보내기 클릭 없이 즉시 handleSend로 자동 전송된다", () => {
+    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(transcribeBody.includes("await handleSend(text);"));
+    assert.ok(!transcribeBody.includes("setInput("), "다시 입력창에 채우고 기다리는 옛 방식으로 되돌아가면 안 된다");
+  });
+
+  it("E. 빈 transcript(무음/공백)는 자동 전송하지 않는다", () => {
+    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(/if \(!text\) \{\s*\/\/[^\n]*\s*setVoiceState\("idle"\);\s*return;\s*\}/.test(transcribeBody));
+  });
+
+  it("F. STT 실패해도 throw하지 않고 비차단 안내 후 idle로 돌아간다(텍스트 Tutor 계속 사용 가능)", () => {
+    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const catchBlock = transcribeBody.split(/\}\s*catch/)[1] ?? "";
+    assert.ok(catchBlock.includes("setError("));
+    assert.ok(catchBlock.includes('setVoiceState("idle")'));
+  });
+
+  it('G. 침묵/시간 기반 자동 종료 코드가 없다 — silence timeout·VAD 상수·백그라운드 타이머 폴링 전부 제거됨', () => {
+    for (const needle of [
+      "SILENCE",
+      "silenceTimeout",
+      "VAD_",
+      "SpeechActivityDetector",
+      "setInterval",
+      "handsFree",
+      "AudioContext",
+      "AnalyserNode",
+    ]) {
+      assert.ok(!tutorApp.includes(needle), `${needle} — 자동 발화 종료 관련 코드가 남아있으면 안 된다`);
+    }
+    // setTimeout은 다른 목적(예: 일시적 UI 지연)으로 쓰일 수 있으나, VAD 폴링 루프
+    // 형태(재귀적으로 자기 자신을 다시 스케줄)는 없어야 한다.
+    assert.ok(!/window\.setTimeout\(tick/.test(tutorApp));
+  });
+
+  it("H. 사용자가 직접 중지하기 전에는 STT가 호출되지 않는다 — recorder.onstop에서만 transcribeAndSend를 부른다", () => {
+    assert.equal((tutorApp.match(/transcribeAndSend\(/g) ?? []).length, 2, "정의 1회 + onstop에서 호출 1회여야 한다");
+    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const onstopBody = micBody.match(/recorder\.onstop = \(\) => \{[\s\S]*?\n      \};/)?.[0] ?? "";
+    assert.ok(onstopBody.includes("transcribeAndSend"), "onstop 콜백 안에서만 호출돼야 한다");
+  });
+
+  it("I. TTS 재생 중에는 새로 마이크를 시작하지 못하게 잠근다", () => {
+    assert.ok(
+      tutorApp.includes('micDisabled={voiceState !== "idle" && voiceState !== "recording"}'),
+      "idle/recording이 아니면(= speaking/thinking/transcribing 포함) 마이크 버튼을 잠가야 한다",
+    );
+  });
+
+  it("J. TTS 종료 후 자동으로 다시 듣지 않는다 — finishSpeaking/stopSpeaking은 idle로만 돌아간다", () => {
     const finishBody = tutorApp.match(/function finishSpeaking\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.equal((finishBody.match(/resumeListening\(\)/g) ?? []).length, 1);
-  });
-});
+    assert.ok(finishBody.includes('setVoiceState("idle");'));
+    assert.ok(!finishBody.includes("Listening") && !/listening/.test(finishBody), "재생 종료 후 자동 listening 진입 코드가 없어야 한다");
 
-describe("수동 마이크 / 핸즈프리 경로 분리 (회귀 테스트)", () => {
-  it("onManualMicClick은 매 녹음마다 새 stream을 열고 끝나면 즉시 track을 정지한다(핸즈프리 stream과 무관)", () => {
-    const manualBody = tutorApp.match(/async function onManualMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(manualBody.includes("await navigator.mediaDevices.getUserMedia"));
-    assert.ok(manualBody.includes("stream.getTracks().forEach((track) => track.stop());"), "수동 녹음은 매번 마이크를 반납해야 한다");
-    assert.ok(!manualBody.includes("handsFreeStreamRef"), "수동 마이크 경로가 핸즈프리 stream을 건드리면 안 된다");
-    assert.ok(!manualBody.includes("vadDetectorRef"), "수동 마이크 경로는 VAD를 쓰지 않는다");
+    const stopBody = tutorApp.match(/function stopSpeaking\(\)[\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(stopBody.includes('setVoiceState("idle");'));
   });
 
-  it("beginHandsFreeRecording은 handsFreeStreamRef(지속 유지되는 stream)만 쓰고 매번 새로 열지 않는다", () => {
-    const handsFreeBody = tutorApp.match(/async function beginHandsFreeRecording\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(!/getUserMedia/.test(handsFreeBody), "매 발화마다 새 getUserMedia를 부르면 안 된다 — 기존 handsFreeStreamRef를 재사용해야 한다");
-    assert.ok(handsFreeBody.includes("handsFreeStreamRef.current"));
+  it("voice-state.ts에 더 이상 'listening' 상태가 없다 — idle/recording/transcribing/thinking/speaking/error 6개뿐", () => {
+    const match = voiceStateSrc.match(/export type VoiceState =\s*([\s\S]*?);/);
+    assert.ok(match, "VoiceState 타입 선언을 찾을 수 없습니다");
+    const union = match![1];
+    assert.ok(!union.includes('"listening"'));
+    for (const value of ["idle", "recording", "transcribing", "thinking", "speaking", "error"]) {
+      assert.ok(union.includes(`"${value}"`), `${value}는 유지돼야 한다`);
+    }
   });
 
-  it("두 경로는 recordingSourceRef로 구분되고, 서로 다른 값일 때는 UI에서 상대 경로를 잠근다", () => {
-    assert.ok(tutorApp.includes('recordingSourceRef.current = "manual"'));
-    assert.ok(tutorApp.includes('recordingSourceRef.current = "handsfree"'));
-    assert.ok(tutorApp.includes('if (voiceStateRef.current !== "idle") return; // 핸즈프리가 이미 쓰고 있는 중 등'));
+  it("핸즈프리/VAD 전용 함수·ref·모듈이 전부 제거됐다", () => {
+    for (const needle of [
+      "toggleHandsFree",
+      "resumeListening",
+      "startHandsFreeListening",
+      "ensureHandsFreeMicStream",
+      "startVadHeartbeat",
+      "runVadTick",
+      "finalizeHandsFreeUtterance",
+      "pauseVadSampling",
+      "handsFreeStreamRef",
+      "handsFreeRecorderRef",
+      "handsFreeChunksRef",
+      "recordingSourceRef",
+      "vadDetectorRef",
+      "vadFloatBufferRef",
+      "analyserRef",
+      "audioContextRef",
+      "cmm-tutor-handsfree",
+    ]) {
+      assert.ok(!tutorApp.includes(needle), `${needle} 잔재가 남아있으면 안 된다`);
+    }
+    assert.ok(!tutorSidebar.includes("handsFree") && !tutorSidebar.includes("onToggleHandsFree"));
+  });
+
+  it("viewer/lib/tutor/vad.ts와 그 전용 테스트가 삭제됐다", async () => {
+    await assert.rejects(() => readFile("viewer/lib/tutor/vad.ts", "utf8"));
+    await assert.rejects(() => readFile("tests/tutor-vad.test.ts", "utf8"));
   });
 });
 

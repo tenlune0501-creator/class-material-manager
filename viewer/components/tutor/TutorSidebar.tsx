@@ -3,10 +3,13 @@
 /**
  * AI Tutor 사이드바 — 교재(LessonContent) 옆에 붙는 좁은 패널.
  *
- * 상태 표시(설명하는 중/듣고 있어요/...) · 음성/핸즈프리 스위치 · 수동 마이크 폴백 ·
+ * 상태 표시(설명하는 중/말하는 중/...) · 음성(TTS) 스위치 · 마이크 시작/중지 ·
  * 텍스트 입력 폴백 · 재생 중지 · 대화 기록 접기/펼치기 · 학습 종료 를 담당한다.
  * 이 컴포넌트는 상태를 갖지 않는다(전부 TutorApp이 들고 있는 값을 prop으로 받는다) —
  * 그래야 TutorApp의 음성 상태 머신을 한 곳에서만 관리할 수 있다.
+ *
+ * 음성 입력은 반자동이다 — 마이크는 사용자가 직접 시작/중지하며, 발화 종료를
+ * 프로그램이 판단하는 핸즈프리/VAD는 쓰지 않는다.
  */
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -37,13 +40,11 @@ export interface TutorSidebarProps {
   ttsAvailable: boolean;
   voiceOn: boolean;
   onToggleVoice: () => void;
-  handsFree: boolean;
-  onToggleHandsFree: () => void;
   onStopSpeaking: () => void;
 
-  onManualMicClick: () => void;
-  manualMicBusy: boolean; // 지금 수동 녹음 중(눌러서 중지 가능한 상태)
-  micDisabled: boolean; // hands-free가 이미 듣고 있는 중 등 — 수동 버튼을 잠근다
+  onMicClick: () => void;
+  recording: boolean; // 지금 녹음 중(눌러서 중지 가능한 상태)
+  micDisabled: boolean; // TTS 재생/응답 대기 중 등 — 새로 시작하지 못하게 잠근다
 
   messages: ChatMessage[];
   historyExpanded: boolean;
@@ -78,7 +79,7 @@ function StateChip({ voiceState }: { voiceState: VoiceState }) {
       color={voiceState === "error" ? "error" : busy ? "primary" : "default"}
       variant={busy ? "filled" : "outlined"}
       icon={
-        voiceState === "listening" || voiceState === "recording" ? (
+        voiceState === "recording" ? (
           <span aria-hidden>🎙️</span>
         ) : voiceState === "speaking" ? (
           <span aria-hidden>🔊</span>
@@ -116,8 +117,8 @@ export function TutorSidebar(props: TutorSidebarProps) {
 
       <Box>
         <StateChip voiceState={props.voiceState} />
-        {/* onStopSpeaking은 TTS 재생만 멈춘다 — listening/recording/transcribing/thinking
-            중에는 눌러도 아무 효과가 없으므로 실제로 말하는 중일 때만 보여준다. */}
+        {/* onStopSpeaking은 TTS 재생만 멈춘다 — recording/transcribing/thinking 중에는
+            눌러도 아무 효과가 없으므로 실제로 말하는 중일 때만 보여준다. */}
         {props.voiceState === "speaking" && (
           <Button size="small" sx={{ ml: 1 }} onClick={props.onStopSpeaking}>
             정지
@@ -129,17 +130,6 @@ export function TutorSidebar(props: TutorSidebarProps) {
         <FormControlLabel
           control={<Switch size="small" checked={props.voiceOn} onChange={props.onToggleVoice} disabled={!props.ttsAvailable} />}
           label={<Typography variant="caption">{props.ttsAvailable ? "음성 응답(TTS)" : "음성(미설정)"}</Typography>}
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              size="small"
-              checked={props.handsFree}
-              onChange={props.onToggleHandsFree}
-              disabled={!props.ttsAvailable || !props.voiceOn}
-            />
-          }
-          label={<Typography variant="caption">핸즈프리(자동 듣기)</Typography>}
         />
       </Stack>
 
@@ -231,21 +221,21 @@ export function TutorSidebar(props: TutorSidebarProps) {
 
       <Stack direction="row" spacing={1} sx={{ alignItems: "flex-end" }}>
         <IconButton
-          color={props.manualMicBusy ? "error" : "default"}
-          onClick={props.onManualMicClick}
+          color={props.recording ? "error" : "default"}
+          onClick={props.onMicClick}
           disabled={props.micDisabled}
-          aria-label="마이크로 말하기"
+          aria-label={props.recording ? "녹음 중지" : "마이크로 말하기"}
           size="small"
           sx={{ border: 1, borderColor: "divider" }}
         >
-          {props.manualMicBusy ? "⏹" : "🎤"}
+          {props.recording ? "⏹" : "🎤"}
         </IconButton>
         <TextField
           fullWidth
           multiline
           maxRows={3}
           size="small"
-          placeholder="메시지를 입력하거나 마이크로 말해보세요"
+          placeholder="메시지를 입력하거나 마이크를 눌러 말해보세요"
           value={props.input}
           onChange={(e) => props.onInputChange(e.target.value)}
           onKeyDown={(e) => {
