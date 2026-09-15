@@ -27,6 +27,14 @@ $MeloPort = 8787
 # 프로덕션이 바뀌면(도메인 이전 등) 이 한 줄만 고치면 된다.
 $ProductionTutorUrl = "https://class-material-manager-dusky.vercel.app/tutor"
 
+# server.py의 CORS 기본값(ALLOWED_ORIGINS)은 로컬 next dev origin만 허용한다
+# (local-services/melotts/server.py, README 참고). 이 launcher는 Production URL을
+# 직접 여는데, 그 오리진을 여기서 넣어주지 않으면 브라우저가 /synthesize preflight를
+# "Disallowed CORS origin"으로 막아 TTS가 조용히 실패한다(텍스트는 정상 동작해서
+# 증상이 눈에 띄지 않는다). $ProductionTutorUrl에서 파생시켜 두 값이 어긋나지 않게 한다.
+$ProductionOrigin = ([Uri]$ProductionTutorUrl).GetLeftPart([UriPartial]::Authority)
+$MeloAllowedOrigins = "http://localhost:3000,http://127.0.0.1:3000,$ProductionOrigin"
+
 $MaxHealthWaitSeconds = 120
 $HealthPollIntervalSeconds = 2
 
@@ -73,6 +81,9 @@ if (Test-MeloHealth) {
         Write-Warn2 "지금은 음성 없이 텍스트 Tutor로 계속 진행합니다."
     } else {
         Write-Info "MeloTTS를 시작합니다(첫 실행이면 한국어 모델을 내려받느라 오래 걸릴 수 있습니다)..."
+        # Start-Process는 명시적으로 새 환경을 지정하지 않는 한 현재 프로세스의 환경변수를
+        # 그대로 물려준다 — 그래서 여기서 $env:ALLOWED_ORIGINS를 설정해 둔다.
+        $env:ALLOWED_ORIGINS = $MeloAllowedOrigins
         $proc = Start-Process -FilePath $MeloVenvPython -ArgumentList @("server.py") `
             -WorkingDirectory $MeloDir -WindowStyle Hidden -PassThru
         Set-Content -Path $PidMarkerFile -Value $proc.Id -Encoding ascii

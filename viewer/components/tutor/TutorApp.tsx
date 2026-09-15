@@ -137,6 +137,10 @@ export function TutorApp(props: TutorAppProps) {
   const [speaking, setSpeaking] = useState(false);
 
   const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
+  /** TTS 실패를 조용히 무시하지 않고 비차단으로 알린다(텍스트 수업은 계속 진행) —
+   * CORS/Private Network Access/브라우저 로컬 네트워크 권한 등 사용자 브라우저 쪽
+   * 설정 문제로 실패해도 원인을 전혀 알 수 없었던 문제의 최소 개선. */
+  const [ttsNotice, setTtsNotice] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [summarizeError, setSummarizeError] = useState<string | null>(null);
@@ -212,12 +216,16 @@ export function TutorApp(props: TutorAppProps) {
       const audio = new Audio(url);
       audioRef.current = audio;
       setSpeaking(true);
+      setTtsNotice(null);
       audio.onended = () => setSpeaking(false);
       audio.onerror = () => setSpeaking(false);
       await audio.play();
     } catch {
-      // TTS 실패 — 텍스트는 이미 화면에 있으므로 조용히 넘어간다 (요구사항: 실패해도 텍스트 유지)
+      // TTS 실패 — 텍스트는 이미 화면에 있으므로 대화를 막지 않는다 (요구사항: 실패해도 텍스트 유지).
+      // 다만 원인(로컬 컴패니언 미실행, CORS, 브라우저의 로컬 네트워크 접근 차단 등)을
+      // 사용자가 전혀 알 수 없던 문제라, 비차단 안내만 한 줄 띄운다.
       setSpeaking(false);
+      setTtsNotice("음성 서비스에 연결할 수 없습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
     }
   }
 
@@ -509,6 +517,12 @@ export function TutorApp(props: TutorAppProps) {
       {fallbackNotice && (
         <Alert severity="info" sx={{ mb: 1 }} onClose={() => setFallbackNotice(null)}>
           {fallbackNotice}
+        </Alert>
+      )}
+
+      {ttsNotice && voiceOn && (
+        <Alert severity="info" sx={{ mb: 1 }} onClose={() => setTtsNotice(null)}>
+          {ttsNotice}
         </Alert>
       )}
 

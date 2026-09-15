@@ -53,6 +53,11 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["content-type"],
     allow_credentials=False,
+    # Chrome의 Private Network Access: 공개 HTTPS 페이지(Vercel)가 127.0.0.1처럼 사설
+    # 주소를 호출하면, 일반 CORS preflight와 별도로 이 플래그를 요구하는 preflight를
+    # 보낸다. False(기본값)면 origin이 allow_origins에 있어도 무조건 차단된다 — 실사용
+    # 검증 중 Production에서만 TTS가 조용히 실패한 원인이 바로 이것이었다.
+    allow_private_network=True,
 )
 
 _tts = None
