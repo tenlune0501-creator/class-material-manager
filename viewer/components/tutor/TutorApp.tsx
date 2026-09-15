@@ -1,7 +1,12 @@
 "use client";
 
 /**
- * AI Tutor 화면 전체 — 시작 화면 → 대화 → 종료 요약 확인의 상태 기계.
+ * AI Tutor 화면 전체 — 시작 화면 → (교재 + Tutor 사이드바) 학습 → 종료 요약 확인의 상태 기계.
+ *
+ * ■ 레이아웃
+ * 주 콘텐츠는 현재 Lesson 교재(LessonContent — /lesson/[...id] 페이지와 같은 렌더러를
+ * 공유한다)이고, AI Tutor는 그 옆의 좁고 접을 수 있는 사이드바(TutorSidebar)다.
+ * 채팅이 화면을 차지하지 않는다 — 대화 기록은 사이드바 안에서 접혀 있다가 펼칠 수 있다.
  *
  * ■ 이 컴포넌트가 하지 않는 것
  * - 전체 대화(transcript)를 서버에 저장하지 않는다. `messages` 는 이 탭이 들고 있는
@@ -14,6 +19,15 @@
  *   노출되지 않는다.
  * - TTS(MeloTTS)는 브라우저가 로컬 컴패니언(NEXT_PUBLIC_MELOTTS_URL)을 직접 부른다 —
  *   Vercel 서버는 사용자의 localhost에 접근할 수 없기 때문이다.
+ *
+ * ■ 음성 상태 머신 (voice-state.ts)
+ * recording/transcribing/speaking/sending 같은 boolean을 따로따로 두면 "speaking과
+ * listening이 동시" 같은 조합이 생긴다. 대신 `VoiceState` 값 하나로 통일한다.
+ *
+ * ■ 핸즈프리 (VAD)
+ * `voiceOn`(TTS 사용 여부, 기존 설정 그대로)과 `handsFree`(자동 듣기, 새 설정 —
+ * 기본 꺼짐)는 분리했다. "TTS는 듣고 싶지만 마이크가 항상 켜지는 건 싫다"는 사용자를
+ * 위해서다 — handsFree는 voiceOn이 켜져 있을 때만 의미가 있다.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,20 +36,26 @@ import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import IconButton from "@mui/material/IconButton";
+import Drawer from "@mui/material/Drawer";
+import Fab from "@mui/material/Fab";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
-import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
+import { LessonContent } from "@/components/LessonContent";
+import { TutorSidebar } from "@/components/tutor/TutorSidebar";
+import type { LessonDetail } from "@/lib/curriculum";
 import { MeloTTSProvider } from "@/lib/tutor/providers/melotts-local";
+import { chunkTextForSpeech } from "@/lib/tutor/tts-chunking";
+import { computeRms, createSpeechActivityDetector, VAD_TICK_MS, type SpeechActivityDetector } from "@/lib/tutor/vad";
+import type { VoiceState } from "@/lib/tutor/voice-state";
 
 // ── 타입 (서버 컴포넌트가 넘겨준 초기 상태) ──────────────────────────
 
@@ -92,49 +112,37 @@ type View = "start" | "chat" | "summarizing" | "summarize" | "saved";
 
 const END_INTENT_PATTERN = /(오늘|여기까지|그만|끝낼래|끝낼게|마칠래|종료할래|공부\s*끝)/;
 
+/** Analyser의 FFT 크기 — 시간축 샘플 512개면 RMS 계산에 충분하고 CPU 부담도 작다. */
+const ANALYSER_FFT_SIZE = 512;
+
 function lessonLabel(lesson: LessonRef): string {
   return `${lesson.trackTitle} · ${lesson.chapterTitle} — ${lesson.title}`;
 }
 
-/**
- * TTS로 읽기 전에 마크다운 기호를 없앤다.
- *
- * 두 가지 이유가 있다: (1) "**1.5**", "`line-height`" 를 기호까지 그대로 읽으면
- * 자연스러운 음성 과외가 아니다. (2) MeloTTS(한국어 심볼 테이블)가 백틱(`)처럼
- * 학습되지 않은 기호를 만나면 합성 자체가 KeyError로 실패한다(실사용 검증 중
- * 발견) — 그래서 안전을 위해서도 코드/강조 기호는 읽기 전에 반드시 벗겨낸다.
- */
-function stripMarkdownForSpeech(text: string): string {
-  return text
-    .replace(/```[\s\S]*?```/g, "") // 코드 블록은 음성으로 읽지 않고 생략한다
-    .replace(/`([^`]*)`/g, "$1")
-    .replace(/\*\*([^*]*)\*\*/g, "$1")
-    .replace(/\*([^*]*)\*/g, "$1")
-    .replace(/^#{1,6}\s*/gm, "")
-    .replace(/^[-*+]\s+/gm, "")
-    .replace(/[`*_~#>|]/g, "")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
-}
-
 export function TutorApp(props: TutorAppProps) {
   const router = useRouter();
+  const theme = useTheme();
+  const isWide = useMediaQuery(theme.breakpoints.up("md"));
+
   const [view, setView] = useState<View>("start");
   const [currentLesson, setCurrentLesson] = useState<LessonRef | null>(
     props.inProgressLesson ?? props.nextLesson,
   );
+  const [lessonDetail, setLessonDetail] = useState<LessonDetail | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   const [voiceOn, setVoiceOn] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const [transcribing, setTranscribing] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
+  const [handsFree, setHandsFree] = useState(false);
+  const [voiceState, setVoiceStateRaw] = useState<VoiceState>("idle");
+
+  const [sidebarOpenDesktop, setSidebarOpenDesktop] = useState(true);
+  const [sidebarOpenMobile, setSidebarOpenMobile] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
 
   const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
   /** TTS 실패를 조용히 무시하지 않고 비차단으로 알린다(텍스트 수업은 계속 진행) —
@@ -146,25 +154,46 @@ export function TutorApp(props: TutorAppProps) {
   const [summarizeError, setSummarizeError] = useState<string | null>(null);
   const [manualNextLessonId, setManualNextLessonId] = useState<string>("");
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordedChunksRef = useRef<Blob[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  /** voiceOn을 즉시 값으로 읽기 위한 ref — handleStart가 mount effect(스테일 클로저
-   * 가능성이 있는)에서도 불릴 수 있어, state 클로저 대신 이걸로 최신값을 본다. */
+  // ── ref: 최신 값을 async 콜백/VAD 루프에서 즉시 읽기 위함(state 클로저 지연 방지) ──
   const voiceOnRef = useRef(voiceOn);
+  const handsFreeRef = useRef(handsFree);
+  const voiceStateRef = useRef<VoiceState>("idle");
+  const recordingSourceRef = useRef<"manual" | "handsfree" | null>(null);
   /** 이번이 "가장 최근" handleStart 호출인지 판별— Strict Mode 등으로 handleStart가
    * 중복 호출돼도 최초 인사말이 두 번 재생되지 않게 한다(마지막 호출만 speak). */
   const handleStartCallIdRef = useRef(0);
+
+  // ── ref: 미디어/오디오 자원 ──
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeObjectUrlRef = useRef<string | null>(null);
+  /** TTS "턴"이 바뀔 때마다 올라간다 — 이전 턴의 pending 합성/재생이 뒤늦게 끝나도
+   * generation이 다르면 전부 무시한다(정지·새 턴 시작 시 stale 재생 방지). */
+  const ttsGenerationRef = useRef(0);
+
+  // ── ref: 핸즈프리 VAD 자원 (수동 마이크와 별개 — 마이크를 계속 열어 둬야 하므로) ──
+  const handsFreeStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const vadFloatBufferRef = useRef<Float32Array<ArrayBuffer> | null>(null);
+  const vadDetectorRef = useRef<SpeechActivityDetector | null>(null);
+  const vadTimerRef = useRef<number | null>(null);
 
   const tts = useMemo(
     () => (props.ttsConfigured ? new MeloTTSProvider(process.env.NEXT_PUBLIC_MELOTTS_URL!) : null),
     [],
   );
 
+  function setVoiceState(next: VoiceState) {
+    voiceStateRef.current = next;
+    setVoiceStateRaw(next);
+  }
+
   useEffect(() => {
     try {
       setVoiceOn(window.localStorage.getItem("cmm-tutor-voice") === "on");
+      setHandsFree(window.localStorage.getItem("cmm-tutor-handsfree") === "on");
     } catch {
       // localStorage 접근 실패(프라이빗 모드 등) — 기본값 off 유지
     }
@@ -175,8 +204,14 @@ export function TutorApp(props: TutorAppProps) {
   }, [voiceOn]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    handsFreeRef.current = handsFree;
+  }, [handsFree]);
+
+  // 언마운트 시 마이크/오디오/타이머를 반드시 정리한다.
+  useEffect(() => {
+    return () => cleanupVoiceResources();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ?lessonId= 로 들어오면 시작 화면 없이 바로 그 Lesson으로 시작한다.
   useEffect(() => {
@@ -187,6 +222,48 @@ export function TutorApp(props: TutorAppProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── 음성 자원 정리 ────────────────────────────────────────────────
+
+  function pauseVadSampling() {
+    if (vadTimerRef.current !== null) {
+      window.clearTimeout(vadTimerRef.current);
+      vadTimerRef.current = null;
+    }
+  }
+
+  /** Lesson 변경/학습 종료/음성 끔/unmount — 마이크·AudioContext·타이머·오디오·큐를 전부 정리한다. */
+  function cleanupVoiceResources() {
+    pauseVadSampling();
+    ttsGenerationRef.current += 1;
+    audioRef.current?.pause();
+    audioRef.current = null;
+    if (activeObjectUrlRef.current) {
+      URL.revokeObjectURL(activeObjectUrlRef.current);
+      activeObjectUrlRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // 이미 멈춘 상태 등 — 무시
+      }
+    }
+    mediaRecorderRef.current = null;
+    recordingSourceRef.current = null;
+    if (handsFreeStreamRef.current) {
+      handsFreeStreamRef.current.getTracks().forEach((track) => track.stop());
+      handsFreeStreamRef.current = null;
+    }
+    analyserRef.current = null;
+    vadFloatBufferRef.current = null;
+    vadDetectorRef.current = null;
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      void audioContextRef.current.close().catch(() => {});
+    }
+    audioContextRef.current = null;
+    setVoiceState("idle");
+  }
+
   function toggleVoice() {
     setVoiceOn((prev) => {
       const next = !prev;
@@ -195,45 +272,370 @@ export function TutorApp(props: TutorAppProps) {
       } catch {
         // 무시 — 이번 세션 동안만 유지된다
       }
-      if (!next) stopSpeaking();
+      if (!next) {
+        // TTS를 끄면 핸즈프리도 의미가 없다 — 듣기 루프를 멈추고 진행 중이던 재생도 멈춘다.
+        pauseVadSampling();
+        stopSpeakingInternal();
+        setVoiceState("idle");
+      }
       return next;
     });
   }
 
-  function stopSpeaking() {
-    audioRef.current?.pause();
-    setSpeaking(false);
+  function toggleHandsFree() {
+    setHandsFree((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem("cmm-tutor-handsfree", next ? "on" : "off");
+      } catch {
+        // 무시
+      }
+      if (next) {
+        if (voiceStateRef.current === "idle") void startHandsFreeListening();
+      } else {
+        pauseVadSampling();
+        if (voiceStateRef.current === "listening") setVoiceState("idle");
+      }
+      return next;
+    });
   }
 
-  async function speak(rawText: string) {
-    if (!tts || !voiceOnRef.current) return;
-    const text = stripMarkdownForSpeech(rawText);
-    if (!text) return;
-    try {
-      stopSpeaking();
-      const blob = await tts.synthesize(text);
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      setSpeaking(true);
-      setTtsNotice(null);
-      audio.onended = () => setSpeaking(false);
-      audio.onerror = () => setSpeaking(false);
-      await audio.play();
-    } catch {
-      // TTS 실패 — 텍스트는 이미 화면에 있으므로 대화를 막지 않는다 (요구사항: 실패해도 텍스트 유지).
-      // 다만 원인(로컬 컴패니언 미실행, CORS, 브라우저의 로컬 네트워크 접근 차단 등)을
-      // 사용자가 전혀 알 수 없던 문제라, 비차단 안내만 한 줄 띄운다.
-      setSpeaking(false);
-      setTtsNotice("음성 서비스에 연결할 수 없습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
+  // ── TTS: chunk 단위 합성 + prefetch 재생 ────────────────────────────
+
+  function stopSpeakingInternal() {
+    ttsGenerationRef.current += 1; // 진행 중이던 합성/재생 파이프라인을 전부 무효화한다
+    audioRef.current?.pause();
+    audioRef.current = null;
+    if (activeObjectUrlRef.current) {
+      URL.revokeObjectURL(activeObjectUrlRef.current);
+      activeObjectUrlRef.current = null;
     }
   }
 
+  /** Sidebar의 "정지" 버튼 — 재생 중지 후 핸즈프리 ON이면 듣기로 복귀한다. */
+  function stopSpeaking() {
+    stopSpeakingInternal();
+    if (handsFreeRef.current && voiceOnRef.current) {
+      resumeListening();
+    } else {
+      setVoiceState("idle");
+    }
+  }
+
+  function playBlob(blob: Blob, gen: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (ttsGenerationRef.current !== gen) return resolve(false);
+      if (activeObjectUrlRef.current) {
+        URL.revokeObjectURL(activeObjectUrlRef.current);
+        activeObjectUrlRef.current = null;
+      }
+      const url = URL.createObjectURL(blob);
+      activeObjectUrlRef.current = url;
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => resolve(ttsGenerationRef.current === gen);
+      audio.onerror = () => resolve(false);
+      audio.play().catch(() => resolve(false));
+    });
+  }
+
+  function finishSpeaking(gen: number) {
+    if (activeObjectUrlRef.current) {
+      URL.revokeObjectURL(activeObjectUrlRef.current);
+      activeObjectUrlRef.current = null;
+    }
+    audioRef.current = null;
+    if (ttsGenerationRef.current !== gen) return; // 이미 다음 턴/정지로 넘어감
+    if (handsFreeRef.current && voiceOnRef.current) {
+      resumeListening();
+    } else {
+      setVoiceState("idle");
+    }
+  }
+
+  /**
+   * 답변 전체를 chunk로 나눠 첫 chunk를 즉시 합성/재생하고, 재생 중 다음 chunk를
+   * prefetch한다 — 긴 답변 전체 합성이 끝날 때까지 기다리지 않는다(time-to-first-audio
+   * 최적화, tts-chunking.ts 상단 실측 주석 참고).
+   */
+  async function speakReply(rawText: string) {
+    const myGen = ++ttsGenerationRef.current;
+    pauseVadSampling(); // TTS 재생 중에는 핸즈프리 listening을 멈춘다(echo/self-loop 방지)
+
+    if (!tts || !voiceOnRef.current) {
+      setVoiceState("idle");
+      return;
+    }
+
+    const chunks = chunkTextForSpeech(rawText);
+    if (chunks.length === 0) {
+      finishSpeaking(myGen);
+      return;
+    }
+
+    setVoiceState("speaking");
+    setTtsNotice(null);
+
+    const blobPromises = new Map<number, Promise<Blob>>();
+    const getBlob = (i: number): Promise<Blob> | null => {
+      if (i < 0 || i >= chunks.length) return null;
+      if (!blobPromises.has(i)) blobPromises.set(i, tts.synthesize(chunks[i]));
+      return blobPromises.get(i) ?? null;
+    };
+
+    getBlob(0); // 첫 chunk는 즉시 합성 시작
+
+    for (let i = 0; i < chunks.length; i++) {
+      if (ttsGenerationRef.current !== myGen) return; // 정지/새 턴 — 조용히 중단
+      getBlob(i + 1); // 지금 chunk가 재생되는 동안 다음 chunk를 미리 합성(prefetch depth=1)
+
+      let blob: Blob;
+      try {
+        blob = await getBlob(i)!;
+      } catch {
+        if (ttsGenerationRef.current !== myGen) return;
+        setTtsNotice("음성 서비스에 연결할 수 없습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
+        break;
+      }
+      if (ttsGenerationRef.current !== myGen) return;
+
+      const played = await playBlob(blob, myGen);
+      if (!played) {
+        if (ttsGenerationRef.current === myGen) {
+          setTtsNotice((prev) => prev ?? "음성 재생 중 문제가 발생했습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
+        }
+        break;
+      }
+    }
+
+    finishSpeaking(myGen);
+  }
+
+  // ── 핸즈프리 VAD: 마이크 → RMS → 발화 시작/종료 ─────────────────────
+
+  async function ensureHandsFreeMicStream(): Promise<MediaStream | null> {
+    if (handsFreeStreamRef.current?.active) return handsFreeStreamRef.current;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => {
+        track.onended = () => {
+          // 장치가 갑자기 빠지거나 브라우저가 권한을 회수한 경우 — 핸즈프리만 끄고 계속 진행한다.
+          handsFreeStreamRef.current = null;
+          if (handsFreeRef.current) {
+            setHandsFree(false);
+            try {
+              window.localStorage.setItem("cmm-tutor-handsfree", "off");
+            } catch {
+              // 무시
+            }
+            setError("마이크 연결이 끊겨 핸즈프리를 껐습니다. 텍스트/수동 마이크로 계속할 수 있습니다.");
+            setVoiceState("idle");
+          }
+        };
+      });
+      handsFreeStreamRef.current = stream;
+      return stream;
+    } catch (err) {
+      setError(classifyMicError(err));
+      return null;
+    }
+  }
+
+  function classifyMicError(err: unknown): string {
+    const name = err instanceof DOMException ? err.name : "";
+    if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+      return "마이크 권한이 거부되었습니다. 브라우저 설정에서 허용해 주세요. 텍스트로 계속 진행할 수 있습니다.";
+    }
+    if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+      return "마이크 장치를 찾을 수 없습니다. 텍스트로 계속 진행할 수 있습니다.";
+    }
+    return "마이크를 사용할 수 없습니다. 텍스트로 계속 진행할 수 있습니다.";
+  }
+
+  function resumeListening() {
+    if (!handsFreeRef.current || !voiceOnRef.current) {
+      setVoiceState("idle");
+      return;
+    }
+    void startHandsFreeListening();
+  }
+
+  async function startHandsFreeListening() {
+    if (!handsFreeRef.current || !voiceOnRef.current) return;
+    if (voiceStateRef.current !== "idle") return;
+
+    const stream = await ensureHandsFreeMicStream();
+    if (!stream) {
+      setHandsFree(false);
+      try {
+        window.localStorage.setItem("cmm-tutor-handsfree", "off");
+      } catch {
+        // 무시
+      }
+      return;
+    }
+
+    if (!audioContextRef.current || audioContextRef.current.state === "closed") {
+      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioContextRef.current = new Ctor();
+    }
+    const audioCtx = audioContextRef.current;
+    if (audioCtx.state === "suspended") {
+      try {
+        await audioCtx.resume();
+      } catch {
+        // 무시 — 다음 사용자 상호작용에서 자동으로 풀리는 브라우저도 있다
+      }
+    }
+
+    if (!analyserRef.current) {
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = ANALYSER_FFT_SIZE;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+      vadFloatBufferRef.current = new Float32Array(analyser.fftSize);
+    }
+
+    vadDetectorRef.current = createSpeechActivityDetector();
+    vadDetectorRef.current.reset(performance.now());
+    setVoiceState("listening");
+    scheduleVadTick();
+  }
+
+  function scheduleVadTick() {
+    if (vadTimerRef.current !== null) return; // 이미 돌고 있음
+
+    const tick = () => {
+      vadTimerRef.current = null;
+      const state = voiceStateRef.current;
+      if (state !== "listening" && state !== "recording") return; // 정지(다른 상태로 전이됨)
+
+      const detector = vadDetectorRef.current;
+      const analyser = analyserRef.current;
+      const buf = vadFloatBufferRef.current;
+      if (!detector || !analyser || !buf) return; // 이미 정리됨
+
+      analyser.getFloatTimeDomainData(buf);
+      const rms = computeRms(buf);
+      const transition = detector.pushSample(rms, performance.now());
+      if (transition?.type === "speech-start") {
+        void beginHandsFreeRecording();
+      } else if (transition?.type === "speech-end") {
+        endHandsFreeRecording();
+      }
+
+      const next = voiceStateRef.current;
+      if (next === "listening" || next === "recording") {
+        vadTimerRef.current = window.setTimeout(tick, VAD_TICK_MS);
+      }
+    };
+    vadTimerRef.current = window.setTimeout(tick, VAD_TICK_MS);
+  }
+
+  async function beginHandsFreeRecording() {
+    const stream = handsFreeStreamRef.current;
+    if (!stream) return;
+    try {
+      const recorder = new MediaRecorder(stream);
+      recordedChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        void transcribeAndMaybeSend(blob, { autoSend: true });
+      };
+      mediaRecorderRef.current = recorder;
+      recordingSourceRef.current = "handsfree";
+      recorder.start();
+      setVoiceState("recording");
+    } catch {
+      setError("마이크를 사용할 수 없습니다.");
+      resumeListening();
+    }
+  }
+
+  function endHandsFreeRecording() {
+    if (recordingSourceRef.current === "handsfree" && mediaRecorderRef.current?.state === "recording") {
+      setVoiceState("transcribing");
+      mediaRecorderRef.current.stop();
+    }
+  }
+
+  // ── STT: 기존 /api/tutor/stt 재사용, 자동 전송 여부만 다르다 ────────
+
+  async function transcribeAndMaybeSend(blob: Blob, opts: { autoSend: boolean }) {
+    setVoiceState("transcribing");
+    try {
+      const form = new FormData();
+      form.append("audio", blob, "recording.webm");
+      const res = await fetch("/api/tutor/stt", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "음성 인식에 실패했습니다.");
+      const text = typeof data.text === "string" ? data.text.trim() : "";
+
+      if (!text) {
+        // 빈 transcript/무음·잡음 — 자동 전송하지 않는다.
+        if (opts.autoSend) resumeListening();
+        else setVoiceState("idle");
+        return;
+      }
+
+      if (opts.autoSend) {
+        await handleSend(text);
+      } else {
+        // 요구사항: 자동 전송 금지 — 입력창에 채워 사용자가 확인·수정 후 보내게 한다.
+        setInput((prev) => (prev ? `${prev} ${text}` : text));
+        setVoiceState("idle");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "음성 인식에 실패했습니다. 텍스트로 입력해 주세요.");
+      if (opts.autoSend) resumeListening();
+      else setVoiceState("idle");
+    }
+  }
+
+  // ── 수동 마이크 폴백 (기존 동작 유지 — 자동 전송하지 않는다) ─────────
+
+  async function onManualMicClick() {
+    if (voiceStateRef.current === "recording" && recordingSourceRef.current === "manual") {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+    if (voiceStateRef.current !== "idle") return; // 핸즈프리가 이미 쓰고 있는 중 등
+
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recordedChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        void transcribeAndMaybeSend(blob, { autoSend: false });
+      };
+      mediaRecorderRef.current = recorder;
+      recordingSourceRef.current = "manual";
+      recorder.start();
+      setVoiceState("recording");
+    } catch (err) {
+      setError(classifyMicError(err));
+    }
+  }
+
+  // ── Lesson 시작/대화 ─────────────────────────────────────────────
+
   async function handleStart(lesson: LessonRef) {
+    cleanupVoiceResources(); // 이전 Lesson의 VAD/TTS/마이크가 남아있지 않게 한다
     const callId = ++handleStartCallIdRef.current;
     setStarting(true);
     setError(null);
     setFallbackNotice(null);
+    setLessonDetail(null);
     try {
       const res = await fetch("/api/tutor/session/start", {
         method: "POST",
@@ -245,6 +647,7 @@ export function TutorApp(props: TutorAppProps) {
 
       setCurrentLesson(lesson);
       setSessionId(data.session.id);
+      setLessonDetail(data.lesson ?? null);
 
       const progress = props.lessonProgress.find((p) => p.lessonId === lesson.id);
       const resuming = progress && (progress.status === "learning" || progress.status === "review");
@@ -256,7 +659,7 @@ export function TutorApp(props: TutorAppProps) {
       // handleStart가 (Strict Mode의 mount effect 이중 호출 등으로) 중복 실행됐다면
       // 가장 마지막 호출만 읽는다 — 기존 speak()를 그대로 재사용, 새 TTS 구현 없음.
       if (handleStartCallIdRef.current === callId) {
-        void speak(greeting);
+        void speakReply(greeting);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
@@ -267,14 +670,15 @@ export function TutorApp(props: TutorAppProps) {
 
   async function handleSend(overrideText?: string) {
     const text = (overrideText ?? input).trim();
-    if (!text || !sessionId || sending) return;
+    if (!text || !sessionId || voiceStateRef.current === "thinking") return;
     setInput("");
     setError(null);
     setShowEndConfirm(false);
 
     const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(nextMessages);
-    setSending(true);
+    setVoiceState("thinking");
+    pauseVadSampling();
 
     if (END_INTENT_PATTERN.test(text)) {
       setShowEndConfirm(true);
@@ -292,60 +696,17 @@ export function TutorApp(props: TutorAppProps) {
       setFallbackNotice(
         data.fallbackModel ? `기본 AI 모델을 사용할 수 없어 ${data.fallbackModel}로 임시 전환했습니다.` : null,
       );
-      void speak(data.reply);
+      void speakReply(data.reply);
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
-    } finally {
-      setSending(false);
-    }
-  }
-
-  async function startRecording() {
-    setError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      recordedChunksRef.current = [];
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
-      };
-      recorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        await transcribe(blob);
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setRecording(true);
-    } catch {
-      setError("마이크 권한을 확인해 주세요.");
-    }
-  }
-
-  function stopRecording() {
-    mediaRecorderRef.current?.stop();
-    setRecording(false);
-  }
-
-  async function transcribe(blob: Blob) {
-    setTranscribing(true);
-    try {
-      const form = new FormData();
-      form.append("audio", blob, "recording.webm");
-      const res = await fetch("/api/tutor/stt", { method: "POST", body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "음성 인식에 실패했습니다.");
-      // 요구사항: 자동 전송 금지 — 입력창에 채워 사용자가 확인·수정 후 보내게 한다.
-      setInput((prev) => (prev ? `${prev} ${data.text}` : data.text));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "음성 인식에 실패했습니다. 텍스트로 입력해 주세요.");
-    } finally {
-      setTranscribing(false);
+      if (handsFreeRef.current && voiceOnRef.current) resumeListening();
+      else setVoiceState("idle");
     }
   }
 
   async function beginEndSession() {
     if (!sessionId) return;
+    cleanupVoiceResources();
     setShowEndConfirm(false);
     setView("summarizing");
     setSummarizeError(null);
@@ -409,6 +770,7 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   async function abandonAndLeave() {
+    cleanupVoiceResources();
     if (sessionId) {
       try {
         await fetch(`/api/tutor/session/${sessionId}/abandon`, { method: "POST" });
@@ -482,134 +844,99 @@ export function TutorApp(props: TutorAppProps) {
     );
   }
 
-  // view === "chat"
+  // view === "chat" — 교재(왼쪽, 가장 넓음) + Tutor 사이드바(오른쪽, 좁고 접힘)
+  const lessonMeta = currentLesson ? `${currentLesson.trackTitle} · ${currentLesson.chapterTitle}` : "";
+
+  const sidebar = (
+    <TutorSidebar
+      lessonTitle={currentLesson?.title ?? ""}
+      lessonMeta={lessonMeta}
+      voiceState={voiceState}
+      ttsAvailable={Boolean(tts)}
+      voiceOn={voiceOn}
+      onToggleVoice={toggleVoice}
+      handsFree={handsFree}
+      onToggleHandsFree={toggleHandsFree}
+      onStopSpeaking={stopSpeaking}
+      onManualMicClick={() => void onManualMicClick()}
+      manualMicBusy={voiceState === "recording" && recordingSourceRef.current === "manual"}
+      micDisabled={voiceState !== "idle" && !(voiceState === "recording" && recordingSourceRef.current === "manual")}
+      messages={messages}
+      historyExpanded={historyExpanded}
+      onToggleHistoryExpanded={() => setHistoryExpanded((v) => !v)}
+      input={input}
+      onInputChange={setInput}
+      onSend={() => void handleSend()}
+      sendDisabled={
+        voiceState === "thinking" ||
+        voiceState === "transcribing" ||
+        (voiceState === "recording" && recordingSourceRef.current === "handsfree")
+      }
+      error={error}
+      onDismissError={() => setError(null)}
+      fallbackNotice={fallbackNotice}
+      onDismissFallbackNotice={() => setFallbackNotice(null)}
+      ttsNotice={ttsNotice}
+      onDismissTtsNotice={() => setTtsNotice(null)}
+      showEndConfirm={showEndConfirm}
+      onConfirmEnd={beginEndSession}
+      onCancelEnd={() => setShowEndConfirm(false)}
+      onRequestEnd={beginEndSession}
+      onLeaveWithoutSaving={abandonAndLeave}
+      onCollapse={isWide ? () => setSidebarOpenDesktop(false) : undefined}
+    />
+  );
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 140px)", maxWidth: 900 }}>
-      <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            🎧 {currentLesson?.title}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {currentLesson?.trackTitle} · {currentLesson?.chapterTitle}
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <FormControlLabel
-            control={<Switch size="small" checked={voiceOn} onChange={toggleVoice} disabled={!tts} />}
-            label={<Typography variant="caption">{tts ? "음성" : "음성(미설정)"}</Typography>}
-          />
-          {speaking && (
-            <Chip size="small" label="🔊 재생 중" onDelete={stopSpeaking} />
-          )}
-          <Button size="small" color="error" variant="outlined" onClick={beginEndSession}>
-            학습 종료
-          </Button>
-        </Stack>
-      </Stack>
-
-      {error && (
-        <Alert severity="warning" sx={{ mb: 1 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {fallbackNotice && (
-        <Alert severity="info" sx={{ mb: 1 }} onClose={() => setFallbackNotice(null)}>
-          {fallbackNotice}
-        </Alert>
-      )}
-
-      {ttsNotice && voiceOn && (
-        <Alert severity="info" sx={{ mb: 1 }} onClose={() => setTtsNotice(null)}>
-          {ttsNotice}
-        </Alert>
-      )}
-
-      <Paper
-        variant="outlined"
-        sx={{ flex: 1, overflowY: "auto", p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}
-      >
-        {messages.map((m, i) => (
-          <Box
-            key={i}
-            sx={{
-              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "80%",
-              bgcolor: m.role === "user" ? "primary.main" : "action.hover",
-              color: m.role === "user" ? "primary.contrastText" : "text.primary",
-              borderRadius: 2,
-              px: 1.5,
-              py: 1,
-              whiteSpace: "pre-wrap",
-              fontSize: "0.9rem",
-              lineHeight: 1.7,
-            }}
-          >
-            {m.content}
+    <Box sx={{ display: "flex", gap: 2, height: "calc(100vh - 140px)", minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, overflowY: "auto", pr: 1 }}>
+        <Stack direction="row" sx={{ alignItems: "flex-start", justifyContent: "space-between", gap: 2, mb: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }} noWrap>
+              {currentLesson?.title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {lessonMeta}
+            </Typography>
           </Box>
-        ))}
-        {sending && (
-          <Box sx={{ alignSelf: "flex-start" }}>
-            <CircularProgress size={16} />
+          {isWide && !sidebarOpenDesktop && (
+            <Button size="small" variant="outlined" onClick={() => setSidebarOpenDesktop(true)} sx={{ flexShrink: 0 }}>
+              🎧 Tutor 펼치기
+            </Button>
+          )}
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+
+        {lessonDetail ? (
+          <LessonContent lesson={lessonDetail} />
+        ) : (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress size={24} />
           </Box>
         )}
-        <div ref={messagesEndRef} />
-      </Paper>
+      </Box>
 
-      {showEndConfirm && (
-        <Alert
-          severity="info"
-          sx={{ mt: 1 }}
-          action={
-            <Stack direction="row" spacing={1}>
-              <Button size="small" onClick={beginEndSession}>
-                네, 종료할게요
-              </Button>
-              <Button size="small" onClick={() => setShowEndConfirm(false)}>
-                아니요, 계속할게요
-              </Button>
-            </Stack>
-          }
-        >
-          오늘 학습을 종료할까요?
-        </Alert>
+      {isWide ? (
+        sidebarOpenDesktop && (
+          <Box sx={{ width: 380, flexShrink: 0, borderLeft: 1, borderColor: "divider", pl: 2, py: 0.5 }}>{sidebar}</Box>
+        )
+      ) : (
+        <>
+          {!sidebarOpenMobile && (
+            <Fab
+              color="primary"
+              onClick={() => setSidebarOpenMobile(true)}
+              sx={{ position: "fixed", right: 16, bottom: 16, zIndex: (t) => t.zIndex.drawer + 1 }}
+              aria-label="AI Tutor 열기"
+            >
+              🎧
+            </Fab>
+          )}
+          <Drawer anchor="right" open={sidebarOpenMobile} onClose={() => setSidebarOpenMobile(false)}>
+            <Box sx={{ width: "88vw", maxWidth: 380, height: "100%", p: 2 }}>{sidebar}</Box>
+          </Drawer>
+        </>
       )}
-
-      <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: "flex-end" }}>
-        <IconButton
-          color={recording ? "error" : "default"}
-          onClick={recording ? stopRecording : startRecording}
-          disabled={transcribing}
-          aria-label="마이크로 말하기"
-          sx={{ border: 1, borderColor: "divider" }}
-        >
-          {transcribing ? <CircularProgress size={20} /> : recording ? "⏹" : "🎤"}
-        </IconButton>
-        <TextField
-          fullWidth
-          multiline
-          maxRows={4}
-          size="small"
-          placeholder="메시지를 입력하거나 마이크로 말해보세요"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void handleSend();
-            }
-          }}
-        />
-        <Button variant="contained" onClick={() => handleSend()} disabled={sending || !input.trim()}>
-          보내기
-        </Button>
-      </Stack>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-        <Box component="span" sx={{ cursor: "pointer", textDecoration: "underline" }} onClick={abandonAndLeave}>
-          저장하지 않고 나가기
-        </Box>
-      </Typography>
     </Box>
   );
 }

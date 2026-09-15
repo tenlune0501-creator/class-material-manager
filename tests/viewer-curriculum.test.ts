@@ -9,9 +9,11 @@ import { describe, it } from "node:test";
 import { readFile } from "node:fs/promises";
 
 const lib = await readFile("viewer/lib/curriculum.ts", "utf8");
+const curriculumRender = await readFile("viewer/lib/curriculum-render.ts", "utf8");
 const curriculumPage = await readFile("viewer/app/curriculum/page.tsx", "utf8");
 const projectsPage = await readFile("viewer/app/projects/page.tsx", "utf8");
 const lessonPage = await readFile("viewer/app/lesson/[...id]/page.tsx", "utf8");
+const lessonContent = await readFile("viewer/components/LessonContent.tsx", "utf8");
 const unitPage = await readFile("viewer/app/unit/[...id]/page.tsx", "utf8");
 const appShell = await readFile("viewer/components/AppShell.tsx", "utf8");
 
@@ -56,8 +58,15 @@ describe("커리큘럼 데이터 계층 (viewer/lib/curriculum.ts)", () => {
   });
 
   it("본문의 {{code: slug}} 를 코드 예제로 치환하는 전처리가 있다", () => {
-    assert.ok(lib.includes("inlineCodeRefs"), "inlineCodeRefs export");
-    assert.ok(/\\\{\\\{\\s\*code:/.test(lib) || lib.includes("{{ code:") || lib.includes("code:\\s*("), "code 참조 정규식");
+    // 실제 정의는 curriculum-render.ts에 있다(DB 접근 없는 순수 헬퍼라 클라이언트
+    // 컴포넌트에서도 쓸 수 있게 분리 — 아래 "AI Tutor 교재 렌더러" describe 참고).
+    // curriculum.ts는 하위 호환을 위해 그대로 재노출한다.
+    assert.ok(lib.includes("export { inlineCodeRefs, SECTION_LABEL }"), "재노출(re-export)해야 한다");
+    assert.ok(curriculumRender.includes("export function inlineCodeRefs"));
+    assert.ok(
+      /\\\{\\\{\\s\*code:/.test(curriculumRender) || curriculumRender.includes("{{ code:") || curriculumRender.includes("code:\\s*("),
+      "code 참조 정규식",
+    );
   });
 });
 
@@ -78,16 +87,35 @@ describe("커리큘럼 화면 (빈 상태 안내)", () => {
   });
 
   it("Lesson 상세는 섹션 · 코드 예제 · 연결 Unit 을 모두 렌더한다", () => {
-    assert.ok(lessonPage.includes("lesson.sections"));
-    assert.ok(lessonPage.includes("lesson.codeExamples"));
-    assert.ok(lessonPage.includes("lesson.linkedUnits"));
-    assert.ok(lessonPage.includes("inlineCodeRefs"));
+    // 실제 렌더링은 LessonContent(공유 부품, AI Tutor와 함께 쓴다)가 맡는다 —
+    // lessonPage는 그 부품을 그대로 가져다 쓴다(같은 렌더러를 두 번 만들지 않는다).
+    assert.ok(lessonPage.includes("LessonContent"), "lessonPage가 LessonContent를 써야 한다");
+    assert.ok(lessonContent.includes("lesson.sections"));
+    assert.ok(lessonContent.includes("lesson.codeExamples"));
+    assert.ok(lessonContent.includes("lesson.linkedUnits"));
+    assert.ok(lessonContent.includes("inlineCodeRefs"));
   });
 
   it("Unit 상세는 본문 섹션 · 예제 · 관련 Lesson 을 렌더한다", () => {
     assert.ok(unitPage.includes("unit.sections"));
     assert.ok(unitPage.includes("unit.examples"));
     assert.ok(unitPage.includes("unit.linkedLessons"));
+  });
+});
+
+describe("curriculum-render.ts — 클라이언트 컴포넌트에서도 안전한 순수 렌더링 헬퍼", () => {
+  it("DB/Supabase server 클라이언트를 import하지 않는다(next/headers가 클라이언트 번들에 끌려가면 빌드가 깨진다)", () => {
+    // 설명 주석에는 이유를 적기 위해 그 경로를 문자열로 언급하므로, 실제 import 구문만 본다.
+    assert.ok(!/^import .*@\/lib\/supabase\/server/m.test(curriculumRender));
+    assert.ok(!/^import .*next\/headers/m.test(curriculumRender));
+  });
+
+  it("LessonContent는 값(inlineCodeRefs/SECTION_LABEL)을 curriculum.ts가 아니라 curriculum-render.ts에서 가져온다", () => {
+    assert.ok(lessonContent.includes('from "@/lib/curriculum-render"'));
+    assert.ok(
+      !/import\s*\{[^}]*\b(inlineCodeRefs|SECTION_LABEL)\b[^}]*\}\s*from\s*"@\/lib\/curriculum"/.test(lessonContent),
+      "value import는 curriculum.ts(서버 전용 supabase client를 최상단에서 import)에서 직접 가져오면 안 된다",
+    );
   });
 });
 

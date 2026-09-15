@@ -39,15 +39,12 @@ export async function POST(request: Request) {
       if (!context) {
         return NextResponse.json({ error: "Lesson을 찾을 수 없습니다." }, { status: 404 });
       }
+      // 교재 중심 레이아웃(AI Tutor 옆에서 실제 Lesson 자료를 보여준다)이 그대로 쓸 수
+      // 있도록 context.lesson(LessonDetail) 전체를 돌려준다 — /lesson/[...id] 페이지가
+      // 보여주는 것과 같은 데이터다(새 Tutor 전용 조회 경로를 만들지 않는다).
       return NextResponse.json({
         session,
-        lesson: {
-          id: context.lesson.id,
-          title: context.lesson.title,
-          mastery: context.lesson.mastery,
-          trackTitle: context.lesson.trackTitle,
-          chapterTitle: context.lesson.chapterTitle,
-        },
+        lesson: context.lesson,
         systemPrompt: context.systemPrompt,
       });
     }

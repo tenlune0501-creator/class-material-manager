@@ -548,41 +548,7 @@ export async function getUnit(unitId: string): Promise<UnitDetail | null> {
   }, null);
 }
 
-/** 섹션 본문의 `{{code: slug}}` 를 코드 예제의 코드 펜스로 치환한다 (Lesson 본문 렌더 전처리). */
-export function inlineCodeRefs(body: string, examples: LessonCodeExample[]): string {
-  const bySlug = new Map(examples.map((e) => [e.slug, e]));
-  return body.replace(/\{\{\s*code:\s*([a-z0-9-]+)\s*\}\}/g, (whole, slug: string) => {
-    const ex = bySlug.get(slug);
-    if (!ex || !ex.code) return whole;
-    const lang = ex.language ?? "";
-    return `\n\`\`\`${lang}\n${ex.code.replace(/\n$/, "")}\n\`\`\`\n`;
-  });
-}
-
-/** 섹션 타입 → 한국어 라벨 (curriculum/README.md §5 어휘). */
-export const SECTION_LABEL: Record<string, string> = {
-  goal: "이 Lesson을 끝내면",
-  prerequisite: "먼저 알아야 할 것",
-  dev_problem: "이게 없으면 겪는 문제",
-  concept: "개념",
-  mechanism: "동작 원리",
-  code: "코드",
-  code_breakdown: "코드 해설",
-  experiment: "직접 해 보기",
-  must_know: "반드시 기억할 것",
-  delegatable: "도구에 맡겨도 되는 것",
-  mission: "직접 구현 과제",
-  project_link: "실제 프로젝트에서",
-  interview_question: "면접 대비",
-  check_question: "이해 점검",
-  digest_prompt: "복습용 요약 프롬프트",
-  review: "한 줄 정리",
-  role: "이 코드가 하는 일",
-  where: "코드 위치",
-  flow: "데이터·상태 흐름",
-  why: "왜 이렇게 했나",
-  framework_role: "프레임워크가 대신하는 것",
-  related_lesson: "이어지는 Lesson",
-  caution: "주의점",
-  next: "다음",
-};
+// inlineCodeRefs/SECTION_LABEL은 DB를 읽지 않는 순수 렌더링 헬퍼라 curriculum-render.ts로
+// 옮겼다(그 파일 상단 주석 참고 — 클라이언트 컴포넌트에서도 이 파일 없이 쓸 수 있어야
+// 해서다). 기존 호출부가 고칠 필요 없게 여기서 그대로 재노출한다.
+export { inlineCodeRefs, SECTION_LABEL } from "./curriculum-render";
