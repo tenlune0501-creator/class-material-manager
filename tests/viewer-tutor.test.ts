@@ -28,6 +28,7 @@ const manifest = await readFile("viewer/public/manifest.webmanifest", "utf8");
 const sw = await readFile("viewer/public/sw.js", "utf8");
 const tutorApp = await readFile("viewer/components/tutor/TutorApp.tsx", "utf8");
 const tutorSidebar = await readFile("viewer/components/tutor/TutorSidebar.tsx", "utf8");
+const appShell = await readFile("viewer/components/AppShell.tsx", "utf8");
 const lessonContentSrc = await readFile("viewer/components/LessonContent.tsx", "utf8");
 const ttsChunking = await readFile("viewer/lib/tutor/tts-chunking.ts", "utf8");
 const voiceStateSrc = await readFile("viewer/lib/tutor/voice-state.ts", "utf8");
@@ -262,21 +263,92 @@ describe("교재 중심 레이아웃 — 기존 Lesson 렌더러 재사용", () 
     assert.ok(startRoute.includes("lesson: context.lesson"), "트리밍하지 않은 전체 LessonDetail을 돌려줘야 한다");
   });
 
-  it("Tutor 사이드바는 좁고 접을 수 있으며, 접으면 교재 영역이 넓어진다", () => {
-    assert.ok(tutorApp.includes("sidebarOpenDesktop"));
-    assert.ok(tutorApp.includes("sidebarOpenMobile"));
+  it("Tutor 사이드바는 Desktop/Mobile 공통으로 하나의 overlay Drawer이고 접을 수 있다", () => {
+    assert.ok(tutorApp.includes("const [sidebarOpen, setSidebarOpen]"), "Desktop/Mobile을 나누던 두 state가 하나로 합쳐져야 한다");
+    assert.ok(!tutorApp.includes("sidebarOpenDesktop") && !tutorApp.includes("sidebarOpenMobile"), "예전 이원화 state가 남아있으면 안 된다");
     assert.ok(tutorSidebar.includes("onCollapse"), "사이드바 안에 접기 버튼이 있어야 한다");
-  });
-
-  it("Desktop은 Lesson+Sidebar 나란히, 좁은 화면은 Drawer로 겹쳐 연다(기존 반응형 breakpoint 재사용)", () => {
-    assert.ok(tutorApp.includes('theme.breakpoints.up("md")'), "AppShell과 같은 breakpoint 기준을 재사용해야 한다");
-    assert.ok(tutorApp.includes("<Drawer"), "좁은 화면은 겹쳐 여는 Drawer를 쓴다");
   });
 
   it("대화 기록은 삭제하지 않고 접혀서 최근 발화만 보이다가 펼치면 전체를 본다", () => {
     assert.ok(tutorSidebar.includes("historyExpanded"));
     assert.ok(tutorSidebar.includes("messages.slice(-2)"), "접힌 기본 상태는 최근 발화만");
     assert.ok(tutorSidebar.includes("props.historyExpanded ? props.messages : lastMessages"));
+  });
+});
+
+/**
+ * 실사용 검수에서 발견된 문제: Desktop에서 [Navigation][Lesson][Tutor] 3열이
+ * 동시에 고정폭을 차지해 Lesson 본문이 지나치게 좁아졌다. 수업 중(view==="chat")에는
+ * Lesson이 화면의 주인공이 되도록 Navigation/Tutor를 모두 overlay Drawer로 바꾸고
+ * 기본 닫힘으로 둔다(2026-09-15 결정). 새 "수업 시작" state를 만들지 않고 기존
+ * view state를 재사용한다.
+ */
+describe("집중 학습 레이아웃 — Lesson이 항상 주 콘텐츠 (회귀 테스트)", () => {
+  it("A/B. AppShell은 useLessonFocusMode(focused)를 받으면 Desktop에서도 Navigation을 permanent가 아닌 overlay로 바꾼다", () => {
+    assert.ok(appShell.includes("export function useLessonFocusMode"), "TutorApp이 호출할 hook을 내보내야 한다");
+    assert.ok(appShell.includes("const desktopPermanent = isWide && !focusMode;"));
+    assert.ok(appShell.includes('variant={desktopPermanent ? "permanent" : "temporary"}'));
+    assert.ok(appShell.includes("open={desktopPermanent || open}"));
+  });
+
+  it("B/C. TutorApp은 view==='chat'일 때만 focus mode를 켠다 — 새 state를 만들지 않고 기존 view를 재사용", () => {
+    assert.ok(tutorApp.includes('useLessonFocusMode(view === "chat");'));
+    // 핸즈프리 때처럼 별도 "수업 시작 여부" state를 새로 만들면 안 된다.
+    assert.ok(!/const \[(?:lessonStarted|inSession|isTeaching)/i.test(tutorApp));
+  });
+
+  it('D. Lesson이 왼쪽 Navigation·오른쪽 Tutor 고정폭 때문에 좁아지는 3-column flex 구조가 없다', () => {
+    // 이전 구조: 바깥 Box가 display:flex이고 Lesson Box(flex:1)와 Tutor Box(width:380)가
+    // 형제로 나란히 배치돼 있었다. 이제 Tutor는 Drawer(별도 오버레이)뿐이어야 한다.
+    assert.ok(!/width:\s*380,\s*flexShrink:\s*0,\s*borderLeft/.test(tutorApp), "Tutor용 고정폭 flex 형제 Box가 남아있으면 안 된다");
+  });
+
+  it("E. Navigation trigger(☰)는 항상 aria-expanded를 갖고, 열림 상태를 그대로 반영한다", () => {
+    assert.ok(appShell.includes('aria-label="탐색 메뉴 열기"'));
+    assert.ok(appShell.includes("aria-expanded={open}"));
+  });
+
+  it("F. Tutor trigger는 사이드바가 닫혀 있을 때만 보이고 눌러도 Lesson 레이아웃을 바꾸지 않는다(Drawer만 연다)", () => {
+    assert.ok(tutorApp.includes("{!sidebarOpen && (") && tutorApp.includes("🎧 AI Tutor"));
+    assert.ok(tutorApp.includes("onClick={() => setSidebarOpen(true)}"));
+  });
+
+  it("G. Tutor Drawer는 MUI Drawer(overlay/portal)이므로 열려도 Lesson Box의 width를 다시 계산하지 않는다", () => {
+    const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
+    assert.ok(chatReturn.includes('<Drawer anchor="right"'));
+    // 예전처럼 Lesson과 Tutor가 같은 flex row의 형제로 폭을 나눠 갖는 구조(고정폭 380
+    // Box)가 없어야 한다 — 위 "D" 테스트가 그 정확한 패턴 부재를 확인한다.
+    assert.ok(chatReturn.includes("maxWidth: 900"), "Lesson 영역은 읽기 좋은 고정 상한만 가질 뿐 Drawer와 폭을 나누지 않는다");
+  });
+
+  it("기존 LessonContent에는 변경이 없다(레이아웃 문제이지 내부 디자인 문제가 아니다)", () => {
+    assert.ok(lessonContentSrc.includes("export function LessonContent"));
+    // TutorApp이 넘기는 방식(단일 lesson prop)이 그대로 유지돼야 한다.
+    assert.ok(tutorApp.includes("<LessonContent lesson={lessonDetail} />"));
+  });
+
+  it("H/I. Tutor Drawer 안 기능(대화 기록/마이크/TTS/텍스트 입력)과 반자동 마이크 자동 전송 흐름이 그대로 유지된다", () => {
+    assert.ok(tutorApp.includes("recording={voiceState ===") && tutorApp.includes("onMicClick="));
+    assert.ok(tutorApp.includes("onSend={() => void handleSend()}"));
+    assert.ok(tutorApp.includes("historyExpanded={historyExpanded}"));
+    assert.ok(tutorApp.includes("onStopSpeaking={stopSpeaking}"));
+    // 이전 회귀 테스트(반자동 마이크 A~J)가 이미 handleSend 자동 호출 등을 검증한다 — 여기서는
+    // 그 wiring이 Drawer 전환 후에도 sidebar 컴포넌트에 그대로 전달되는지만 본다.
+  });
+
+  it("K. Lesson을 새로 시작하면 Tutor Drawer는 항상 닫힌 채로 시작한다(이전 세션의 열림 상태가 새지 않음)", () => {
+    const handleStartBody = tutorApp.match(/async function handleStart\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(handleStartBody.includes("setSidebarOpen(false)"));
+  });
+
+  it("useLessonFocusMode는 라우트를 완전히 벗어나면(unmount) 일반 Navigation으로 복귀시킨다", () => {
+    const hookBody = appShell.match(/export function useLessonFocusMode[\s\S]*?\n\}/)?.[0] ?? "";
+    assert.ok(hookBody.includes("return () => setFocusMode(false);"));
+  });
+
+  it("L. Mobile/좁은 화면도 같은 Drawer 코드 경로를 쓴다 — Desktop 전용 별도 구현이 없다", () => {
+    const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
+    assert.equal((chatReturn.match(/<Drawer/g) ?? []).length, 1, "Desktop/Mobile을 나눠 Drawer를 두 번 렌더하면 안 된다");
   });
 });
 

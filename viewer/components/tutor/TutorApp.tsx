@@ -41,17 +41,15 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import Fab from "@mui/material/Fab";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
 
 import { LessonContent } from "@/components/LessonContent";
+import { useLessonFocusMode } from "@/components/AppShell";
 import { TutorSidebar } from "@/components/tutor/TutorSidebar";
 import type { LessonDetail } from "@/lib/curriculum";
 import { MeloTTSProvider } from "@/lib/tutor/providers/melotts-local";
@@ -119,10 +117,11 @@ function lessonLabel(lesson: LessonRef): string {
 
 export function TutorApp(props: TutorAppProps) {
   const router = useRouter();
-  const theme = useTheme();
-  const isWide = useMediaQuery(theme.breakpoints.up("md"));
 
   const [view, setView] = useState<View>("start");
+  // Lesson이 실제 학습 화면(수업 중)일 때만 왼쪽 Navigation을 접는다 — 새 상태를
+  // 만들지 않고 기존 view state를 그대로 재사용한다.
+  useLessonFocusMode(view === "chat");
   const [currentLesson, setCurrentLesson] = useState<LessonRef | null>(
     props.inProgressLesson ?? props.nextLesson,
   );
@@ -137,8 +136,9 @@ export function TutorApp(props: TutorAppProps) {
   const [voiceOn, setVoiceOn] = useState(false);
   const [voiceState, setVoiceStateRaw] = useState<VoiceState>("idle");
 
-  const [sidebarOpenDesktop, setSidebarOpenDesktop] = useState(true);
-  const [sidebarOpenMobile, setSidebarOpenMobile] = useState(false);
+  // 수업 중에는 Lesson이 화면의 주인공이다 — Tutor 패널은 필요할 때만 여는
+  // overlay(Drawer)이고 기본은 닫힘이다(Desktop/Mobile 공통, isWide로 나누지 않는다).
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
 
   const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
@@ -443,6 +443,7 @@ export function TutorApp(props: TutorAppProps) {
         : `안녕하세요! 오늘은 "${lesson.title}"를 같이 볼게요. 준비되면 말씀해 주세요 — 목표부터 짚어드릴까요?`;
       setMessages([{ role: "assistant", content: greeting }]);
       setView("chat");
+      setSidebarOpen(false); // 새 Lesson을 시작할 때마다 Tutor 패널은 항상 닫힌 채로 시작한다
       // handleStart가 (Strict Mode의 mount effect 이중 호출 등으로) 중복 실행됐다면
       // 가장 마지막 호출만 읽는다 — 기존 speak()를 그대로 재사용, 새 TTS 구현 없음.
       if (handleStartCallIdRef.current === callId) {
@@ -629,7 +630,9 @@ export function TutorApp(props: TutorAppProps) {
     );
   }
 
-  // view === "chat" — 교재(왼쪽, 가장 넓음) + Tutor 사이드바(오른쪽, 좁고 접힘)
+  // view === "chat" — 집중 학습 레이아웃: Lesson 교재가 주 콘텐츠이고, Tutor는
+  // 필요할 때만 여는 overlay Drawer다(왼쪽 Navigation은 AppShell이 useLessonFocusMode로
+  // 접는다 — 위 참고). Desktop/Mobile을 나눠 별도 구현하지 않는다.
   const lessonMeta = currentLesson ? `${currentLesson.trackTitle} · ${currentLesson.chapterTitle}` : "";
 
   const sidebar = (
@@ -662,13 +665,15 @@ export function TutorApp(props: TutorAppProps) {
       onCancelEnd={() => setShowEndConfirm(false)}
       onRequestEnd={beginEndSession}
       onLeaveWithoutSaving={abandonAndLeave}
-      onCollapse={isWide ? () => setSidebarOpenDesktop(false) : undefined}
+      onCollapse={() => setSidebarOpen(false)}
     />
   );
 
   return (
-    <Box sx={{ display: "flex", gap: 2, height: "calc(100vh - 140px)", minWidth: 0 }}>
-      <Box sx={{ flex: 1, minWidth: 0, overflowY: "auto", pr: 1 }}>
+    <Box sx={{ position: "relative", minWidth: 0 }}>
+      {/* 읽기 좋은 폭으로 제한한다(기존 /lesson/[...id] 페이지와 같은 900px 관례) —
+          Navigation/Tutor를 접어 넓어진 화면을 글자가 끝까지 늘어나는 데 쓰지 않는다. */}
+      <Box sx={{ maxWidth: 900 }}>
         <Stack direction="row" sx={{ alignItems: "flex-start", justifyContent: "space-between", gap: 2, mb: 1.5 }}>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }} noWrap>
@@ -678,9 +683,15 @@ export function TutorApp(props: TutorAppProps) {
               {lessonMeta}
             </Typography>
           </Box>
-          {isWide && !sidebarOpenDesktop && (
-            <Button size="small" variant="outlined" onClick={() => setSidebarOpenDesktop(true)} sx={{ flexShrink: 0 }}>
-              🎧 Tutor 펼치기
+          {!sidebarOpen && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setSidebarOpen(true)}
+              sx={{ flexShrink: 0 }}
+              aria-expanded={sidebarOpen}
+            >
+              🎧 AI Tutor
             </Button>
           )}
         </Stack>
@@ -695,27 +706,10 @@ export function TutorApp(props: TutorAppProps) {
         )}
       </Box>
 
-      {isWide ? (
-        sidebarOpenDesktop && (
-          <Box sx={{ width: 380, flexShrink: 0, borderLeft: 1, borderColor: "divider", pl: 2, py: 0.5 }}>{sidebar}</Box>
-        )
-      ) : (
-        <>
-          {!sidebarOpenMobile && (
-            <Fab
-              color="primary"
-              onClick={() => setSidebarOpenMobile(true)}
-              sx={{ position: "fixed", right: 16, bottom: 16, zIndex: (t) => t.zIndex.drawer + 1 }}
-              aria-label="AI Tutor 열기"
-            >
-              🎧
-            </Fab>
-          )}
-          <Drawer anchor="right" open={sidebarOpenMobile} onClose={() => setSidebarOpenMobile(false)}>
-            <Box sx={{ width: "88vw", maxWidth: 380, height: "100%", p: 2 }}>{sidebar}</Box>
-          </Drawer>
-        </>
-      )}
+      {/* Tutor는 항상 overlay Drawer다 — 열려도 위 Lesson 영역의 폭을 밀어내지 않는다. */}
+      <Drawer anchor="right" open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+        <Box sx={{ width: { xs: "88vw", sm: 380 }, maxWidth: 380, height: "100%", p: 2 }}>{sidebar}</Box>
+      </Drawer>
     </Box>
   );
 }

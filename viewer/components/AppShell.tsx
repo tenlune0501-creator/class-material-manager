@@ -6,7 +6,7 @@
  * 모든 페이지가 이 안에 담깁니다.
  * 과목과 자료 수가 항상 보여서 어디에 무엇이 있는지 파악하기 쉽습니다.
  */
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import NextLink from "next/link";
 
@@ -31,6 +31,27 @@ import type { SubjectInfo } from "@/lib/data";
 import { logout } from "@/lib/supabase/actions";
 
 const DRAWER_WIDTH = 240;
+
+/**
+ * "집중 학습" 모드 — Lesson 화면(AI Tutor 대화 중 등)이 왼쪽 Navigation을 항상
+ * 고정폭으로 차지하지 않도록, 그 화면이 켜 있는 동안만 Desktop에서도 permanent
+ * Drawer 대신 overlay(temporary)로 바꾼다. 상태 자체는 AppShell이 들고 있고,
+ * 켜고 끄는 setter만 Context로 내려준다 — Lesson 쪽(TutorApp 등)은
+ * `useLessonFocusMode(true/false)` 한 줄만 부르면 된다.
+ */
+const SetLessonFocusModeContext = createContext<(focused: boolean) => void>(() => {});
+
+export function useLessonFocusMode(focused: boolean): void {
+  const setFocusMode = useContext(SetLessonFocusModeContext);
+  useEffect(() => {
+    setFocusMode(focused);
+  }, [focused, setFocusMode]);
+  // 화면을 완전히 벗어나면(예: 다른 라우트로 이동) 항상 일반 Navigation으로 복귀한다.
+  useEffect(() => {
+    return () => setFocusMode(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
 
 /** 위쪽 검색창 */
 function SearchBox() {
@@ -187,12 +208,17 @@ export function AppShell({
   const theme = useTheme();
   const isWide = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const pathname = usePathname();
 
   // 로그인 화면은 사이드바 없이 이메일 · 비밀번호 · 버튼만 보여줍니다.
   if (pathname === "/login") {
     return <>{children}</>;
   }
+
+  // 집중 학습 모드에서는 Desktop에서도 permanent Drawer를 쓰지 않는다 — Lesson이
+  // 화면의 주인공이고, Navigation은 필요할 때만 여는 overlay가 된다.
+  const desktopPermanent = isWide && !focusMode;
 
   const drawerContent = (
     <>
@@ -333,73 +359,75 @@ export function AppShell({
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        color="default"
-        sx={{
-          zIndex: (t) => t.zIndex.drawer + 1,
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Toolbar sx={{ gap: 2 }}>
-          {!isWide && (
-            <IconButton edge="start" onClick={() => setOpen(!open)} aria-label="과목 목록 열기">
-              ☰
-            </IconButton>
-          )}
-
-          <Typography
-            component={NextLink}
-            href="/"
-            variant="h6"
-            sx={{
-              fontSize: "1rem",
-              fontWeight: 700,
-              textDecoration: "none",
-              color: "inherit",
-              whiteSpace: "nowrap",
-            }}
-          >
-            📚 수업자료 아카이브
-          </Typography>
-
-          <Box sx={{ flex: 1 }} />
-          <SearchBox />
-
-          <ThemeToggle />
-
-          <IconButton onClick={() => void logout()} aria-label="로그아웃" title="로그아웃" sx={{ ml: 1 }}>
-            🚪
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      {/* 넓은 화면에서는 항상 보이고, 좁으면 버튼으로 엽니다. */}
-      <Drawer
-        variant={isWide ? "permanent" : "temporary"}
-        open={isWide || open}
-        onClose={() => setOpen(false)}
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: DRAWER_WIDTH,
-            boxSizing: "border-box",
-            borderRight: "1px solid",
+    <SetLessonFocusModeContext.Provider value={setFocusMode}>
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <AppBar
+          position="fixed"
+          elevation={0}
+          color="default"
+          sx={{
+            zIndex: (t) => t.zIndex.drawer + 1,
+            borderBottom: "1px solid",
             borderColor: "divider",
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
+          }}
+        >
+          <Toolbar sx={{ gap: 2 }}>
+            {!desktopPermanent && (
+              <IconButton edge="start" onClick={() => setOpen(!open)} aria-label="탐색 메뉴 열기" aria-expanded={open}>
+                ☰
+              </IconButton>
+            )}
 
-      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 4 } }}>
-        <Toolbar />
-        {children}
+            <Typography
+              component={NextLink}
+              href="/"
+              variant="h6"
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                color: "inherit",
+                whiteSpace: "nowrap",
+              }}
+            >
+              📚 수업자료 아카이브
+            </Typography>
+
+            <Box sx={{ flex: 1 }} />
+            <SearchBox />
+
+            <ThemeToggle />
+
+            <IconButton onClick={() => void logout()} aria-label="로그아웃" title="로그아웃" sx={{ ml: 1 }}>
+              🚪
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+
+        {/* 넓은 화면 + 집중 학습 모드가 아니면 항상 보이고, 그 외에는 버튼으로 엽니다. */}
+        <Drawer
+          variant={desktopPermanent ? "permanent" : "temporary"}
+          open={desktopPermanent || open}
+          onClose={() => setOpen(false)}
+          sx={{
+            width: DRAWER_WIDTH,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: DRAWER_WIDTH,
+              boxSizing: "border-box",
+              borderRight: "1px solid",
+              borderColor: "divider",
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+
+        <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 4 } }}>
+          <Toolbar />
+          {children}
+        </Box>
       </Box>
-    </Box>
+    </SetLessonFocusModeContext.Provider>
   );
 }
