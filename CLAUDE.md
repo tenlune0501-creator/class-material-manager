@@ -54,3 +54,18 @@ Codex 리뷰 후 기존 `PROJECT_CONTEXT.md` 및 사용자 요구사항과 충�
 
 Codex의 제안은 자동 승인하지 않는다.
 `PROJECT_CONTEXT.md`와 사용자 요구사항에 맞는지 확인한 뒤 반영한다.
+
+## trace-mcp (선택적 코드 인덱스 도구)
+
+이 프로젝트에서 실측 검증(2026-09-29)한 결과, trace-mcp는 기본 분석 도구가 아니라
+효과가 확인된 영역에서만 쓰는 선택적 보조 도구다. `src/**` 일반 TS 모듈의 의존관계·영향
+분석, Next.js 라우트 구조 파악, 처음 보는 모듈 탐색에는 쓸 수 있다. 다음은 그 사용법에 대한
+최소 규칙이다.
+
+- trace-mcp 결과는 항상 가설로 취급한다. 중요한 호출관계·영향범위는 실제 소스로
+  교차검증한 뒤 보고한다.
+- 이 저장소에서는 trace-mcp의 `affectedTests` / `untested` 결과를 신뢰하지 않는다 —
+  `tests/`가 대상 소스 파일을 `readFile()` 문자열로 참조하는 구조라 구조적으로 누락될
+  수 있다(예: `tests/viewer-tutor.test.ts`).
+- `viewer/components/**`, `viewer/app/**/page.tsx`의 React 컴포넌트 내부 흐름 분석에는
+  trace-mcp를 쓰지 않고 일반 검색(grep 등)·소스 직접 확인을 우선한다.
