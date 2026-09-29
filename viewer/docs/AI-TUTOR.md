@@ -67,6 +67,7 @@ viewer/
     context.ts              현재 Lesson 기준 system prompt 빌더 (길이 상한 포함)
     progress.ts             진도/세션/복습 조회 + computeNextLesson (SELECT만)
     session.ts              세션 시작/종료 + 4개 테이블 upsert (쓰기)
+    resume-dto.ts           getResumeState() 결과를 JSON DTO로 (progress.ts↔/api/tutor/resume 공용)
   app/api/tutor/
     session/start/route.ts
     session/[id]/message/route.ts
@@ -74,8 +75,11 @@ viewer/
     session/[id]/finish/route.ts
     session/[id]/abandon/route.ts
     stt/route.ts
-  app/tutor/page.tsx         서버: getResumeState() → TutorApp에 props로 전달
-  components/tutor/TutorApp.tsx   클라이언트: 시작/대화/요약 상태 기계 전체
+    resume/route.ts          GET, getResumeState()를 얇게 감싼 lazy-fetch 전용 (아래 절 참고)
+  app/tutor/page.tsx         서버: getResumeState() → TutorApp(standalone)에 props로 전달
+  app/lesson/[...id]/page.tsx   서버: LessonTutorSidebar로 감싸 Tutor를 그 자리에 임베드(아래 절 참고)
+  components/tutor/TutorApp.tsx   클라이언트: 시작/대화/요약 상태 기계 전체 (standalone/sidebar 겸용)
+  components/tutor/LessonTutorSidebar.tsx   클라이언트: Lesson 화면 임베드 전용 위치/폭/열림 상태 래퍼
   public/manifest.webmanifest, sw.js, icon-*.png   PWA
   scripts/generate-pwa-icons.mjs   아이콘 생성 스크립트 (1회성, sharp 사용)
 
@@ -138,6 +142,59 @@ Piper 등)는 만들지 않았다. 복잡한 DI 프레임워크 없이 `provider
    `user_project_progress`) + `user_learning_notes`(confusing/review_later 누적) +
    `user_review_items`(복습 후보 → 실제 복습 항목, `prompt_hash = md5(prompt)`)에 반영한다.
    이미 `completed`인 세션에 다시 호출해도 안전하다(중복 제출 무시).
+
+## Lesson 화면 임베드 (Sidebar 모드, 2026-09-29)
+
+`/lesson/[...id]`에서 화면을 떠나지 않고 AI Tutor를 열 수 있다 — **두 번째 Tutor 구현을
+만들지 않고**, 기존 `TutorApp`을 새 `layoutMode` prop으로 재사용한다.
+
+- `layoutMode?: "standalone" | "sidebar"` (기본 `"standalone"`) — `/tutor`는 이 prop을
+  넘기지 않으므로 기존 동작이 그대로다. `"sidebar"`일 때는:
+  - `initialLesson`(화면에 보이는 정확한 Lesson)으로 시작을 고정한다 —
+    `allLessons.find(autoStartLessonId)` 조회에 의존하지 않는다(화면 Lesson과 Tutor
+    Lesson이 어긋날 위험 차단).
+  - 자기 Lesson 렌더링·자체 Drawer 없이 `TutorSidebar` 하나만 반환한다(위치/폭은 부모
+    책임).
+  - 왼쪽 Navigation을 건드리지 않는다(`useLessonFocusMode`는 standalone에서만 켠다).
+  - "저장하지 않고 나가기"/종료 후 화면은 `router.push` 대신 같은 화면에 머물며
+    `onRequestClose`로 패널만 닫는다(기존 `handleStart()` 재호출로 새 세션 재무장 —
+    새 로직 없음).
+- **`components/tutor/LessonTutorSidebar.tsx`**(신규, client)가 Lesson 페이지를 감싸
+  패널의 위치·폭·열림 상태만 책임진다. Tutor 세션은 이 컴포넌트가 처음 열릴 때만
+  `/api/tutor/resume`(`getResumeState()`를 그대로 감싼 얇은 GET)을 lazy-fetch해 시작한다
+  — Lesson을 그냥 읽기만 해도 세션이 생기지 않는다.
+  - **"닫기" ≠ unmount**: 한 번 열리면(`everOpened`) TutorApp은 계속 마운트된 채로
+    남고, 이후 열림/닫힘(`panelOpen`)은 순수 CSS 토글이다 — `messages`/`sessionId`/
+    `draft`가 보존돼 재오픈 시 대화가 이어진다. TutorApp에는 `active={panelOpen}`을
+    내려 닫힌 동안 뒤늦게 도착하는 마이크 시작/STT/TTS/세션시작 응답을 조용히 버리게
+    한다(제출·재생하지 않음) — 아래 참고.
+  - **Desktop push / Mobile overlay**: 같은 자리의 Box 하나가 `sx`만으로 두 모드를
+    표현한다(MUI Drawer는 기본적으로 닫히면 자식을 unmount해서 쓰지 않았다). push는
+    화면 폭 **1400px 이상**에서만 켠다 — Navigation(240)+본문 패딩(64)+패널(380)+
+    gap(24)을 빼면 900px(AppShell의 `md`)에서는 Lesson에 약 192px만 남아 2026-09-15에
+    고친 "3열이 Lesson을 좁게 만드는" 문제를 재현하기 때문에, AppShell의 breakpoint를
+    그대로 재사용하지 않고 독립된 값을 쓴다. 1400px 미만(1280/1366 등 흔한 노트북
+    포함)은 overlay(backdrop + Escape로 닫힘, Lesson 폭은 그대로).
+  - **Lesson이 바뀌면**: Lesson 페이지가 `<LessonTutorSidebar key={lesson.id}>`로
+    감싸므로, 다른 Lesson으로 이동하면 이 컴포넌트 전체가 강제로 새로 마운트된다 —
+    기존 unmount cleanup이 자동 실행되고, 새 mount는 `startSession()`의 기존
+    "다른 target이면 이전 active 세션을 abandoned로 정리" 로직에 그대로 의존한다(새
+    추적 로직 없음). 두 Lesson의 context가 한 세션에 섞이지 않는다.
+  - **마이크/STT/TTS 비동기 작업 취소**: `cleanupVoiceResources()`가 부르는
+    `MediaRecorder.stop()`은 원래 `recorder.onstop`에서 항상 전사·전송(`transcribeAndSend`)
+    으로 이어졌다 — 패널이 닫히는 동안 강제로 멈추면 "녹음 취소"가 아니라 "녹음 제출"이
+    되는 결함이었다. sidebar 모드 전용 `activeRef`(닫히면 false)로 `onMicClick`의
+    `getUserMedia` 이후·`recorder.onstop`·`transcribeAndSend`·`handleStart`·`speakReply`
+    진입점을 가드해, 닫힌 뒤 도착하는 응답은 상태를 반영하거나 재생하지 않고 버린다.
+    `messages`는 그대로 보존한다(사용자가 보낸 질문/받은 답변 자체는 사라지지 않아야
+    한다) — 숨겨진 곳에서 오디오가 재생되는 것만 막는다.
+  - **음성 정책은 바뀌지 않았다**: TTS 종료 후 idle 그대로, 자동 listening/VAD/
+    hands-free는 여전히 없다(2026-09-15 결정 유지).
+- 기존 `/tutor` standalone route는 그대로 유지한다(파일 자체를 수정하지 않았다) —
+  전체 화면으로 Tutor만 쓰고 싶을 때 계속 쓸 수 있다.
+- **범위 밖**: `/unit/[...id]`(project_unit)에는 적용하지 않았다 — `project_unit`
+  세션은 서버가 LLM context를 만들어주지 않아(`buildLessonContext`가 `lesson: "lesson"`
+  대상만 지원) 의미 있는 Tutor 연동이 아직 불가능하다(아래 "알려진 한계" 참고).
 
 ## 다음 Lesson 계산 (`lib/tutor/progress.ts:computeNextLesson`)
 

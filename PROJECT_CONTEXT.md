@@ -497,6 +497,15 @@ CMM을 개인 AI Tutor PWA로 확장했다. 상세 아키텍처·결정 근거·
   검증(`npm run test:live-groq`, 브라우저 종단 간 확인 포함). 검증 중 발견한 실제
   버그(마크다운 백틱이 MeloTTS 합성을 깨뜨림)를 그 자리에서 수정(`stripMarkdownForSpeech`).
   상세는 `TODO.md` "Groq 실사용(live) 검증 완료" 항목·`viewer/docs/AI-TUTOR.md`.
+- **Lesson 화면 내 AI Tutor(2026-09-29 완료)** — `/lesson/[...id]`를 떠나지 않고 그
+  자리에서 AI Tutor를 열 수 있다(별도 두 번째 Tutor 구현 없이 기존 TutorApp/
+  TutorSidebar/session lifecycle/Groq/STT/TTS를 재사용). Desktop은 화면이 충분히 넓을
+  때만(1400px+) Lesson+Tutor를 나란히 두고, 그보다 좁으면(노트북 포함)과 Mobile은
+  Lesson 가독성을 지키는 overlay로 보여준다. Sidebar를 닫아도 대화는 유지되고, 다른
+  Lesson으로 이동하면 새 Tutor 세션으로 전환해 이전 Lesson의 대화와 섞이지 않는다.
+  음성 정책(TTS 종료 후 idle, 자동 listening/VAD/hands-free 없음)은 그대로다. 기존
+  `/tutor` 전체화면 route도 유지한다. 구현 세부사항은 `viewer/docs/AI-TUTOR.md`
+  "Lesson 화면 임베드 (Sidebar 모드)" 절.
 
 ### AI 협업 원칙
 

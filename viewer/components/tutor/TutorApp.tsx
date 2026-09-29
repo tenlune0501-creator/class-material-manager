@@ -91,6 +91,24 @@ interface TutorAppProps {
   dueReviewItems: DueReviewItem[];
   allLessons: LessonRef[];
   lessonProgress: { lessonId: string; status: string }[];
+
+  // ── sidebar 모드 전용 (기본 "standalone" — /tutor는 이 prop들을 넘기지 않으므로
+  //     기존 동작이 그대로 유지된다) ────────────────────────────────────────
+  /** "standalone"(기본, /tutor 전체 화면) | "sidebar"(/lesson/[...id] 페이지에 임베드).
+   * 차이는 이 값 하나로 분기한다 — Tutor 로직을 복제하지 않는다. */
+  layoutMode?: "standalone" | "sidebar";
+  /** sidebar 모드에서만 쓰인다 — 지금 화면에 보이는 정확한 Lesson으로 시작을 고정한다.
+   * allLessons.find(autoStartLessonId) 조회에 의존하면(커리큘럼 목록에 없는 Lesson 등)
+   * 화면과 Tutor가 서로 다른 Lesson을 가리킬 위험이 있다. */
+  initialLesson?: LessonRef;
+  /** sidebar 모드에서만 쓰인다 — 부모가 패널을 지금 활성 상태로 보여주고 있는지(true)
+   * 숨겼는지(false). false가 되면 진행 중인 마이크 시작/STT/TTS/세션시작 응답이 뒤늦게
+   * 도착해도 조용히 버린다(제출·재생하지 않는다) — messages/sessionId/draft는 그대로
+   * 보존한다(재오픈 시 대화가 이어진다). 생략하면 항상 true(standalone 기존 동작). */
+  active?: boolean;
+  /** sidebar 모드에서만 쓰인다 — "접기"/닫기 등으로 부모에게 패널을 숨겨 달라고 요청한다
+   * (TutorApp 자신은 계속 마운트된 채로 남는다 — unmount하지 않아야 대화가 보존된다). */
+  onRequestClose?: () => void;
 }
 
 interface ChatMessage {
@@ -117,11 +135,13 @@ function lessonLabel(lesson: LessonRef): string {
 
 export function TutorApp(props: TutorAppProps) {
   const router = useRouter();
+  const layoutMode = props.layoutMode ?? "standalone";
 
   const [view, setView] = useState<View>("start");
   // Lesson이 실제 학습 화면(수업 중)일 때만 왼쪽 Navigation을 접는다 — 새 상태를
-  // 만들지 않고 기존 view state를 그대로 재사용한다.
-  useLessonFocusMode(view === "chat");
+  // 만들지 않고 기존 view state를 그대로 재사용한다. sidebar 모드는 /lesson 페이지
+  // 자신의 레이아웃이므로 왼쪽 Navigation을 건드리지 않는다(표준 화면 그대로 유지).
+  useLessonFocusMode(layoutMode === "standalone" && view === "chat");
   const [currentLesson, setCurrentLesson] = useState<LessonRef | null>(
     props.inProgressLesson ?? props.nextLesson,
   );
@@ -157,6 +177,16 @@ export function TutorApp(props: TutorAppProps) {
   /** 이번이 "가장 최근" handleStart 호출인지 판별— Strict Mode 등으로 handleStart가
    * 중복 호출돼도 최초 인사말이 두 번 재생되지 않게 한다(마지막 호출만 speak). */
   const handleStartCallIdRef = useRef(0);
+  /** sidebar 모드에서 패널이 "지금 화면에 보이는 활성 상태"인지 — false면 진행 중인
+   * 비동기 응답(마이크 시작/STT/세션시작)이 도착해도 조용히 버린다(제출·재생 안 함).
+   * standalone에서는 항상 true다(props.active를 넘기지 않으므로). */
+  const activeRef = useRef(true);
+  /** 닫힐 때(active: true→false)마다 올라간다 — "그 이전에 시작된" 마이크/STT 요청을
+   * 구분하는 용도다. activeRef만으로는 "닫기 전 시작 → 닫힘 → 다시 열림 → 응답 도착"
+   * 순서에서 다시 true가 돼 버려 오래된 녹음이 자동 제출되는 것을 못 막는다(Codex
+   * 최종 리뷰에서 발견). onMicClick/recorder.onstop/transcribeAndSend가 시작 시점의
+   * 값을 캡처해 응답 도착 시 비교한다. */
+  const requestEpochRef = useRef(0);
 
   // ── ref: 미디어/오디오 자원 ──
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -189,14 +219,38 @@ export function TutorApp(props: TutorAppProps) {
     voiceOnRef.current = voiceOn;
   }, [voiceOn]);
 
+  // sidebar 모드: 부모가 패널을 보이는 상태로 유지하는지를 그대로 따른다. 열림→닫힘
+  // 전환마다 진행 중이던 마이크/재생을 실제로 멈춘다(Codex 최종 리뷰: Escape/backdrop로
+  // 닫을 때는 "접기" 버튼과 달리 아무 정리도 안 하고 있었다 — 트리거와 무관하게 active
+  // 자체가 정리 시점이 되도록 한 곳으로 모았다).
+  useEffect(() => {
+    const next = props.active ?? true;
+    const wasActive = activeRef.current;
+    activeRef.current = next;
+    if (layoutMode === "sidebar" && wasActive && !next) {
+      requestEpochRef.current += 1;
+      cleanupVoiceResources();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.active]);
+
   // 언마운트 시 마이크/오디오를 반드시 정리한다.
   useEffect(() => {
-    return () => cleanupVoiceResources();
+    return () => {
+      activeRef.current = false;
+      cleanupVoiceResources();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ?lessonId= 로 들어오면 시작 화면 없이 바로 그 Lesson으로 시작한다.
+  // sidebar 모드: 지금 화면에 보이는 Lesson으로 시작을 고정한다(allLessons 조회에
+  // 의존하면 화면과 Tutor가 다른 Lesson을 가리킬 위험이 있다).
+  // standalone(/tutor): 기존과 동일하게 ?lessonId= 로 들어오면 목록에서 찾아 시작한다.
   useEffect(() => {
+    if (layoutMode === "sidebar") {
+      if (props.initialLesson) void handleStart(props.initialLesson);
+      return;
+    }
     if (props.autoStartLessonId) {
       const lesson = props.allLessons.find((l) => l.id === props.autoStartLessonId);
       if (lesson) void handleStart(lesson);
@@ -294,6 +348,14 @@ export function TutorApp(props: TutorAppProps) {
    * 최적화, tts-chunking.ts 상단 실측 주석 참고).
    */
   async function speakReply(rawText: string) {
+    // sidebar 모드에서 패널이 닫힌 뒤에는 화면에 보이지 않는 곳에서 음성이 재생되면
+    // 안 된다 — standalone에서는 activeRef가 항상 true라 영향이 없다. voiceState를
+    // 여기서 idle로 되돌리지 않으면 handleSend가 남겨둔 "thinking"이 그대로 굳어
+    // 입력이 잠긴 채로 남는다(Codex 최종 리뷰에서 발견).
+    if (!activeRef.current) {
+      setVoiceState("idle");
+      return;
+    }
     const myGen = ++ttsGenerationRef.current;
 
     if (!tts || !voiceOnRef.current) {
@@ -359,13 +421,22 @@ export function TutorApp(props: TutorAppProps) {
   // ── STT: 기존 /api/tutor/stt 재사용, 중지 시 그 구간의 오디오만 보낸다 ──
 
   /** 발화 종료는 프로그램이 판단하지 않는다 — 사용자가 ⏹로 직접 중지한 구간만 전달된다. */
-  async function transcribeAndSend(blob: Blob) {
+  /** myEpoch: 이 녹음을 시작할 때의 requestEpochRef 값 — 응답이 도착했을 때도 "그 사이
+   * 한 번이라도 닫혔다 나온" 녹음이 아닌지 확인한다. activeRef(지금 열려 있는지)만으로는
+   * "녹음 시작 → 닫힘 → 다시 열림 → 응답 도착" 순서에서 다시 true가 돼 버려 오래된
+   * 녹음이 자동 제출되는 것을 못 막는다(Codex 최종 리뷰에서 발견). */
+  async function transcribeAndSend(blob: Blob, myEpoch: number) {
     setVoiceState("transcribing");
     try {
       const form = new FormData();
       form.append("audio", blob, "recording.webm");
       const res = await fetch("/api/tutor/stt", { method: "POST", body: form });
       const data = await res.json();
+      if (!activeRef.current || requestEpochRef.current !== myEpoch) {
+        // 응답 도착 전에 패널이 닫혔거나, 닫혔다 다시 열렸다 — 오래된 녹음이니 버린다.
+        setVoiceState("idle");
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? "음성 인식에 실패했습니다.");
       const text = typeof data.text === "string" ? data.text.trim() : "";
 
@@ -378,6 +449,7 @@ export function TutorApp(props: TutorAppProps) {
       // 유효한 transcript는 별도 "보내기" 클릭 없이 즉시 Tutor로 보낸다.
       await handleSend(text);
     } catch (err) {
+      if (!activeRef.current || requestEpochRef.current !== myEpoch) return;
       setError(err instanceof Error ? err.message : "음성 인식에 실패했습니다. 텍스트로 입력해 주세요.");
       setVoiceState("idle");
     }
@@ -393,9 +465,15 @@ export function TutorApp(props: TutorAppProps) {
     }
     if (voiceStateRef.current !== "idle") return; // TTS 재생/응답 대기 중에는 새로 시작하지 않는다
 
+    const myEpoch = requestEpochRef.current;
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!activeRef.current || requestEpochRef.current !== myEpoch) {
+        // 권한 요청 중 패널이 닫혔다 — 뒤늦게 허용돼도 숨겨진 곳에서 녹음을 시작하지 않는다.
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const recorder = new MediaRecorder(stream);
       recordedChunksRef.current = [];
       recorder.ondataavailable = (e) => {
@@ -403,8 +481,12 @@ export function TutorApp(props: TutorAppProps) {
       };
       recorder.onstop = () => {
         stream.getTracks().forEach((track) => track.stop());
+        // cleanupVoiceResources()가 패널이 닫히는 동안 이 stop()을 유발했을 수 있다 —
+        // 그 경우 사용자가 직접 중지 버튼을 누른 게 아니므로 제출하지 않고 버린다
+        // (녹음 취소가 녹음 제출이 되면 안 된다).
+        if (!activeRef.current || requestEpochRef.current !== myEpoch) return;
         const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        void transcribeAndSend(blob);
+        void transcribeAndSend(blob, myEpoch);
       };
       mediaRecorderRef.current = recorder;
       recorder.start();
@@ -430,6 +512,10 @@ export function TutorApp(props: TutorAppProps) {
         body: JSON.stringify({ targetKind: "lesson", targetId: lesson.id }),
       });
       const data = await res.json();
+      // activeRef로 여기를 막지 않는다 — sidebar 모드에서 첫 세션 준비 중 패널이 닫히면
+      // (이 mount-effect 호출은 단 한 번뿐이라) 재시도할 방법이 없어 재오픈해도 영구
+      // 로딩에 빠진다(Codex 최종 리뷰에서 발견). 세션 데이터는 항상 반영하고, 숨겨진
+      // 곳에서 음성만 나지 않게 speakReply() 자신의 activeRef 체크로 막는다.
       if (!res.ok) throw new Error(data.error ?? "세션을 시작하지 못했습니다.");
 
       setCurrentLesson(lesson);
@@ -459,6 +545,10 @@ export function TutorApp(props: TutorAppProps) {
   async function handleSend(overrideText?: string) {
     const text = (overrideText ?? input).trim();
     if (!text || !sessionId || voiceStateRef.current === "thinking") return;
+    // 이 메시지가 "지금 세션"에 속한다는 표시 — 응답이 오는 동안 abandon 재무장 등으로
+    // 새 세션이 시작되면(handleStart가 다시 호출되면) 값이 바뀐다. 단순히 패널을
+    // 닫았다 여는 것만으로는 바뀌지 않으므로 그 경우엔 응답이 정상적으로 이어진다.
+    const sendGen = handleStartCallIdRef.current;
     setInput("");
     setError(null);
     setShowEndConfirm(false);
@@ -478,6 +568,7 @@ export function TutorApp(props: TutorAppProps) {
         body: JSON.stringify({ history: messages, message: text }),
       });
       const data = await res.json();
+      if (handleStartCallIdRef.current !== sendGen) return; // 그 사이 새 세션이 시작됐다 — 옛 답변을 섞지 않는다
       if (!res.ok) throw new Error(data.error ?? "응답을 받지 못했습니다.");
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
       setFallbackNotice(
@@ -485,6 +576,7 @@ export function TutorApp(props: TutorAppProps) {
       );
       void speakReply(data.reply);
     } catch (err) {
+      if (handleStartCallIdRef.current !== sendGen) return;
       setError(err instanceof Error ? err.message : "알 수 없는 오류");
       setVoiceState("idle");
     }
@@ -555,14 +647,30 @@ export function TutorApp(props: TutorAppProps) {
     setDraft(null);
   }
 
+  /** sidebar 모드: 현재 화면(Lesson 페이지)을 벗어나지 않는다 — abandon 후 같은 Lesson으로
+   * 새 세션을 조용히 준비해 두고(기존 handleStart 재사용, 새 로직 없음) 패널만 닫는다
+   * (재오픈하면 깨끗한 상태로 시작한다). standalone(/tutor): 기존과 동일하게 홈으로 이동. */
   async function abandonAndLeave() {
     cleanupVoiceResources();
-    if (sessionId) {
+    const abandonedSessionId = sessionId;
+    if (abandonedSessionId) {
       try {
-        await fetch(`/api/tutor/session/${sessionId}/abandon`, { method: "POST" });
+        await fetch(`/api/tutor/session/${abandonedSessionId}/abandon`, { method: "POST" });
       } catch {
         // 최선 노력 — 실패해도 화면 전환은 계속한다
       }
+    }
+    if (layoutMode === "sidebar") {
+      // abandon 응답을 기다리는 동안 패널이 닫히거나(재열기 전) 이 컴포넌트 자체가
+      // unmount됐을 수 있다(Lesson 변경) — 그 경우 여기서 새 세션을 재무장하면 다른
+      // Lesson으로 옮겨간 뒤에 이 Lesson의 세션이 서버에서 다시 active가 되어 새
+      // Lesson의 세션을 도리어 abandon시킨다(Codex 최종 리뷰에서 발견). activeRef는
+      // unmount 시에도 false로 남으므로(위 unmount effect) 여기서 재확인한다.
+      if (!activeRef.current) return;
+      if (currentLesson) await handleStart(currentLesson);
+      cleanupVoiceResources(); // 방금 준비된 세션의 인사말이 재생 중이면 나가기 전에 멈춘다
+      props.onRequestClose?.();
+      return;
     }
     router.push("/");
   }
@@ -570,6 +678,36 @@ export function TutorApp(props: TutorAppProps) {
   // ── 화면 ──────────────────────────────────────────────────────────
 
   if (view === "start") {
+    // sidebar 모드: 화면에 보이는 Lesson으로만 시작한다 — 다른 Lesson을 고를 수 있는
+    // 전체 목록 picker는 보여주지 않는다(화면 Lesson과 Tutor Lesson이 어긋나면 안 된다).
+    if (layoutMode === "sidebar") {
+      return (
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 6 }}>
+          {error ? (
+            <>
+              <Alert severity="error" sx={{ width: "100%" }}>
+                {error}
+              </Alert>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={starting}
+                onClick={() => props.initialLesson && void handleStart(props.initialLesson)}
+              >
+                다시 시도
+              </Button>
+            </>
+          ) : (
+            <>
+              <CircularProgress size={24} />
+              <Typography variant="caption" color="text.secondary">
+                이 Lesson으로 Tutor를 준비하고 있어요…
+              </Typography>
+            </>
+          )}
+        </Box>
+      );
+    }
     return (
       <StartScreen
         starting={starting}
@@ -618,14 +756,28 @@ export function TutorApp(props: TutorAppProps) {
         <Typography color="text.secondary" sx={{ mb: 3 }}>
           오늘 학습이 진도·복습 목록에 반영됐습니다. 다음에 들어오면 이어서 안내해 드릴게요.
         </Typography>
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" onClick={() => router.push("/tutor")}>
-            Tutor 홈으로
-          </Button>
-          <Button variant="outlined" onClick={() => router.push("/study")}>
-            복습 목록 보기
-          </Button>
-        </Stack>
+        {layoutMode === "sidebar" ? (
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              onClick={() => currentLesson && void handleStart(currentLesson)}
+            >
+              이 Lesson 새 대화 시작
+            </Button>
+            <Button variant="outlined" onClick={() => props.onRequestClose?.()}>
+              닫기
+            </Button>
+          </Stack>
+        ) : (
+          <Stack direction="row" spacing={1}>
+            <Button variant="contained" onClick={() => router.push("/tutor")}>
+              Tutor 홈으로
+            </Button>
+            <Button variant="outlined" onClick={() => router.push("/study")}>
+              복습 목록 보기
+            </Button>
+          </Stack>
+        )}
       </Box>
     );
   }
@@ -665,9 +817,19 @@ export function TutorApp(props: TutorAppProps) {
       onCancelEnd={() => setShowEndConfirm(false)}
       onRequestEnd={beginEndSession}
       onLeaveWithoutSaving={abandonAndLeave}
-      onCollapse={() => setSidebarOpen(false)}
+      onCollapse={
+        // 정리는 위 active effect가 트리거와 무관하게(▸ 버튼/Escape/backdrop 전부)
+        // 공통으로 처리한다 — 여기서는 부모에게 닫아 달라고 요청만 한다.
+        layoutMode === "sidebar" ? () => props.onRequestClose?.() : () => setSidebarOpen(false)
+      }
     />
   );
+
+  if (layoutMode === "sidebar") {
+    // 부모(LessonTutorSidebar)가 위치·폭·overlay 여부를 담당한다 — 여기서는 순수
+    // TutorSidebar 하나만 돌려준다(Lesson 렌더링도, 자체 Drawer도 없음 — 복제 없음).
+    return <Box sx={{ height: "100%" }}>{sidebar}</Box>;
+  }
 
   return (
     <Box sx={{ position: "relative", minWidth: 0 }}>
