@@ -23,11 +23,14 @@ import Typography from "@mui/material/Typography";
 
 import { NavCardArea } from "@/components/nav";
 import { getLearningList, subjectLabel } from "@/lib/data";
+import { getMaterialLessonIds } from "@/lib/curriculum";
+import { materialEntryHref } from "@/lib/url";
 
 export const metadata = { title: "통합 학습자료 · 수업자료 아카이브" };
 
 export default async function LearnPage() {
   const items = await getLearningList();
+  const destinations = await getMaterialLessonIds(items.map((item) => item.materialId));
 
   if (items.length === 0) {
     return (
@@ -115,7 +118,7 @@ export default async function LearnPage() {
             {list.map((item) => (
               <Card key={item.materialId} variant="outlined">
                 <NavCardArea
-                  href={`/m/${encodeURIComponent(item.materialId)}`}
+                  href={materialEntryHref(item.materialId, destinations)}
                   sx={{ p: 2.5, height: "100%", alignItems: "flex-start" }}
                 >
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1, flexWrap: "wrap" }}>

@@ -317,10 +317,12 @@ describe("Tutor 진입 통일 — 실제 수업은 Lesson + Tutor Sidebar 하나
     assert.ok(!tutorPage.includes("autoStartLessonId"));
   });
 
-  it("Lesson 페이지는 ?tutor=open 이면 패널을 열린 채로 시작한다 — 사용자가 여는 것과 같은 handleOpen 재사용", () => {
-    assert.ok(lessonPage.includes('initialOpen={tutor === "open"}'));
+  it("일반 Lesson 직접 진입은 query·진입 경로와 무관하게 Tutor를 연다", () => {
+    assert.ok(!lessonPage.includes("searchParams"));
+    assert.ok(!lessonTutorSidebar.includes("initialOpen"));
+    assert.ok(!/localStorage|sessionStorage|usePathname|useSearchParams/.test(lessonTutorSidebar));
     assert.ok(
-      /useEffect\(\(\) => \{\s*if \(initialOpen\) handleOpen\(\);/.test(lessonTutorSidebar),
+      /useEffect\(\(\) => \{\s*handleOpen\(\);/.test(lessonTutorSidebar),
       "자동 열기는 별도 로직이 아니라 기존 handleOpen(resume 로딩·마운트·focus)을 그대로 불러야 한다",
     );
   });

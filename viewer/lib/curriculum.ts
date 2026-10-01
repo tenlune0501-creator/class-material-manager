@@ -18,6 +18,7 @@
  */
 import { createClient } from "./supabase/server";
 import { dbConfigured } from "./db";
+import { lessonsForMaterials, materialLessonIds } from "./lesson-entry";
 
 // ── 타입 ────────────────────────────────────────────────────
 
@@ -95,6 +96,7 @@ export interface LessonDetail {
   estimatedMinutes: number | null;
   tags: string[];
   sources: unknown[];
+  relatedMaterialIds: string[];
   sections: LessonSection[];
   codeExamples: LessonCodeExample[];
   linkedUnits: LinkedUnitRef[];
@@ -205,6 +207,27 @@ const byOrd = (a: { ord: number }, b: { ord: number }) => a.ord - b.ord;
 
 // ── 커리큘럼 ────────────────────────────────────────────────
 
+const lessonEntryRows = () => selectAll(
+  "learning_lessons", "id,title,chapter_id,ord,lesson_kind,related_material_ids",
+);
+
+/** 과목·검색·복습의 기존 자료에서 같은 정규 Lesson으로 진입한다. DB 쓰기 없음. */
+export async function getLessonsForMaterials(materialIds: readonly string[]) {
+  if (materialIds.length === 0) return [];
+  return safe(async () => lessonsForMaterials(
+    await lessonEntryRows(),
+    materialIds,
+  ), []);
+}
+
+export async function getMaterialLessonIds(materialIds: readonly string[]): Promise<Record<string, string>> {
+  if (materialIds.length === 0) return {};
+  return safe(async () => materialLessonIds(
+    await lessonEntryRows(),
+    materialIds,
+  ), {});
+}
+
 export async function getTracks(): Promise<TrackSummary[]> {
   return safe(async () => {
     const [tracks, chapters, lessons] = await Promise.all([
@@ -284,7 +307,7 @@ export async function getLesson(lessonId: string): Promise<LessonDetail | null> 
     const supabase = await createClient();
     const { data: lessonRow, error } = await supabase
       .from("learning_lessons")
-      .select("id,chapter_id,title,mastery,lesson_kind,summary,estimated_minutes,tags,sources")
+      .select("id,chapter_id,title,mastery,lesson_kind,summary,estimated_minutes,tags,sources,related_material_ids")
       .eq("id", lessonId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -369,6 +392,7 @@ export async function getLesson(lessonId: string): Promise<LessonDetail | null> 
       estimatedMinutes: (l.estimated_minutes as number | null) ?? null,
       tags: asStrArray(l.tags),
       sources: asArr(l.sources),
+      relatedMaterialIds: asStrArray(l.related_material_ids),
       sections,
       codeExamples,
       linkedUnits,

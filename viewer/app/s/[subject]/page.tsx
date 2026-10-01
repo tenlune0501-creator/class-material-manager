@@ -14,6 +14,9 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 import { NavChip, NavListItem } from "@/components/nav";
+import { MaterialLessonLinks } from "@/components/MaterialLessonLinks";
+import { getMaterialLessonIds } from "@/lib/curriculum";
+import { materialEntryHref } from "@/lib/url";
 import {
   getMaterialsBySubject,
   getReferencesBySubject,
@@ -40,6 +43,7 @@ export default async function SubjectPage({
   ]);
 
   if (materials.length === 0 && references.length === 0) notFound();
+  const destinations = await getMaterialLessonIds(materials.map((material) => material.docId));
 
   return (
     <Box>
@@ -93,6 +97,7 @@ export default async function SubjectPage({
           </Typography>
 
           <List dense disablePadding>
+            <MaterialLessonLinks materialIds={materials.map((material) => material.docId)} />
             {materials.map((material) => {
               const sections = [
                 ...new Set(material.occurrences.map((o) => o.section).filter(Boolean)),
@@ -101,7 +106,7 @@ export default async function SubjectPage({
               return (
                 <NavListItem
                   key={material.docId}
-                  href={`/m/${encodeURIComponent(material.docId)}`}
+                  href={materialEntryHref(material.docId, destinations)}
                   sx={{ py: 1 }}
                 >
                   <ListItemText

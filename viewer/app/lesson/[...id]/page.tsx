@@ -10,11 +10,14 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import List from "@mui/material/List";
+import ListItemText from "@mui/material/ListItemText";
 
 import { LessonContent } from "@/components/LessonContent";
-import { NavChip } from "@/components/nav";
+import { NavChip, NavListItem } from "@/components/nav";
 import { LessonTutorSidebar } from "@/components/tutor/LessonTutorSidebar";
 import { getLesson } from "@/lib/curriculum";
+import { getMaterial } from "@/lib/data";
 
 const MASTERY_LABEL: Record<string, string> = {
   understand: "이해",
@@ -30,17 +33,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function LessonPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string[] }>;
-  searchParams: Promise<{ tutor?: string }>;
 }) {
   const { id } = await params;
-  // /tutor(수업 선택)에서 들어오면 ?tutor=open — Tutor 패널을 열린 채로 시작한다.
-  const { tutor } = await searchParams;
   const lessonId = id.map(decodeURIComponent).join("/");
   const lesson = await getLesson(lessonId);
   if (!lesson) notFound();
+  const originals = (await Promise.all(lesson.relatedMaterialIds.map(getMaterial)))
+    .filter((found) => found !== null);
 
   const trackHref = `/curriculum/${encodeURIComponent(lesson.trackId)}`;
   const ttsConfigured = Boolean(process.env.NEXT_PUBLIC_MELOTTS_URL);
@@ -57,7 +58,6 @@ export default async function LessonPage({
         chapterTitle: lesson.chapterTitle ?? "",
       }}
       ttsConfigured={ttsConfigured}
-      initialOpen={tutor === "open"}
     >
       <Box sx={{ maxWidth: 900 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -85,6 +85,15 @@ export default async function LessonPage({
         <Divider sx={{ mb: 3 }} />
 
         <LessonContent lesson={lesson} />
+        {originals.length > 0 && (
+          <List dense aria-label="원문 자료">
+            {originals.map(({ material }) => (
+              <NavListItem key={material.docId} href={`/m/${encodeURIComponent(material.docId)}`}>
+                <ListItemText primary={`원문 열기 · ${material.title}`} />
+              </NavListItem>
+            ))}
+          </List>
+        )}
       </Box>
     </LessonTutorSidebar>
   );

@@ -18,7 +18,10 @@
     "backup": "node src/index.ts backup",
     "restore": "node src/index.ts restore",
     "e2e": "playwright test",
-    "cmm-install-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-cmm-shortcut.ps1"
+    "cmm-install-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-cmm-shortcut.ps1",
+    "desktop:dev": "node desktop/cli.mjs dev",
+    "desktop:build": "node desktop/cli.mjs build",
+    "desktop:runtime": "node desktop/cli.mjs runtime-dev"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
@@ -30,6 +33,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@tauri-apps/cli": "2.12.1",
     "@types/node": "^24.0.0",
     "@types/turndown": "^5.0.6",
     "supabase": "^2.115.0",

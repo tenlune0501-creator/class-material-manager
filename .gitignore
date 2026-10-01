@@ -19,6 +19,13 @@ Thumbs.db
 viewer/tsconfig.tsbuildinfo
 *.tsbuildinfo
 
+# Local Desktop PoC build/tooling (never secrets or distribution artifacts)
+/.desktop-tools/
+/desktop/.runtime/
+/src-tauri/target/
+/src-tauri/gen/
+/viewer/.next-desktop/
+
 # Playwright
 test-results/
 playwright-report/

@@ -16,6 +16,9 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 import { NavListItem } from "@/components/nav";
+import { MaterialLessonLinks } from "@/components/MaterialLessonLinks";
+import { getMaterialLessonIds } from "@/lib/curriculum";
+import { materialEntryHref } from "@/lib/url";
 import { search, subjectLabel } from "@/lib/data";
 
 export default async function SearchPage({
@@ -43,6 +46,7 @@ export default async function SearchPage({
 
   const materials = hits.filter((h) => h.type === "material");
   const references = hits.filter((h) => h.type === "reference");
+  const destinations = await getMaterialLessonIds(materials.map((hit) => decodeURIComponent(hit.href.slice("/m/".length))));
 
   /** 표시 개수가 전체보다 적으면 "n건 중 m건" 으로 알려 줍니다. */
   const countLabel = (shown: number, total: number): string =>
@@ -75,10 +79,13 @@ export default async function SearchPage({
             </Typography>
 
             <List dense disablePadding>
+              {label === "수업자료" && (
+                <MaterialLessonLinks materialIds={materials.map((hit) => decodeURIComponent(hit.href.slice("/m/".length)))} />
+              )}
               {items.map((hit) => (
                 <NavListItem
                   key={hit.href}
-                  href={hit.href}
+                  href={hit.type === "material" ? materialEntryHref(decodeURIComponent(hit.href.slice("/m/".length)), destinations) : hit.href}
                   sx={{ py: 1.2, alignItems: "flex-start" }}
                 >
                   <ListItemText

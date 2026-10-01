@@ -17,6 +17,14 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  // Desktop has its own output; web dev/build keeps the existing .next directory.
+  ...(process.env.CMM_DESKTOP === "1" ? { distDir: ".next-desktop" } : {}),
+  env: {
+    NEXT_PUBLIC_CMM_DESKTOP: process.env.CMM_DESKTOP === "1" ? "1" : "0",
+    ...(process.env.CMM_DESKTOP === "1"
+      ? { NEXT_PUBLIC_MELOTTS_URL: "/__cmm_desktop/melotts" }
+      : {}),
+  },
   turbopack: { root: here },
 
   // 서버에서만 쓰는 패키지가 브라우저로 딸려가지 않게 합니다.

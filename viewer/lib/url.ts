@@ -81,3 +81,10 @@ export function lessonHref(lessonId: string, options: { openTutor?: boolean } = 
   const path = `/lesson/${lessonId.split("/").map(encodeURIComponent).join("/")}`;
   return options.openTutor ? `${path}?tutor=open` : path;
 }
+
+/** 일반 학습 목록의 목적지. 원문 열기는 직접 /m 링크를 사용해 우회 없이 보존한다. */
+export function materialEntryHref(materialId: string, destinations: Readonly<Record<string, string>>): string {
+  return Object.hasOwn(destinations, materialId)
+    ? lessonHref(destinations[materialId]!)
+    : `/m/${encodeURIComponent(materialId)}`;
+}

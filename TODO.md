@@ -171,6 +171,9 @@
 
 ## 나중에 / 미결 판단
 
+* [ ] **한국어 Tutor TTS의 영문 개발 용어 pronunciation normalization 검토** — HTML,
+  article 등 실제 MeloTTS 발음 확인 후 speech-only dictionary 적용 검토. 별도 후속 작업.
+
 * [ ] **refresh 수집 소프트 실패 조사 (별도 진행)** — 2026-08-27 `refresh` 실행 시 Google
   문서 18건 + 파일 42건이 재수집 실패(403/404 추정). 파이프라인은 기존 로컬 사본을 유지하고
   넘어갔고(`index.json` 393 유지, `failed.json` 빈 상태, `collect-status` = SUCCESS),

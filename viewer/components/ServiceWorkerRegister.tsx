@@ -10,6 +10,9 @@ import { useEffect } from "react";
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
+    // The Desktop bootstrap clears only its isolated origin before loading Next.
+    // Keep web/PWA registration unchanged; never install a worker on Desktop.
+    if (process.env.NEXT_PUBLIC_CMM_DESKTOP === "1") return;
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {
         // 등록 실패해도 앱은 평소대로 동작한다(설치 가능성만 없어질 뿐).

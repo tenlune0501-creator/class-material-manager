@@ -23,6 +23,9 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
 import { StudyCard } from "@/components/StudyCard";
+import { MaterialLessonLinks } from "@/components/MaterialLessonLinks";
+import { getMaterialLessonIds } from "@/lib/curriculum";
+import { materialEntryHref } from "@/lib/url";
 import { NavChip, NavListItem } from "@/components/nav";
 import {
   PRIORITY_COLOR,
@@ -93,6 +96,10 @@ export default async function StudyPage({
   const notableMaterials = materials
     .filter((material) => material.priority !== "KEEP")
     .filter((material) => !selectedSubject || material.subject === selectedSubject);
+  const destinations = await getMaterialLessonIds([
+    ...notableMaterials.map((material) => material.materialId),
+    ...sorted.flatMap((guide) => guide.materials.map((material) => material.materialId)),
+  ]);
 
   const link = (nextPriority: string, nextSubject: string): string => {
     const parts: string[] = [];
@@ -206,8 +213,9 @@ export default async function StudyPage({
           </Typography>
           <Paper variant="outlined">
             <List dense disablePadding>
+              <MaterialLessonLinks materialIds={notableMaterials.map((material) => material.materialId)} />
               {notableMaterials.slice(0, 12).map((material) => (
-                <NavListItem key={material.materialId} href={`/m/${encodeURIComponent(material.materialId)}`}>
+                <NavListItem key={material.materialId} href={materialEntryHref(material.materialId, destinations)}>
                   <ListItemText
                     primary={
                       <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
@@ -251,7 +259,7 @@ export default async function StudyPage({
             </Typography>
           </Typography>
           {sorted.slice(0, LIMIT).map((guide) => (
-            <StudyCard key={guide.comparisonId} guide={guide} showSubject={!selectedSubject} />
+            <StudyCard key={guide.comparisonId} guide={guide} showSubject={!selectedSubject} destinations={destinations} />
           ))}
         </>
       ) : (
@@ -266,7 +274,7 @@ export default async function StudyPage({
                 </Typography>
               </Typography>
               {group.slice(0, LIMIT).map((guide) => (
-                <StudyCard key={guide.comparisonId} guide={guide} showSubject={!selectedSubject} />
+                <StudyCard key={guide.comparisonId} guide={guide} showSubject={!selectedSubject} destinations={destinations} />
               ))}
             </Box>
           );

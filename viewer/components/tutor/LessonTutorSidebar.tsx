@@ -9,8 +9,8 @@
  * 일은 딱 하나, "이 패널을 화면 어디에 어떻게 보여줄지"뿐이다(위치/폭/열림 상태).
  *
  * ■ 마운트를 유지한다("닫기" ≠ unmount)
- * 최초로 열기 전에는 TutorApp을 마운트조차 하지 않는다(`everOpened`) — Lesson을 그냥
- * 읽기만 해도 Tutor 세션이 생기면 안 되기 때문이다. 한 번 열리고 나면 이후의 "닫기"는
+ * Lesson 진입 시 기본으로 열린다. 최초 열기와 데이터 로딩 후 TutorApp을 마운트한다.
+ * 한 번 열리고 나면 이후의 "닫기"는
  * 순수 표시(CSS) 토글일 뿐이다(`panelOpen`) — TutorApp은 계속 마운트된 채로 남아
  * messages/sessionId/draft를 그대로 들고 있는다(재오픈하면 대화가 이어진다).
  * TutorApp에는 `active={panelOpen}`을 내려준다 — 닫힌 동안 뒤늦게 도착하는 마이크/STT/
@@ -55,13 +55,10 @@ export interface LessonTutorSidebarLesson {
 export function LessonTutorSidebar({
   lesson,
   ttsConfigured,
-  initialOpen = false,
   children,
 }: {
   lesson: LessonTutorSidebarLesson;
   ttsConfigured: boolean;
-  /** /tutor(수업 선택)에서 이 Lesson으로 들어왔을 때 — 패널을 처음부터 열어 수업을 시작한다. */
-  initialOpen?: boolean;
   children: React.ReactNode;
 }) {
   const isWide = useMediaQuery(`(min-width:${PUSH_MIN_WIDTH_PX}px)`);
@@ -139,10 +136,10 @@ export function LessonTutorSidebar({
     focusAfterPaint(() => toggleButtonRef.current);
   }
 
-  // 수업 선택 화면에서 들어온 경우: 사용자가 버튼을 누른 것과 똑같이 연다(같은 경로 재사용 —
+  // 모든 Lesson 진입에서 사용자가 버튼을 누른 것과 똑같이 연다(같은 경로 재사용 —
   // resume 로딩·TutorApp 마운트·focus 처리가 전부 handleOpen 한 곳에 있다). 마운트 시 1회.
   useEffect(() => {
-    if (initialOpen) handleOpen();
+    handleOpen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

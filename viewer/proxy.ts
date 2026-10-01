@@ -14,7 +14,8 @@ export async function proxy(request: NextRequest) {
   // 서버 코드를 다시 실행하지 않습니다. 그래서 24시간 자동 갱신 감지는 모든 요청이
   // 실제로 거치는 이 미들웨어에서 합니다. 응답을 보낸 뒤(after)에 실행되므로
   // 화면 표시를 기다리게 하지 않습니다.
-  after(() => checkAndTriggerRefresh());
+  // Local Desktop must not dispatch production refresh workflows on navigation.
+  if (process.env.CMM_DESKTOP !== "1") after(() => checkAndTriggerRefresh());
 
   return updateSession(request);
 }
