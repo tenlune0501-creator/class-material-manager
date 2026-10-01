@@ -37,6 +37,20 @@ const lessonTutorSidebar = await readFile("viewer/components/tutor/LessonTutorSi
 const lessonPage = await readFile("viewer/app/lesson/[...id]/page.tsx", "utf8");
 const resumeRoute = await readFile("viewer/app/api/tutor/resume/route.ts", "utf8");
 const resumeDto = await readFile("viewer/lib/tutor/resume-dto.ts", "utf8");
+const tutorPage = await readFile("viewer/app/tutor/page.tsx", "utf8");
+const voiceIndicator = await readFile("viewer/components/tutor/VoiceIndicator.tsx", "utf8");
+const supabaseProxy = await readFile("viewer/lib/supabase/proxy.ts", "utf8");
+const loginActions = await readFile("viewer/lib/supabase/actions.ts", "utf8");
+const loginPage = await readFile("viewer/app/login/page.tsx", "utf8");
+const loginForm = await readFile("viewer/app/login/LoginForm.tsx", "utf8");
+
+/** 함수 본문(선언부터 2칸 들여쓴 닫는 중괄호까지)을 잘라온다 — 이 파일 전체의 기존 관례. */
+function fnBody(src: string, signature: string): string {
+  const start = src.indexOf(signature);
+  if (start === -1) return "";
+  const end = src.indexOf("\n  }\n", start);
+  return end === -1 ? "" : src.slice(start, end + 5);
+}
 
 describe("Groq Provider 경계", () => {
   it("LLM/STT 모두 GROQ_API_KEY 를 생성자로만 받는다 (프로세스 환경변수 직접 참조는 팩토리에서만)", () => {
@@ -253,24 +267,74 @@ describe("음성 UX 안전 규칙", () => {
   });
 });
 
-describe("교재 중심 레이아웃 — 기존 Lesson 렌더러 재사용", () => {
-  it("AI Tutor 전용 Lesson 렌더러를 새로 만들지 않고 LessonContent를 그대로 쓴다", () => {
-    assert.ok(tutorApp.includes('import { LessonContent } from "@/components/LessonContent"'));
-    assert.ok(tutorApp.includes("<LessonContent lesson={lessonDetail} />"));
+/**
+ * 2026-09-30 결정: 실제 수업 UI는 /lesson/[...id] 의 [Lesson + AI Tutor Sidebar] 하나뿐이다.
+ * /tutor 는 수업 "선택"만 하고 고르면 그 Lesson 화면으로 이동한다(?tutor=open). 이전의
+ * /tutor 전용 채팅형 수업 화면(TutorApp standalone chat + 자체 Drawer + LessonContent)은
+ * 제거했다 — Tutor UI를 두 벌 유지하지 않는다.
+ */
+describe("Tutor 진입 통일 — 실제 수업은 Lesson + Tutor Sidebar 하나", () => {
+  it("TutorApp은 Lesson 본문을 직접 그리지 않는다 — 교재는 Lesson 페이지의 LessonContent 한 곳뿐", () => {
+    assert.ok(lessonPage.includes("<LessonContent lesson={lesson} />"), "Lesson 페이지가 기존 렌더러를 그대로 쓴다");
+    assert.ok(
+      !tutorApp.includes('from "@/components/LessonContent"') && !tutorApp.includes("<LessonContent"),
+      "TutorApp이 교재를 다시 렌더하면 수업 화면이 두 벌이 된다",
+    );
     assert.ok(
       !/lesson\.sections\.map|lesson\.codeExamples\.map/.test(tutorApp),
       "TutorApp이 섹션/코드예제를 직접 렌더하면 안 된다 — LessonContent에 위임",
     );
+    assert.ok(lessonContentSrc.includes("export function LessonContent"));
   });
 
-  it("session/start가 Tutor context뿐 아니라 화면에 보여줄 Lesson 전체(LessonDetail)도 함께 돌려준다", () => {
-    assert.ok(startRoute.includes("lesson: context.lesson"), "트리밍하지 않은 전체 LessonDetail을 돌려줘야 한다");
-  });
-
-  it("Tutor 사이드바는 Desktop/Mobile 공통으로 하나의 overlay Drawer이고 접을 수 있다", () => {
-    assert.ok(tutorApp.includes("const [sidebarOpen, setSidebarOpen]"), "Desktop/Mobile을 나누던 두 state가 하나로 합쳐져야 한다");
-    assert.ok(!tutorApp.includes("sidebarOpenDesktop") && !tutorApp.includes("sidebarOpenMobile"), "예전 이원화 state가 남아있으면 안 된다");
+  it("TutorApp에 별도 수업 화면용 Drawer/열림 state/focus mode가 남아있지 않다", () => {
+    for (const needle of ["import Drawer", "<Drawer", "sidebarOpen", "useLessonFocusMode", "lessonDetail"]) {
+      assert.ok(!tutorApp.includes(needle), `${needle} — standalone 채팅형 수업 화면의 잔재`);
+    }
+    // 예전처럼 Lesson과 Tutor가 같은 flex row의 형제로 폭을 나눠 갖는 구조(고정폭 380 Box)도 없어야 한다.
+    assert.ok(!/width:\s*380,\s*flexShrink:\s*0,\s*borderLeft/.test(tutorApp));
     assert.ok(tutorSidebar.includes("onCollapse"), "사이드바 안에 접기 버튼이 있어야 한다");
+  });
+
+  it("chat view는 TutorSidebar 하나만 돌려준다(위치·폭·overlay는 LessonTutorSidebar 담당)", () => {
+    const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
+    assert.ok(chatReturn.includes('return <Box sx={{ height: "100%" }}>{sidebar}</Box>;'));
+    assert.equal((chatReturn.match(/return /g) ?? []).length, 1, "chat view의 다른 레이아웃 분기가 없어야 한다");
+  });
+
+  it("/tutor 수업 선택 → Lesson 화면으로 이동(?tutor=open) — standalone에서 세션을 직접 시작하지 않는다", () => {
+    const openBody = tutorApp.match(/function openLessonPage\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.ok(openBody.includes("router.push(lessonHref(lesson.id, { openTutor: true }));"));
+    assert.ok(tutorApp.includes("onPick={openLessonPage}"), "StartScreen의 선택은 Lesson 화면 이동이어야 한다");
+    assert.ok(!tutorApp.includes("onPick={handleStart}"), "standalone에서 handleStart로 수업을 시작하면 수업 화면이 두 벌이 된다");
+    const mountEffect = tutorApp.match(/useEffect\(\(\) => \{\s*if \(layoutMode === "sidebar"\) \{[\s\S]*?\n  \}, \[\]\);/)?.[0] ?? "";
+    assert.ok(mountEffect, "mount effect를 찾을 수 없습니다");
+    assert.ok(!mountEffect.includes("autoStartLessonId"), "standalone 자동 시작 경로는 제거됐다");
+  });
+
+  it("/tutor?lessonId= (예전 바로 시작 링크)는 같은 Lesson 화면으로 redirect한다", () => {
+    assert.ok(tutorPage.includes("if (lessonId) redirect(lessonHref(lessonId, { openTutor: true }));"));
+    assert.ok(!tutorPage.includes("autoStartLessonId"));
+  });
+
+  it("Lesson 페이지는 ?tutor=open 이면 패널을 열린 채로 시작한다 — 사용자가 여는 것과 같은 handleOpen 재사용", () => {
+    assert.ok(lessonPage.includes('initialOpen={tutor === "open"}'));
+    assert.ok(
+      /useEffect\(\(\) => \{\s*if \(initialOpen\) handleOpen\(\);/.test(lessonTutorSidebar),
+      "자동 열기는 별도 로직이 아니라 기존 handleOpen(resume 로딩·마운트·focus)을 그대로 불러야 한다",
+    );
+  });
+
+  it("AppShell의 Navigation trigger(☰)는 항상 aria-expanded를 갖고, 열림 상태를 그대로 반영한다", () => {
+    assert.ok(appShell.includes('aria-label="탐색 메뉴 열기"'));
+    assert.ok(appShell.includes("aria-expanded={open}"));
+  });
+
+  it("사이드바 wiring(대화 기록/마이크/TTS/텍스트 입력)이 그대로 전달된다", () => {
+    assert.ok(tutorApp.includes("recording={voiceState ===") && tutorApp.includes("onMicClick={onMicClick}"));
+    assert.ok(tutorApp.includes("onSend={() => void handleSend()}"));
+    assert.ok(tutorApp.includes("historyExpanded={historyExpanded}"));
+    assert.ok(tutorApp.includes("onStopSpeaking={stopSpeaking}"));
   });
 
   it("대화 기록은 삭제하지 않고 접혀서 최근 발화만 보이다가 펼치면 전체를 본다", () => {
@@ -278,84 +342,9 @@ describe("교재 중심 레이아웃 — 기존 Lesson 렌더러 재사용", () 
     assert.ok(tutorSidebar.includes("messages.slice(-2)"), "접힌 기본 상태는 최근 발화만");
     assert.ok(tutorSidebar.includes("props.historyExpanded ? props.messages : lastMessages"));
   });
-});
 
-/**
- * 실사용 검수에서 발견된 문제: Desktop에서 [Navigation][Lesson][Tutor] 3열이
- * 동시에 고정폭을 차지해 Lesson 본문이 지나치게 좁아졌다. 수업 중(view==="chat")에는
- * Lesson이 화면의 주인공이 되도록 Navigation/Tutor를 모두 overlay Drawer로 바꾸고
- * 기본 닫힘으로 둔다(2026-09-15 결정). 새 "수업 시작" state를 만들지 않고 기존
- * view state를 재사용한다.
- */
-describe("집중 학습 레이아웃 — Lesson이 항상 주 콘텐츠 (회귀 테스트)", () => {
-  it("A/B. AppShell은 useLessonFocusMode(focused)를 받으면 Desktop에서도 Navigation을 permanent가 아닌 overlay로 바꾼다", () => {
-    assert.ok(appShell.includes("export function useLessonFocusMode"), "TutorApp이 호출할 hook을 내보내야 한다");
-    assert.ok(appShell.includes("const desktopPermanent = isWide && !focusMode;"));
-    assert.ok(appShell.includes('variant={desktopPermanent ? "permanent" : "temporary"}'));
-    assert.ok(appShell.includes("open={desktopPermanent || open}"));
-  });
-
-  it("B/C. TutorApp은 view==='chat'일 때만 focus mode를 켠다 — 새 state를 만들지 않고 기존 view를 재사용", () => {
-    // 2026-09-29: /lesson 페이지에 임베드되는 sidebar 모드는 왼쪽 Navigation을 건드리지
-    // 않아야 하므로(그 페이지 자신의 레이아웃) standalone일 때만 focus mode를 켠다 —
-    // view state 자체를 새로 만들지 않는다는 원래 취지는 그대로다.
-    assert.ok(tutorApp.includes('useLessonFocusMode(layoutMode === "standalone" && view === "chat");'));
-    // 핸즈프리 때처럼 별도 "수업 시작 여부" state를 새로 만들면 안 된다.
-    assert.ok(!/const \[(?:lessonStarted|inSession|isTeaching)/i.test(tutorApp));
-  });
-
-  it('D. Lesson이 왼쪽 Navigation·오른쪽 Tutor 고정폭 때문에 좁아지는 3-column flex 구조가 없다', () => {
-    // 이전 구조: 바깥 Box가 display:flex이고 Lesson Box(flex:1)와 Tutor Box(width:380)가
-    // 형제로 나란히 배치돼 있었다. 이제 Tutor는 Drawer(별도 오버레이)뿐이어야 한다.
-    assert.ok(!/width:\s*380,\s*flexShrink:\s*0,\s*borderLeft/.test(tutorApp), "Tutor용 고정폭 flex 형제 Box가 남아있으면 안 된다");
-  });
-
-  it("E. Navigation trigger(☰)는 항상 aria-expanded를 갖고, 열림 상태를 그대로 반영한다", () => {
-    assert.ok(appShell.includes('aria-label="탐색 메뉴 열기"'));
-    assert.ok(appShell.includes("aria-expanded={open}"));
-  });
-
-  it("F. Tutor trigger는 사이드바가 닫혀 있을 때만 보이고 눌러도 Lesson 레이아웃을 바꾸지 않는다(Drawer만 연다)", () => {
-    assert.ok(tutorApp.includes("{!sidebarOpen && (") && tutorApp.includes("🎧 AI Tutor"));
-    assert.ok(tutorApp.includes("onClick={() => setSidebarOpen(true)}"));
-  });
-
-  it("G. Tutor Drawer는 MUI Drawer(overlay/portal)이므로 열려도 Lesson Box의 width를 다시 계산하지 않는다", () => {
-    const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
-    assert.ok(chatReturn.includes('<Drawer anchor="right"'));
-    // 예전처럼 Lesson과 Tutor가 같은 flex row의 형제로 폭을 나눠 갖는 구조(고정폭 380
-    // Box)가 없어야 한다 — 위 "D" 테스트가 그 정확한 패턴 부재를 확인한다.
-    assert.ok(chatReturn.includes("maxWidth: 900"), "Lesson 영역은 읽기 좋은 고정 상한만 가질 뿐 Drawer와 폭을 나누지 않는다");
-  });
-
-  it("기존 LessonContent에는 변경이 없다(레이아웃 문제이지 내부 디자인 문제가 아니다)", () => {
-    assert.ok(lessonContentSrc.includes("export function LessonContent"));
-    // TutorApp이 넘기는 방식(단일 lesson prop)이 그대로 유지돼야 한다.
-    assert.ok(tutorApp.includes("<LessonContent lesson={lessonDetail} />"));
-  });
-
-  it("H/I. Tutor Drawer 안 기능(대화 기록/마이크/TTS/텍스트 입력)과 반자동 마이크 자동 전송 흐름이 그대로 유지된다", () => {
-    assert.ok(tutorApp.includes("recording={voiceState ===") && tutorApp.includes("onMicClick="));
-    assert.ok(tutorApp.includes("onSend={() => void handleSend()}"));
-    assert.ok(tutorApp.includes("historyExpanded={historyExpanded}"));
-    assert.ok(tutorApp.includes("onStopSpeaking={stopSpeaking}"));
-    // 이전 회귀 테스트(반자동 마이크 A~J)가 이미 handleSend 자동 호출 등을 검증한다 — 여기서는
-    // 그 wiring이 Drawer 전환 후에도 sidebar 컴포넌트에 그대로 전달되는지만 본다.
-  });
-
-  it("K. Lesson을 새로 시작하면 Tutor Drawer는 항상 닫힌 채로 시작한다(이전 세션의 열림 상태가 새지 않음)", () => {
-    const handleStartBody = tutorApp.match(/async function handleStart\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(handleStartBody.includes("setSidebarOpen(false)"));
-  });
-
-  it("useLessonFocusMode는 라우트를 완전히 벗어나면(unmount) 일반 Navigation으로 복귀시킨다", () => {
-    const hookBody = appShell.match(/export function useLessonFocusMode[\s\S]*?\n\}/)?.[0] ?? "";
-    assert.ok(hookBody.includes("return () => setFocusMode(false);"));
-  });
-
-  it("L. Mobile/좁은 화면도 같은 Drawer 코드 경로를 쓴다 — Desktop 전용 별도 구현이 없다", () => {
-    const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
-    assert.equal((chatReturn.match(/<Drawer/g) ?? []).length, 1, "Desktop/Mobile을 나눠 Drawer를 두 번 렌더하면 안 된다");
+  it("session/start는 Tutor context와 함께 LessonDetail도 돌려준다(서버 계약 유지)", () => {
+    assert.ok(startRoute.includes("lesson: context.lesson"));
   });
 });
 
@@ -368,11 +357,11 @@ describe("mic 권한/오류 처리", () => {
 
   it("Lesson 변경/학습 종료/unmount 시 마이크·오디오·큐를 정리한다(cleanup)", () => {
     const cleanupBody = tutorApp.match(/function cleanupVoiceResources\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    for (const needle of ["URL.revokeObjectURL", "mediaRecorderRef.current = null", "mediaRecorderRef.current.stop()"]) {
+    for (const needle of ["stopSpeakingInternal()", "sttAbortRef.current?.abort()", "mediaRecorderRef.current = null", "mediaRecorderRef.current.stop()"]) {
       assert.ok(cleanupBody.includes(needle), `cleanup에 ${needle}가 있어야 한다`);
     }
     assert.ok(
-      /return \(\) => \{\s*activeRef\.current = false;\s*cleanupVoiceResources\(\);\s*\};/.test(tutorApp),
+      /return \(\) => \{\s*activeRef\.current = false;\s*cleanupVoiceResources\(\);/.test(tutorApp),
       "unmount 시 정리해야 한다(sidebar 모드의 activeRef도 함께 꺼야 한다)",
     );
     assert.ok(/cleanupVoiceResources\(\); \/\/ 이전 Lesson/.test(tutorApp), "Lesson 재시작 시 이전 TTS/마이크를 정리해야 한다");
@@ -423,7 +412,7 @@ describe("TTS 이중 호출 방지 (회귀 테스트)", () => {
     assert.ok(!/\bspeak\(data\.reply\)/.test(tutorApp), "구 speak(data.reply) 호출이 남아있으면 안 된다");
     // speakReply는 정의 1회 + 실제 호출 2회(greeting, 일반 답변)여야 한다.
     assert.equal((tutorApp.match(/async function speakReply\(/g) ?? []).length, 1);
-    assert.equal((tutorApp.match(/void speakReply\(/g) ?? []).length, 2, "greeting/reply 각 1회, 총 2회여야 한다");
+    assert.equal((tutorApp.match(/void speakReply\(/g) ?? []).length, 3, "세션 인사/음성 ON 인사/일반 응답이 같은 파이프라인을 사용한다");
   });
 
   it("greeting은 handleStart 안에서 정확히 1번만 speakReply를 호출한다", () => {
@@ -481,99 +470,98 @@ describe("음성 state/ref 동기화 (회귀 테스트)", () => {
  * 핸즈프리/VAD 기반 자동 발화 종료를 완전히 제거하고, 사용자가 마이크 시작/중지를
  * 직접 제어하는 반자동 음성 입력으로 전환한 최종 UX를 검증한다(2026-09-15 결정).
  */
-describe("반자동 마이크 음성 입력 (핸즈프리/VAD 제거 후 최종 UX)", () => {
-  it("A. idle에서 마이크를 누르면 recording을 시작한다", () => {
-    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(micBody.includes('if (voiceStateRef.current !== "idle") return;'), "idle이 아니면 새로 시작하지 않는다");
-    assert.ok(micBody.includes('setVoiceState("recording");'));
-    assert.ok(micBody.includes("await navigator.mediaDevices.getUserMedia"));
-  });
-
-  it("B. recording 중 마이크(중지) 버튼을 누르면 MediaRecorder.stop()만 호출한다 — 발화 종료를 프로그램이 판단하지 않는다", () => {
-    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+describe("수동 시작·종료 후 STT 자동 전송", () => {
+  it("A. 녹음 시작은 idle에서만 — speaking/thinking/transcribing 중에는 시작하지 않는다", () => {
+    const startBody = fnBody(tutorApp, "async function startRecording(");
     assert.ok(
-      /if \(voiceStateRef\.current === "recording"\) \{\s*\/\/[^\n]*\s*mediaRecorderRef\.current\?\.stop\(\);\s*return;\s*\}/.test(
-        micBody,
-      ),
-      "recording 중 클릭은 오직 stop()만 해야 한다",
+      startBody.includes('if (voiceStateRef.current !== "idle" || micStartingRef.current) return;'),
+      "idle이 아니거나 권한 요청이 진행 중이면 새로 시작하지 않는다(TTS와 마이크 동시 활성 금지)",
+    );
+    assert.ok(startBody.includes('setVoiceState("recording");'));
+    assert.ok(startBody.includes("await navigator.mediaDevices.getUserMedia"));
+    assert.ok(
+      startBody.includes('voiceStateRef.current !== "idle") {'),
+      "권한 요청을 기다리는 사이 다른 상태(텍스트 전송 등)가 됐으면 녹음을 시작하지 않아야 한다",
     );
   });
 
+  it("B. 🎤(recording 중)/[말하기 끝]은 MediaRecorder.stop()만 호출한다 — 발화 종료를 프로그램이 판단하지 않는다", () => {
+    const micBody = fnBody(tutorApp, "function onMicClick(");
+    assert.ok(/if \(voiceStateRef\.current === "recording"\) \{\s*stopRecording\(\);\s*return;\s*\}/.test(micBody));
+    const stopBody = fnBody(tutorApp, "function stopRecording(");
+    assert.ok(stopBody.includes('if (voiceStateRef.current !== "recording") return;'));
+    assert.ok(stopBody.includes("recorder.stop();") && stopBody.includes('setVoiceState("transcribing")'));
+    assert.equal(
+      (tutorApp.match(/stopRecording\(\)/g) ?? []).length,
+      2,
+      "정의 1회 + 🎤 토글 호출 1회뿐이어야 한다(그 외엔 [말하기 끝] prop 전달) — 타이머/자동 호출 금지",
+    );
+    assert.ok(tutorApp.includes("onFinishUtterance={stopRecording}"), "[말하기 끝] 버튼은 stopRecording에 연결된다");
+  });
+
   it("C. 중지(stop) 시 기존 /api/tutor/stt(Whisper)로 그 구간의 오디오만 보낸다", () => {
-    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(micBody.includes("recorder.onstop"));
-    assert.ok(micBody.includes("void transcribeAndSend(blob, myEpoch)"));
-    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const startBody = fnBody(tutorApp, "async function startRecording(");
+    assert.ok(startBody.includes("recorder.onstop"));
+    assert.ok(startBody.includes("void transcribeAndSend(blob, myEpoch)"));
+    const transcribeBody = fnBody(tutorApp, "async function transcribeAndSend(");
     assert.ok(transcribeBody.includes('fetch("/api/tutor/stt"'));
   });
 
   it("D. 유효 transcript는 별도 보내기 클릭 없이 즉시 handleSend로 자동 전송된다", () => {
-    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const transcribeBody = fnBody(tutorApp, "async function transcribeAndSend(");
     assert.ok(transcribeBody.includes("await handleSend(text);"));
     assert.ok(!transcribeBody.includes("setInput("), "다시 입력창에 채우고 기다리는 옛 방식으로 되돌아가면 안 된다");
   });
 
-  it("E. 빈 transcript(무음/공백)는 자동 전송하지 않는다", () => {
-    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(/if \(!text\) \{\s*\/\/[^\n]*\s*setVoiceState\("idle"\);\s*return;\s*\}/.test(transcribeBody));
+  it("E. 빈 transcript(무음/공백)는 자동 전송하지 않고, 알린 뒤 다시 말할 수 있게 복구한다", () => {
+    const transcribeBody = fnBody(tutorApp, "async function transcribeAndSend(");
+    const emptyBlock = transcribeBody.match(/if \(!text\) \{[\s\S]*?\n      \}/)?.[0] ?? "";
+    assert.ok(emptyBlock.includes("setError("), "사용자에게 상태를 보여줘야 한다");
+    assert.ok(emptyBlock.includes('setVoiceState("idle");'));
+    assert.ok(emptyBlock.includes("return;") && !emptyBlock.includes("handleSend"), "빈 transcript를 보내면 안 된다");
   });
 
-  it("F. STT 실패해도 throw하지 않고 비차단 안내 후 idle로 돌아간다(텍스트 Tutor 계속 사용 가능)", () => {
-    const transcribeBody = tutorApp.match(/async function transcribeAndSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    const catchBlock = transcribeBody.split(/\}\s*catch/)[1] ?? "";
-    assert.ok(catchBlock.includes("setError("));
-    assert.ok(catchBlock.includes('setVoiceState("idle")'));
+  it("F. STT 실패는 idle로 복구하고 수동 재시도를 기다린다", () => {
+    const body = fnBody(tutorApp, "async function transcribeAndSend(");
+    const failure = body.split(/\}\s*catch/)[1] ?? "";
+    assert.ok(failure.includes('setVoiceState("idle")'));
+    assert.ok(failure.includes("setError("));
+    assert.ok(!body.includes("startRecording(") && !body.includes("maybeAutoListen"));
   });
 
-  it('G. 침묵/시간 기반 자동 종료 코드가 없다 — silence timeout·VAD 상수·백그라운드 타이머 폴링 전부 제거됨', () => {
-    for (const needle of [
-      "SILENCE",
-      "silenceTimeout",
-      "VAD_",
-      "SpeechActivityDetector",
-      "setInterval",
-      "handsFree",
-      "AudioContext",
-      "AnalyserNode",
-    ]) {
-      assert.ok(!tutorApp.includes(needle), `${needle} — 자동 발화 종료 관련 코드가 남아있으면 안 된다`);
+  it("G. 녹음에는 발화 감지기·자동 종료 타이머가 없다", () => {
+    const body = fnBody(tutorApp, "async function startRecording(");
+    for (const token of ["TurnDetector", "AudioContext", "setInterval", "setTimeout", "heardSpeech"]) {
+      assert.ok(!body.includes(token), token);
     }
-    // setTimeout은 다른 목적(예: 일시적 UI 지연)으로 쓰일 수 있으나, VAD 폴링 루프
-    // 형태(재귀적으로 자기 자신을 다시 스케줄)는 없어야 한다.
-    assert.ok(!/window\.setTimeout\(tick/.test(tutorApp));
+    assert.ok(!tutorApp.includes('startRecording("auto")'));
   });
 
   it("H. 사용자가 직접 중지하기 전에는 STT가 호출되지 않는다 — recorder.onstop에서만 transcribeAndSend를 부른다", () => {
     assert.equal((tutorApp.match(/transcribeAndSend\(/g) ?? []).length, 2, "정의 1회 + onstop에서 호출 1회여야 한다");
-    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    const onstopBody = micBody.match(/recorder\.onstop = \(\) => \{[\s\S]*?\n      \};/)?.[0] ?? "";
+    const startBody = fnBody(tutorApp, "async function startRecording(");
+    const onstopBody = startBody.match(/recorder\.onstop = \(\) => \{[\s\S]*?\n    \};/)?.[0] ?? "";
     assert.ok(onstopBody.includes("transcribeAndSend"), "onstop 콜백 안에서만 호출돼야 한다");
   });
 
-  it("I. TTS 재생 중에는 새로 마이크를 시작하지 못하게 잠근다", () => {
-    assert.ok(
-      tutorApp.includes('micDisabled={voiceState !== "idle" && voiceState !== "recording"}'),
-      "idle/recording이 아니면(= speaking/thinking/transcribing 포함) 마이크 버튼을 잠가야 한다",
-    );
+  it("I. 설명 중에는 마이크가 잠기며 음성 중지와 녹음 시작은 별도 사용자 행동이다", () => {
+    assert.ok(tutorApp.includes('micDisabled={voiceState !== "idle" && voiceState !== "recording"}'));
+    assert.ok(!fnBody(tutorApp, "function onMicClick(").includes("stopSpeakingInternal"));
   });
 
-  it("J. TTS 종료 후 자동으로 다시 듣지 않는다 — finishSpeaking/stopSpeaking은 idle로만 돌아간다", () => {
-    const finishBody = tutorApp.match(/function finishSpeaking\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(finishBody.includes('setVoiceState("idle");'));
-    assert.ok(!finishBody.includes("Listening") && !/listening/.test(finishBody), "재생 종료 후 자동 listening 진입 코드가 없어야 한다");
-
-    const stopBody = tutorApp.match(/function stopSpeaking\(\)[\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(stopBody.includes('setVoiceState("idle");'));
+  it("J. TTS 종료/정지/실패는 idle로 돌아가며 마이크를 열지 않는다", () => {
+    assert.ok(fnBody(tutorApp, "function finishSpeaking(").includes("endAssistantTurn();"));
+    assert.ok(fnBody(tutorApp, "function stopSpeaking()").includes("endAssistantTurn();"));
+    const end = fnBody(tutorApp, "function endAssistantTurn(");
+    assert.ok(end.includes('setVoiceState("idle")'));
+    assert.ok(!end.includes("startRecording"));
+    assert.ok(!tutorApp.includes("maybeAutoListen"));
   });
 
-  it("voice-state.ts에 더 이상 'listening' 상태가 없다 — idle/recording/transcribing/thinking/speaking/error 6개뿐", () => {
-    const match = voiceStateSrc.match(/export type VoiceState =\s*([\s\S]*?);/);
-    assert.ok(match, "VoiceState 타입 선언을 찾을 수 없습니다");
-    const union = match![1];
+  it("음성 상태는 수동 녹음의 여섯 상태로 유지한다", () => {
+    const union = voiceStateSrc.match(/export type VoiceState =\s*([\s\S]*?);/)?.[1] ?? "";
     assert.ok(!union.includes('"listening"'));
-    for (const value of ["idle", "recording", "transcribing", "thinking", "speaking", "error"]) {
-      assert.ok(union.includes(`"${value}"`), `${value}는 유지돼야 한다`);
-    }
+    for (const state of ["idle", "recording", "transcribing", "thinking", "speaking", "error"]) assert.ok(union.includes(state));
   });
 
   it("핸즈프리/VAD 전용 함수·ref·모듈이 전부 제거됐다", () => {
@@ -670,80 +658,63 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
   });
 
   it("녹음 취소가 녹음 제출이 되면 안 된다 — 패널이 닫히는 동안(또는 닫혔다 다시 열려도)의 오래된 녹음은 전송하지 않는다", () => {
-    const micBody = tutorApp.match(/async function onMicClick\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(micBody.includes("const myEpoch = requestEpochRef.current;"), "녹음 시작 시점의 세대를 캡처해야 한다");
+    const startBody = fnBody(tutorApp, "async function startRecording(");
+    assert.ok(startBody.includes("const myEpoch = requestEpochRef.current;"), "녹음 시작 시점의 세대를 캡처해야 한다");
     assert.ok(
       /recorder\.onstop = \(\) => \{[\s\S]*?if \(!activeRef\.current \|\| requestEpochRef\.current !== myEpoch\) return;[\s\S]*?void transcribeAndSend\(blob, myEpoch\);\s*\};/.test(
-        micBody,
+        startBody,
       ),
       "onstop은 지금 닫혀 있거나 그 사이 닫혔다 다시 열렸으면(세대 불일치) transcribeAndSend를 부르지 않고 버려야 한다",
     );
     assert.ok(
-      micBody.includes("if (!activeRef.current || requestEpochRef.current !== myEpoch) {") &&
-        micBody.includes("stream.getTracks().forEach((track) => track.stop());"),
+      startBody.includes("if (!activeRef.current || requestEpochRef.current !== myEpoch ||") &&
+        startBody.includes("stream.getTracks().forEach((track) => track.stop());"),
       "권한 요청 중 패널이 닫혔으면 새로 받은 stream을 바로 정리해야 한다",
+    );
+    const cleanupBody = fnBody(tutorApp, "function cleanupVoiceResources(");
+    assert.ok(
+      cleanupBody.includes("requestEpochRef.current += 1;"),
+      "정리(대화 모드 끔/학습 종료 등) 자체가 세대를 올려야 한다 — 그래야 cleanup이 stop()한 녹음의 onstop이 제출되지 않는다",
     );
   });
 
-  it("abandonAndLeave/saved 화면은 sidebar 모드에서 현재 화면을 벗어나지 않는다(router.push 없음)", () => {
-    const abandonBody = tutorApp.match(/async function abandonAndLeave\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(abandonBody.includes('if (layoutMode === "sidebar") {'));
-    assert.ok(
-      /if \(layoutMode === "sidebar"\) \{[\s\S]*?return;\s*\}\s*router\.push\("\/"\);/.test(abandonBody),
-      "sidebar 분기는 router.push 전에 return해야 한다(standalone만 홈으로 이동)",
-    );
+  it("abandonAndLeave/saved 화면은 현재 화면을 벗어나지 않는다(router.push 없음)", () => {
+    const abandonBody = fnBody(tutorApp, "async function abandonAndLeave(");
+    assert.ok(!abandonBody.includes("router.push"), "수업은 Lesson 화면에서만 진행된다 — 나가기가 다른 화면으로 이동하면 안 된다");
+    assert.ok(abandonBody.includes("props.onRequestClose?.();"));
     const savedMatch = tutorApp.match(/if \(view === "saved"\) \{[\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(savedMatch.includes('layoutMode === "sidebar" ?'), "saved 화면도 layoutMode로 분기해야 한다");
     assert.ok(
       savedMatch.includes('onClick={() => props.onRequestClose?.()}'),
-      "sidebar 모드의 saved 화면은 닫기만 해야 한다(Tutor 홈/복습 목록으로 이동 금지)",
+      "saved 화면은 닫기만 해야 한다(Tutor 홈/복습 목록으로 이동 금지)",
     );
+    assert.ok(!savedMatch.includes("router.push"));
   });
 
   it("abandon 응답 도착 전에 닫히거나 unmount됐으면 새 세션을 재무장하지 않는다(다른 Lesson 세션을 abandon시키는 사고 방지)", () => {
-    const abandonBody = tutorApp.match(/async function abandonAndLeave\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const abandonBody = fnBody(tutorApp, "async function abandonAndLeave(");
     assert.ok(
-      /if \(layoutMode === "sidebar"\) \{\s*[\s\S]*?if \(!activeRef\.current\) return;\s*if \(currentLesson\) await handleStart\(currentLesson\);/.test(
-        abandonBody,
-      ),
+      /if \(!activeRef\.current\) return;\s*if \(currentLesson\) await handleStart\(currentLesson\);/.test(abandonBody),
       "activeRef가 꺼져 있으면(닫힘 또는 unmount) handleStart 재호출 전에 그쳐야 한다 — 다른 Lesson으로 이동한 뒤 이 abandon 응답이 도착해 handleStart를 부르면 그 Lesson의 새 세션이 서버에서 abandon된다",
     );
   });
 
   it("handleSend는 응답 도착 시 세션이 이미 다른 것으로 바뀌었으면 옛 답변을 섞지 않는다", () => {
-    const handleSendBody = tutorApp.match(/async function handleSend\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const handleSendBody = fnBody(tutorApp, "async function handleSend(");
     assert.ok(
       handleSendBody.includes("const sendGen = handleStartCallIdRef.current;"),
       "보낼 때의 세션 세대를 캡처해야 한다(abandon 재무장은 handleStart를 다시 부르므로 이 값이 바뀐다)",
     );
     assert.ok(
-      /const data = await res\.json\(\);\s*if \(handleStartCallIdRef\.current !== sendGen\) return;/.test(handleSendBody),
+      handleSendBody.indexOf("if (handleStartCallIdRef.current !== sendGen) return;") < handleSendBody.indexOf("setMessages((prev)"),
       "응답이 오는 사이 새 세션이 시작됐으면(abandon 재무장 등) setMessages/speakReply 전에 버려야 한다",
     );
   });
 
-  it("sidebar 모드의 chat view는 TutorSidebar 하나만 돌려준다 — Lesson 렌더링·자체 Drawer가 없다", () => {
+  it("onCollapse는 대화를 지우지 않고 부모에게 닫기만 요청한다(정리는 active effect가 트리거와 무관하게 공통 처리)", () => {
     assert.ok(
-      tutorApp.includes('return <Box sx={{ height: "100%" }}>{sidebar}</Box>;'),
-      "부모(LessonTutorSidebar)가 위치/폭/overlay를 담당해야 한다",
-    );
-    // 이 return이 실제로 chat view의 sidebar 분기 안에 있는지(엉뚱한 곳에서 우연히
-    // 매치된 게 아닌지) — sidebar 엘리먼트를 만든 뒤, standalone return보다 먼저 온다.
-    const sidebarConstIdx = tutorApp.indexOf("const sidebar = (");
-    const sidebarModeReturnIdx = tutorApp.indexOf('return <Box sx={{ height: "100%" }}>{sidebar}</Box>;');
-    const standaloneReturnIdx = tutorApp.indexOf('<Box sx={{ position: "relative", minWidth: 0 }}>');
-    assert.ok(sidebarConstIdx < sidebarModeReturnIdx && sidebarModeReturnIdx < standaloneReturnIdx);
-  });
-
-  it("onCollapse는 sidebar 모드에서 대화를 지우지 않고 부모에게 닫기만 요청한다(정리는 active effect가 트리거와 무관하게 공통 처리)", () => {
-    const onCollapseBody = tutorApp.match(/onCollapse=\{[\s\S]*?\n\s*\}\n\s*\/>/)?.[0] ?? "";
-    assert.ok(onCollapseBody.includes('layoutMode === "sidebar"'));
-    assert.ok(
-      onCollapseBody.includes('layoutMode === "sidebar" ? () => props.onRequestClose?.()'),
+      tutorApp.includes("onCollapse={() => props.onRequestClose?.()}"),
       "▸ 버튼이 직접 cleanup을 부르면 Escape/backdrop 경로와 정리 시점이 달라진다 — active effect 한 곳에 모아야 한다",
     );
-    assert.ok(onCollapseBody.includes(": () => setSidebarOpen(false)"), "standalone은 기존 동작 그대로여야 한다");
-    assert.ok(!onCollapseBody.includes("setMessages("), "sidebar 모드의 닫기가 messages를 지우면 재오픈 시 대화가 사라진다");
   });
 
   it("LessonTutorSidebar — 최초로 열기 전에는 TutorApp을 마운트하지 않는다(everOpened)", () => {
@@ -830,7 +801,93 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
     assert.ok(resumeDto.includes("progressByLessonId.entries()"), "Map을 JSON 배열로 바꿔야 한다");
   });
 
-  it("기존 /tutor 페이지는 이번 작업에서 손대지 않았다(standalone 회귀 위험 최소화)", () => {
+  it("TutorApp은 LessonTutorSidebar wrapper를 알지 못한다(반대 방향 의존 없음)", () => {
     assert.ok(!tutorApp.includes("import { LessonTutorSidebar }"), "TutorApp이 새 wrapper를 알 필요는 없다(반대 방향 의존)");
+  });
+});
+
+/**
+ * 대화 모드(2026-09-30 결정) — 발화 "시작"만 자동, 발화 "종료"는 사용자.
+ * AI 답변 → TTS 완전 종료 → 녹음 자동 시작 → [말하기 끝] → STT → 자동 전송 → 반복.
+ * 순수 판단(shouldAutoListen)은 tests/tutor-voice-conversation.test.ts 가 직접 검증한다.
+ */
+describe("수동 음성 입력과 공통 TTS", () => {
+    it("이전 자동 대화 설정을 읽지 않고 자동 녹음도 시작하지 않는다", () => {
+      for (const token of ["conversationOn", "cmm-tutor-conversation", "maybeAutoListen", "TurnDetector"]) assert.ok(!tutorApp.includes(token), token);
+      assert.equal((tutorApp.match(/void startRecording\(\)/g) ?? []).length, 1);
+      assert.ok(fnBody(tutorApp, "function onMicClick(").includes("void startRecording();"));
+    });
+    it("음성 OFF는 요청과 미디어를 취소하고 ON은 인사를 공통 TTS로 보낸다", () => {
+      const body = fnBody(tutorApp, "function setVoice(");
+      assert.ok(body.includes("cleanupVoiceResources();"));
+      assert.ok(body.includes("void speakReply(greeting[0].content)"));
+      assert.ok(!body.includes("startRecording"));
+    });
+    it("STT의 최신 session/history ref와 녹음 중 텍스트 전송 방어를 유지한다", () => {
+      const body = fnBody(tutorApp, "async function handleSend(");
+      assert.ok(body.includes("const currentSessionId = sessionIdRef.current;"));
+      assert.ok(body.includes("const history = messagesRef.current;"));
+      assert.ok(body.includes('voiceStateRef.current === "recording"'));
+    });
+    it("사이드바의 수동 마이크·말하기 끝·음성 중지·텍스트 fallback이 유지된다", () => {
+      assert.ok(tutorSidebar.includes('aria-label={props.recording ? "말하기 끝" : "말하기 시작"}'));
+      assert.ok(tutorSidebar.includes("onFinishUtterance") && tutorSidebar.includes("음성 중지"));
+      assert.ok(tutorSidebar.includes("음성 대화") && tutorSidebar.includes("props.onSend()"));
+      assert.ok(!tutorSidebar.includes("onToggleConversation"));
+    });
+  });
+
+describe("VoiceIndicator — 하나의 컴포넌트, 레벨은 표시 전용", () => {
+  it("TutorSidebar는 VoiceIndicator를 한 번만 렌더하고 상태를 prop으로 넘긴다(상태별 원을 따로 만들지 않는다)", () => {
+    assert.equal((tutorSidebar.match(/<VoiceIndicator /g) ?? []).length, 1);
+    assert.ok(tutorSidebar.includes("<VoiceIndicator state={props.voiceState} stream={props.micStream} />"));
+    assert.ok(tutorSidebar.includes('role="status" aria-live="polite"'), "상태 문구는 스크린리더에도 전달된다");
+  });
+
+  it("레벨은 녹음 종료 판단에 쓰이지 않는다 — 콜백 prop이 없고 MediaRecorder/stop을 건드리지 않는다", () => {
+    const signature = voiceIndicator.match(/export function VoiceIndicator\(([\s\S]*?)\) \{/)?.[1] ?? "";
+    assert.ok(signature.includes("state: VoiceState; stream: MediaStream | null"));
+    assert.ok(!/on[A-Z]\w*:/.test(signature), "콜백 prop이 있으면 레벨이 녹음 종료로 이어질 수 있다");
+    for (const needle of ["MediaRecorder", ".stop()", "getTracks"]) {
+      assert.ok(!voiceIndicator.includes(needle), `${needle} — Indicator는 스트림을 소유/종료하지 않는다`);
+    }
+  });
+
+  it("레벨은 React state가 아니라 CSS 변수로 매 프레임 쓴다(리렌더 없음)", () => {
+    assert.ok(voiceIndicator.includes('el.style.setProperty("--voice-level"'));
+    assert.ok(!/useState/.test(voiceIndicator), "애니메이션 값을 state로 두면 매 프레임 리렌더된다");
+    assert.ok(voiceIndicator.includes("requestAnimationFrame(tick)"));
+  });
+
+  it("분석 자원을 정리한다 — rAF 취소, 노드 disconnect, AudioContext close / 스피커로 되돌리지 않는다", () => {
+    for (const needle of ["cancelAnimationFrame(frame)", "source.disconnect()", "analyser.disconnect()", "audioCtx.close()", "void ctx?.close()"]) {
+      assert.ok(voiceIndicator.includes(needle), `${needle} 정리가 있어야 한다`);
+    }
+    assert.ok(!voiceIndicator.includes("ctx.destination"), "내 목소리를 스피커로 출력하면 안 된다");
+  });
+
+  it("prefers-reduced-motion에서 반복 애니메이션을 끈다", () => {
+    const start = voiceIndicator.indexOf('"@media (prefers-reduced-motion: reduce)"');
+    const reduced = voiceIndicator.slice(start, start + 600);
+    assert.ok(start > 0 && reduced.includes('animation: "none"') && reduced.includes('transition: "none"'));
+  });
+});
+
+describe("로그인 후 원래 경로로 복귀 — 내부 경로만 허용(Open Redirect 방지)", () => {
+  it("proxy는 로그인 안 된 요청의 경로를 safeNextPath로 걸러 ?next= 로 넘긴다", () => {
+    assert.ok(supabaseProxy.includes("safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`)"));
+    assert.ok(supabaseProxy.includes('url.searchParams.set("next", next)'));
+    assert.ok(supabaseProxy.includes('url.search = "";'), "원래 query가 /login URL에 그대로 섞이면 안 된다");
+  });
+
+  it("이미 로그인된 채로 /login?next= 에 오면 검증된 경로로, 아니면 / 로 보낸다", () => {
+    assert.ok(supabaseProxy.includes('safeNextPath(request.nextUrl.searchParams.get("next")) ?? "/"'));
+  });
+
+  it("로그인 폼은 next를 hidden 값으로 넘기고, 서버 액션이 다시 검증한다(폼 값은 조작 가능)", () => {
+    assert.ok(loginPage.includes("<LoginForm next={safeNextPath(next)} />"));
+    assert.ok(loginForm.includes('<input type="hidden" name="next" value={next} />'));
+    assert.ok(loginActions.includes('redirect(safeNextPath(formData.get("next")) ?? "/");'));
+    assert.ok(!/redirect\("\/"\);\s*\}\s*\n\s*export async function logout/.test(loginActions), "무조건 / 로 보내던 예전 동작이 남아있으면 안 된다");
   });
 });

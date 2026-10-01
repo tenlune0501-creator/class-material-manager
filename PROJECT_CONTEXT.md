@@ -503,9 +503,17 @@ CMM을 개인 AI Tutor PWA로 확장했다. 상세 아키텍처·결정 근거·
   때만(1400px+) Lesson+Tutor를 나란히 두고, 그보다 좁으면(노트북 포함)과 Mobile은
   Lesson 가독성을 지키는 overlay로 보여준다. Sidebar를 닫아도 대화는 유지되고, 다른
   Lesson으로 이동하면 새 Tutor 세션으로 전환해 이전 Lesson의 대화와 섞이지 않는다.
-  음성 정책(TTS 종료 후 idle, 자동 listening/VAD/hands-free 없음)은 그대로다. 기존
-  `/tutor` 전체화면 route도 유지한다. 구현 세부사항은 `viewer/docs/AI-TUTOR.md`
-  "Lesson 화면 임베드 (Sidebar 모드)" 절.
+  구현 세부사항은 `viewer/docs/AI-TUTOR.md` "Lesson 화면 임베드 (Sidebar 모드)" 절.
+- **Tutor 진입 통일 + 대화 모드(2026-09-30 결정)** — 실제 수업 UI는 `/lesson/[...id]`의
+  [Lesson + AI Tutor Sidebar] 하나뿐이다. `/tutor`는 수업 선택만 하고, 고르면
+  `/lesson/<id>?tutor=open`(패널 열린 채)으로 이동한다(`/tutor?lessonId=`도 같은 곳으로
+  redirect). 이전 `/tutor` 전용 채팅형 수업 화면은 제거했다(Tutor UI 두 벌 유지 금지).
+  음성은 "반자동 대화 모드"(선택, 기본 OFF): AI 답변 TTS가 **완전히 끝난 뒤** 녹음을
+  자동 시작하고, 발화 종료는 사용자가 [말하기 끝]으로만 정한다 — VAD/침묵 기반 자동
+  종료는 여전히 쓰지 않는다. speaking과 recording은 동시에 존재하지 않는다. 음성 상태는
+  원형 `VoiceIndicator` 하나가 보여주며, 마이크 레벨은 표시에만 쓴다. 로그인 후에는
+  원래 요청 경로로 복귀한다(`safeNextPath`, 내부 경로만 허용). 상세는
+  `viewer/docs/AI-TUTOR.md` "대화 모드" 절.
 
 ### AI 협업 원칙
 

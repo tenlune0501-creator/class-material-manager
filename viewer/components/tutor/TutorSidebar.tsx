@@ -8,8 +8,9 @@
  * 이 컴포넌트는 상태를 갖지 않는다(전부 TutorApp이 들고 있는 값을 prop으로 받는다) —
  * 그래야 TutorApp의 음성 상태 머신을 한 곳에서만 관리할 수 있다.
  *
- * 음성 입력은 반자동이다 — 마이크는 사용자가 직접 시작/중지하며, 발화 종료를
- * 프로그램이 판단하는 핸즈프리/VAD는 쓰지 않는다.
+ * 음성 입력은 반자동이다 — 발화 종료는 언제나 사용자가 [말하기 끝]/⏹ 로 직접 정한다
+ * (핸즈프리/VAD 없음). 시작도 사용자 클릭으로만 한다.
+ * 음성 상태는 VoiceIndicator 하나가 표현한다.
  */
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -25,6 +26,7 @@ import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
+import { VoiceIndicator } from "@/components/tutor/VoiceIndicator";
 import { VOICE_STATE_LABEL, type VoiceState } from "@/lib/tutor/voice-state";
 
 export interface ChatMessage {
@@ -41,6 +43,11 @@ export interface TutorSidebarProps {
   voiceOn: boolean;
   onToggleVoice: () => void;
   onStopSpeaking: () => void;
+
+  /** 녹음 중인 마이크 스트림 — VoiceIndicator가 입력 레벨을 "보여주는" 데만 쓴다. */
+  micStream: MediaStream | null;
+  /** [말하기 끝] — 녹음만 끝낸다(절대 새로 시작하지 않는다). 이후 STT → 자동 전송. */
+  onFinishUtterance: () => void;
 
   onMicClick: () => void;
   recording: boolean; // 지금 녹음 중(눌러서 중지 가능한 상태)
@@ -94,6 +101,9 @@ function StateChip({ voiceState }: { voiceState: VoiceState }) {
 
 export function TutorSidebar(props: TutorSidebarProps) {
   const lastMessages = props.messages.slice(-2);
+  // 음성이 오가는 중에는 원형 Indicator로 크게 보여준다. 그 외(텍스트만
+  // 쓰는 대기 상태)에는 기존의 작은 상태 칩으로 자리를 아낀다.
+  const showIndicator = props.voiceState !== "idle";
 
   return (
     <Stack sx={{ height: "100%", display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
@@ -115,22 +125,50 @@ export function TutorSidebar(props: TutorSidebarProps) {
 
       <Divider />
 
-      <Box>
-        <StateChip voiceState={props.voiceState} />
-        {/* onStopSpeaking은 TTS 재생만 멈춘다 — recording/transcribing/thinking 중에는
-            눌러도 아무 효과가 없으므로 실제로 말하는 중일 때만 보여준다. */}
-        {props.voiceState === "speaking" && (
-          <Button size="small" sx={{ ml: 1 }} onClick={props.onStopSpeaking}>
-            정지
-          </Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: showIndicator ? "column" : "row",
+          alignItems: "center",
+          gap: showIndicator ? 0.5 : 1,
+          py: showIndicator ? 1 : 0,
+        }}
+      >
+        {showIndicator ? (
+          <>
+            <VoiceIndicator state={props.voiceState} stream={props.micStream} />
+            <Typography variant="body2" sx={{ fontWeight: 600 }} role="status" aria-live="polite">
+              {VOICE_STATE_LABEL[props.voiceState]}
+            </Typography>
+          </>
+        ) : (
+          <StateChip voiceState={props.voiceState} />
         )}
+        <Stack direction="row" spacing={1} sx={{ mt: showIndicator ? 0.5 : 0 }}>
+          {props.recording && (
+            // 발화 종료는 이 버튼(또는 🎤 옆 ⏹)으로만 — 침묵이 길어도 자동으로 끝나지 않는다.
+            <Button variant="contained" size="small" onClick={props.onFinishUtterance}>
+              말하기 끝
+            </Button>
+          )}
+          {/* onStopSpeaking은 TTS 재생만 멈춘다 — recording/transcribing/thinking 중에는
+              눌러도 아무 효과가 없으므로 실제로 말하는 중일 때만 보여준다. */}
+          {props.voiceState === "speaking" && (
+            <Button size="small" onClick={props.onStopSpeaking}>
+              음성 중지
+            </Button>
+          )}
+        </Stack>
       </Box>
 
       <Stack spacing={0.5}>
         <FormControlLabel
           control={<Switch size="small" checked={props.voiceOn} onChange={props.onToggleVoice} disabled={!props.ttsAvailable} />}
-          label={<Typography variant="caption">{props.ttsAvailable ? "음성 응답(TTS)" : "음성(미설정)"}</Typography>}
+          label={<Typography variant="caption">{props.ttsAvailable ? "음성 대화" : "음성(미설정)"}</Typography>}
         />
+        <Typography variant="caption" color="text.secondary">
+          마이크로 시작하고 말하기 끝을 눌러 주세요. 변환된 말은 자동 전송됩니다.
+        </Typography>
       </Stack>
 
       {props.error && (
@@ -224,7 +262,8 @@ export function TutorSidebar(props: TutorSidebarProps) {
           color={props.recording ? "error" : "default"}
           onClick={props.onMicClick}
           disabled={props.micDisabled}
-          aria-label={props.recording ? "녹음 중지" : "마이크로 말하기"}
+          aria-label={props.recording ? "말하기 끝" : "말하기 시작"}
+          title={props.recording ? "말하기 끝" : "말하기 시작"}
           size="small"
           sx={{ border: 1, borderColor: "divider" }}
         >

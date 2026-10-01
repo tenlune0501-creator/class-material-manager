@@ -15,7 +15,7 @@ import { login, type LoginState } from "@/lib/supabase/actions";
 
 const initialState: LoginState = {};
 
-export function LoginForm() {
+export function LoginForm({ next }: { next: string | null }) {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
@@ -25,6 +25,7 @@ export function LoginForm() {
       </Typography>
 
       <Box component="form" action={formAction} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {next && <input type="hidden" name="next" value={next} />}
         <TextField
           name="email"
           type="email"

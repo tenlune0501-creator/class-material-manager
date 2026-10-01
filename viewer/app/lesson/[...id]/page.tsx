@@ -28,8 +28,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: lesson ? `${lesson.title} · Lesson` : "Lesson" };
 }
 
-export default async function LessonPage({ params }: { params: Promise<{ id: string[] }> }) {
+export default async function LessonPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string[] }>;
+  searchParams: Promise<{ tutor?: string }>;
+}) {
   const { id } = await params;
+  // /tutor(수업 선택)에서 들어오면 ?tutor=open — Tutor 패널을 열린 채로 시작한다.
+  const { tutor } = await searchParams;
   const lessonId = id.map(decodeURIComponent).join("/");
   const lesson = await getLesson(lessonId);
   if (!lesson) notFound();
@@ -49,6 +57,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
         chapterTitle: lesson.chapterTitle ?? "",
       }}
       ttsConfigured={ttsConfigured}
+      initialOpen={tutor === "open"}
     >
       <Box sx={{ maxWidth: 900 }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

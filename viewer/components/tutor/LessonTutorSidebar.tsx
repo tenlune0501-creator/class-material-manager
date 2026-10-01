@@ -55,10 +55,13 @@ export interface LessonTutorSidebarLesson {
 export function LessonTutorSidebar({
   lesson,
   ttsConfigured,
+  initialOpen = false,
   children,
 }: {
   lesson: LessonTutorSidebarLesson;
   ttsConfigured: boolean;
+  /** /tutor(수업 선택)에서 이 Lesson으로 들어왔을 때 — 패널을 처음부터 열어 수업을 시작한다. */
+  initialOpen?: boolean;
   children: React.ReactNode;
 }) {
   const isWide = useMediaQuery(`(min-width:${PUSH_MIN_WIDTH_PX}px)`);
@@ -135,6 +138,13 @@ export function LessonTutorSidebar({
     setPanelOpen(false);
     focusAfterPaint(() => toggleButtonRef.current);
   }
+
+  // 수업 선택 화면에서 들어온 경우: 사용자가 버튼을 누른 것과 똑같이 연다(같은 경로 재사용 —
+  // resume 로딩·TutorApp 마운트·focus 처리가 전부 handleOpen 한 곳에 있다). 마운트 시 1회.
+  useEffect(() => {
+    if (initialOpen) handleOpen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Escape로 닫는다(모든 폭에서) — 열려 있을 때만 리스너를 붙인다.
   useEffect(() => {
@@ -231,7 +241,6 @@ export function LessonTutorSidebar({
             active={panelOpen}
             onRequestClose={handleClose}
             initialLesson={lesson}
-            autoStartLessonId={null}
             ttsConfigured={ttsConfigured}
             lastSession={resume.lastSession}
             inProgressLesson={resume.inProgressLesson}

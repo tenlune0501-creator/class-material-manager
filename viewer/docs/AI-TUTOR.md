@@ -196,6 +196,91 @@ Piper 등)는 만들지 않았다. 복잡한 DI 프레임워크 없이 `provider
   세션은 서버가 LLM context를 만들어주지 않아(`buildLessonContext`가 `lesson: "lesson"`
   대상만 지원) 의미 있는 Tutor 연동이 아직 불가능하다(아래 "알려진 한계" 참고).
 
+## Tutor 진입 통일 · 대화 모드 · Voice Indicator (2026-09-30)
+
+### 진입 통일 — 실제 수업 UI는 하나
+- 실제 수업 화면은 `/lesson/[...id]`의 [Lesson + `LessonTutorSidebar`]뿐이다.
+- `/tutor`(TutorApp `layoutMode="standalone"`)는 수업 **선택**(StartScreen)만 한다. 고르면
+  `openLessonPage()` → `lessonHref(id, { openTutor: true })` = `/lesson/<id>?tutor=open`.
+  Lesson 페이지가 `initialOpen`을 넘기고, `LessonTutorSidebar`는 마운트 시 사용자가 누른
+  것과 같은 `handleOpen()`을 호출한다(별도 열기 로직 없음).
+- `/tutor?lessonId=`(예전 바로 시작 링크)는 `page.tsx`에서 같은 주소로 redirect.
+- 제거: `/tutor` 전용 채팅형 수업 화면(standalone chat view + 자체 MUI Drawer +
+  TutorApp 안의 `LessonContent` + `useLessonFocusMode` 호출 + standalone 저장/나가기 분기).
+  `AppShell`의 `useLessonFocusMode`/focus mode 자체는 손대지 않았다(현재 호출부 없음 —
+  정리 후보).
+
+### 확정 음성 UX — 시작·종료 모두 사용자 결정 (2026-10-01 정정)
+- 마이크 클릭 → `recording` → 사용자가 [말하기 끝] → `transcribing` → 유효 transcript
+  자동 전송 → `thinking` → `speaking` → `idle`. 별도 보내기 클릭은 필요 없다.
+- 침묵·TV·주변 대화·발화 길이·문장 완결 추정으로 녹음을 종료하지 않는다.
+  TurnDetector, adaptive silence, 자동 녹음 시작, 자동 barge-in, 대화 모드 스위치는 제거했다.
+  이전 `cmm-tutor-conversation` 저장값은 사용하지 않는다.
+- TTS 재생 중 마이크는 비활성이다. [음성 중지] 후 사용자가 직접 마이크를 시작한다.
+- `transcript-validation.ts`는 빈 값·구두점만 있는 값·명백한 잡음 표기를 거른다.
+  네/응/아니/왜?/몰라/다시 등 짧은 답변은 허용한다. 주변 사람의 정상 문장을
+  사용자 발화와 구별하는 화자 분리 기능은 없다.
+- 빈 결과·STT 실패·장치 중단은 안내 후 idle로 복구한다. 마이크나 텍스트로 재시도한다.
+  장치 오류나 cleanup으로 중단된 녹음은 전송하지 않는다.
+- 음성 OFF·패널 닫기·Lesson 변경/unmount·학습 종료는 tracks/recorder와 진행 중 요청을
+  취소하고 세대를 무효화한다. 늦은 권한 응답의 tracks도 닫는다. VoiceIndicator의
+  AudioContext/rAF는 표시 전용이며 녹음 종료 판단에 관여하지 않는다.
+
+### TTS 속도·취소·측정
+- 인사·음성 ON 시 첫 인사·일반 답변은 `speakReply` 한 경로를 쓴다.
+- 기존 markdown 제거와 문장 경계 chunking을 유지한다. 첫 chunk만 먼저 합성하고,
+  준비되면 즉시 재생을 시작한 뒤 다음 chunk 하나를 prefetch한다. 전체 합성을 기다리지 않는다.
+- 실브라우저에서 인라인 코드의 `=`가 MeloTTS 502(`TTS 합성 실패: '='`)를 일으키는 것을
+  확인했다. 음성 사본의 `=`/`=>`만 이퀄/화살표로 바꾸며 화면 코드는 그대로 둔다.
+- 정지/새 generation은 현재 audio를 멈추고 pending 합성 fetch를 abort한다.
+  재생 Promise를 정리하고 handlers·Object URL을 해제한다. 이전 세대는 새 오디오를 건드리지 못한다.
+- 개발 모드 console의 `[Tutor voice latency]`: T0 응답 수신/인사 준비, T1 첫 합성 요청,
+  T2 response headers, T3 blob 준비, T4 play(), T5 실제 playing. 시간은 T0 대비 ms이며
+  production에는 출력하지 않는다. 텍스트·오디오·secret은 기록하지 않는다.
+- LLM은 기존 JSON 응답 방식이다. LLM 전체 답변 수신 전부터 음성을 시작하는 streaming은 없다.
+- 실제 마이크·배경 소음·브라우저 자동재생 권한·MeloTTS 성능은 MANUAL CHECK 대상이다.
+
+### 2026-10-01 검증 기록
+- `npm run typecheck`, `npm run typecheck --prefix viewer`: PASS.
+- `npm test`: 422 tests, 97 suites, 422 PASS / 0 FAIL / 0 skipped.
+  실제 TutorApp 함수 본문을 실행하는 미디어 대역 테스트로 수동 종료·STT 자동 전송,
+  빈/잡음 결과·오류 복구·취소·늦은 권한 응답·TTS 순서 및 이전 세대 차단을 검증했다.
+  이 테스트는 실제 React 렌더링이나 마이크 품질을 보증하지 않는다.
+- 실제 로컬 브라우저: useState Lesson/Sidebar, 첫 인사 MeloTTS, 텍스트 질문과 Lesson에
+  맞는 실제 LLM 응답, 여러 chunk 재생, 음성 중지, 음성 OFF, 패널 닫기 확인.
+- 합성 오디오를 브라우저 MediaStream으로 공급한 테스트: 녹음은 134초 후에도 유지됐고
+  사용자 종료 후에만 STT/자동 전송됐다. UTF-8 한국어 샘플로 짧게 재검증한 결과
+  "다시 설명해 주세요."가 정확히 인식돼 실제 LLM 응답으로 이어졌다. 실제 마이크는 아니다.
+- 실제 오류 발견/수정: 인라인 코드 `=`의 MeloTTS 502. 수정 후 두 chunk 모두 HTTP 200,
+  순차 재생 완료, idle 복귀, audio pause/src 해제, 경고 없음 확인.
+- 개발 지연 표본: 첫 인사 T5 41,147ms(T2 40,973ms), 짧은 응답 T5 2,461~2,946ms,
+  코드 설명 T5 12,555ms(T2 12,513ms). 서버/네트워크 응답 대기가 대부분이며
+  길이에 따라 합성 지연이 남는다. 보장 지연이나 성능 평균이 아닌 해당 환경의 표본이다.
+- 검증 탭의 Service Worker가 오래된 개발 번들을 제공해 수정 반영을 방해했다.
+  격리된 localhost 검증 탭의 worker/cache만 지우고 최신 번들을 확인했다. 앱의 SW 코드는
+  변경하지 않았다. 로컬 수정 후 옛 동작이 보이면 사이트 캐시도 확인한다.
+- MANUAL CHECK: 실제 사용자 마이크·TV/음악/타인 발화 환경, 스피커 출력 품질,
+  사용자 브라우저 권한·자동재생 정책. 화자 분리는 지원하지 않는다.
+
+### Voice Indicator (`components/tutor/VoiceIndicator.tsx`)
+- 한 컴포넌트가 `VoiceState`에 따라 모두 표현: recording(실제 마이크 레벨로 원 크기·
+  바깥 링 진하기 변화 + 느린 잔물결), transcribing(원 둘레를 도는 호), thinking(느린
+  호흡), speaking(바깥 파동 + 호흡), idle/error(정지). 색은 테마 `primary`/`error`.
+- 레벨: `AudioContext` + `AnalyserNode` RMS → `micLevelFromRms()`(dB 스케일 0~1) →
+  root의 CSS 변수 `--voice-level`에 rAF로 기록(React state 아님 → 리렌더 없음).
+  destination에 연결하지 않는다. **표시 전용** — 콜백 prop이 없어 녹음 종료로 이어질
+  경로가 구조적으로 없다. 스트림 소유·정지는 TutorApp.
+- `prefers-reduced-motion: reduce`: 반복 애니메이션·크기 변화 끔(레벨은 링 진하기로만).
+- speaking의 움직임은 CSS 애니메이션이다(실제 TTS 오디오 파형 분석은 하지 않음 —
+  오디오를 Web Audio 그래프로 우회시키면 재생 경로가 바뀌는 위험이 있어 제외).
+
+### 로그인 후 원래 경로 복귀
+`proxy` → `/login?next=<경로+쿼리>` → hidden input → `login` 서버 액션이
+`redirect(safeNextPath(next) ?? "/")`. `safeNextPath`(lib/url.ts)는 `/`로 시작하는 내부
+경로만 허용하고 `//host`·`/\`·스킴·제어문자·`/login`·`/api`를 거부한다(세 곳에서 모두
+재검증 — 폼 값은 조작 가능). 이미 로그인된 채 `/login?next=`에 오면 proxy가 같은 규칙으로
+보낸다.
+
 ## 다음 Lesson 계산 (`lib/tutor/progress.ts:computeNextLesson`)
 
 단순 "Lesson id + 1"이 아니다:
@@ -372,11 +457,11 @@ Windows 바탕화면 아이콘
 - **launcher를 반복 실행하면 앱 창이 하나씩 늘어난다** — 같은 URL의 기존 app 창을
   재사용/포커스하는 기능은 의도적으로 만들지 않았다(Chrome/Edge 창 열거는 복잡도
   대비 이득이 적어 단순하게 두기로 함, "CMM Tutor 원클릭 launcher" 절 참고).
-- **로그인 세션이 없으면 `/tutor`가 아니라 홈(`/`)으로 착지한다** — 기존
-  `lib/supabase/proxy.ts`가 로그인 성공 후 항상 `/`로 보내고 원래 요청 경로로
-  돌아가지 않는다(이 동작은 기존 auth 흐름이라 이번 launcher 작업에서 바꾸지
-  않았다). 로그인 후 사이드바의 "AI Tutor"를 한 번 더 눌러야 한다. 세션이 살아
-  있는 일반적인 경우(로그인 뒤 매일 실행)에는 영향 없음.
+- ~~로그인 세션이 없으면 홈(`/`)으로 착지~~ — 2026-09-30 해결: 로그인 후 원래 요청
+  경로로 돌아간다("로그인 후 원래 경로 복귀" 절).
+- **launcher(`CMMTutor.cmd`)는 여전히 `/tutor`(수업 선택 화면)를 연다** — 이제 거기서
+  Lesson을 고르면 Lesson + Sidebar 화면으로 이동한다. launcher 자체는 Desktop 앱 전환
+  단계에서 정리한다(이번에는 수정하지 않음).
 
 ## Groq 실사용(live) 검증 (2026-09-11 완료)
 

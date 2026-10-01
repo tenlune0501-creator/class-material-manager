@@ -7,16 +7,20 @@
 import type { Metadata } from "next";
 import Box from "@mui/material/Box";
 
+import { safeNextPath } from "@/lib/url";
+
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "로그인 — 수업자료 아카이브",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  // proxy가 붙여 준 "로그인 후 돌아갈 경로". 여기서 한 번 거르고, 제출 시 서버 액션이 한 번 더 거른다.
+  const { next } = await searchParams;
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", p: 2 }}>
-      <LoginForm />
+      <LoginForm next={safeNextPath(next)} />
     </Box>
   );
 }

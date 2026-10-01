@@ -49,5 +49,5 @@ export interface STTProvider {
 /** 브라우저에서 직접 로컬 컴패니언을 호출하는 쪽이라 서버 코드에서는 쓰지 않는다 (client 전용). */
 export interface TTSProvider {
   readonly name: string;
-  synthesize(text: string): Promise<Blob>;
+  synthesize(text: string, options?: { signal?: AbortSignal; onResponse?: () => void }): Promise<Blob>;
 }

@@ -8,6 +8,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/url";
 
 export interface LoginState {
   error?: string;
@@ -28,7 +29,9 @@ export async function login(_prevState: LoginState | undefined, formData: FormDa
     return { error: "이메일 또는 비밀번호가 올바르지 않습니다." };
   }
 
-  redirect("/");
+  // 로그인 전에 보려던 화면으로 돌아간다. 폼 값은 사용자가 조작할 수 있으므로 여기서
+  // 다시 검증한다 — 외부 주소·//host·/api 등은 전부 거부되고 / 로 간다(Open Redirect 방지).
+  redirect(safeNextPath(formData.get("next")) ?? "/");
 }
 
 export async function logout(): Promise<void> {

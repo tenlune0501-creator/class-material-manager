@@ -15,6 +15,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNextPath } from "@/lib/url";
+
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -54,14 +56,24 @@ export async function updateSession(request: NextRequest) {
   const isLoginPage = request.nextUrl.pathname === "/login";
 
   if (!user && !isLoginPage) {
+    // 로그인 후 원래 보려던 화면(예: /lesson/...?tutor=open)으로 돌아갈 수 있게 경로를
+    // ?next= 로 넘긴다. 내부 경로만 허용한다(safeNextPath — /api 등은 제외돼 그냥 / 로 간다).
     const url = request.nextUrl.clone();
+    const next = safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);
     url.pathname = "/login";
+    url.search = "";
+    if (next && next !== "/") url.searchParams.set("next", next);
     return NextResponse.redirect(url);
   }
 
   if (user && isLoginPage) {
+    // 이미 로그인된 채로 /login?next=... 에 오면 바로 그 경로로 보낸다.
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    const next = safeNextPath(request.nextUrl.searchParams.get("next")) ?? "/";
+    const target = new URL(next, url.origin);
+    url.pathname = target.pathname;
+    url.search = target.search;
+    url.hash = "";
     return NextResponse.redirect(url);
   }
 

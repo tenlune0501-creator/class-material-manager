@@ -28,12 +28,14 @@ export class MeloTTSProvider implements TTSProvider {
     }
   }
 
-  async synthesize(text: string): Promise<Blob> {
+  async synthesize(text: string, options?: { signal?: AbortSignal; onResponse?: () => void }): Promise<Blob> {
     const res = await fetch(`${this.baseUrl}/synthesize`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: options?.signal,
     });
+    options?.onResponse?.();
     if (!res.ok) {
       throw new Error(`MeloTTS 합성 실패 (${res.status})`);
     }

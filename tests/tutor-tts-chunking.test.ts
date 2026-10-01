@@ -18,6 +18,11 @@ import {
 } from "../viewer/lib/tutor/tts-chunking.ts";
 
 describe("stripMarkdownForSpeech", () => {
+  it("MeloTTS에서 실패하는 인라인 코드의 =와 =>를 음성용 말로 바꾼다", () => {
+    const text = stripMarkdownForSpeech("`let count = 0`과 `setCount(prev => prev + 1)`입니다.");
+    assert.ok(!text.includes("=") && !text.includes(">"));
+    assert.ok(text.includes("이퀄") && text.includes("화살표"));
+  });
   it("코드 블록은 통째로 없앤다", () => {
     assert.equal(stripMarkdownForSpeech("설명\n```js\nconst x = 1;\n```\n끝"), "설명\n끝");
   });

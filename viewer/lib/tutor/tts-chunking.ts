@@ -41,6 +41,10 @@ export function stripMarkdownForSpeech(text: string): string {
     .replace(/\*([^*]*)\*/g, "$1")
     .replace(/^#{1,6}\s*/gm, "")
     .replace(/^[-*+]\s+/gm, "")
+    // MeloTTS 한국어 합성에서 '='가 KeyError를 일으킨다(실브라우저 502 재현).
+    // 화면의 코드는 보존하고 음성 사본에서만 연산자를 읽을 수 있는 말로 바꾼다.
+    .replace(/=>/g, " 화살표 ")
+    .replace(/=+/g, " 이퀄 ")
     .replace(/[`*_~#>|]/g, "")
     .replace(/\n{2,}/g, "\n")
     .trim();
