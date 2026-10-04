@@ -26,7 +26,7 @@ import {
   subjectLabel,
   type StudyGuide,
 } from "@/lib/data";
-import { safeHref, materialEntryHref } from "@/lib/url";
+import { safeHref } from "@/lib/url";
 
 const CODE_FONT = { fontFamily: "'D2Coding', monospace" as const };
 
@@ -72,10 +72,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function StudyCard({ guide, showSubject = true, destinations = {} }: {
+export function StudyCard({ guide, showSubject = true }: {
   guide: StudyGuide;
   showSubject?: boolean;
-  destinations?: Readonly<Record<string, string>>;
 }) {
   // 수업 당시 코드와 지금 방식 — 둘 중 **하나라도** 근거가 있을 때만 그립니다.
   const hasOld = Boolean(guide.oldCode ?? guide.oldPattern);
@@ -175,7 +174,7 @@ export function StudyCard({ guide, showSubject = true, destinations = {} }: {
               key={material.materialId}
               size="small"
               variant="outlined"
-              href={materialEntryHref(material.materialId, destinations)}
+              href={`/m/${encodeURIComponent(material.materialId)}`}
               label={`📄 ${material.title.slice(0, 26)}`}
             />
           ))}

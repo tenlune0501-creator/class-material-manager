@@ -7,14 +7,19 @@ import { setImmediate } from "node:timers/promises";
 import { describe, it } from "node:test";
 import ts from "typescript";
 import { chunkTextForSpeech } from "../viewer/lib/tutor/tts-chunking.ts";
+import { recordingFilename, recordingMime, MAX_STT_AUDIO_BYTES, AUDIO_TOO_LARGE } from "../viewer/lib/tutor/recording.ts";
+import { readTutorResponse } from "../viewer/lib/tutor/response.ts";
 import { validTranscript } from "../viewer/lib/tutor/transcript-validation.ts";
 
 const source = await readFile("viewer/components/tutor/TutorApp.tsx", "utf8");
 const tree = ts.createSourceFile("TutorApp.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const app = tree.statements.find((n) => ts.isFunctionDeclaration(n) && n.name?.text === "TutorApp") as ts.FunctionDeclaration;
-const names = ["stopSpeakingInternal", "playBlob", "finishSpeaking", "speakReply", "cleanupVoiceResources"];
+const names = ["stopSpeakingInternal", "speakReply", "cleanupVoiceResources"];
 const code = app.body!.statements.filter((n) => ts.isFunctionDeclaration(n) && names.includes(n.name!.text)).map((n) => n.getText(tree)).join("\n");
 const js = ts.transpileModule(`${code}\n({${names.join(",")}})`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+
+const adapterSource = (await readFile("viewer/lib/tutor/speech-output.ts", "utf8")).replace(/^import .*;$/gm, "").replace(/export /g, "");
+const adapterJs = ts.transpileModule(adapterSource + "\n({ BlobSpeechOutput, BrowserSpeechOutput, koreanVoice })", { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
 const micNames = ["startRecording", "stopRecording", "onMicClick", "transcribeAndSend", "classifyMicError", "cleanupVoiceResources", "endAssistantTurn"];
 const micSource = app.body!.statements.filter((n) => ts.isFunctionDeclaration(n) && micNames.includes(n.name!.text)).map((n) => n.getText(tree)).join("\n");
@@ -35,6 +40,7 @@ function micHarness() {
   let pendingResponse: Promise<unknown> | null = null;
   const stream = { getTracks: () => [{ stop: () => { stoppedTracks++; } }] };
   class FakeRecorder {
+    static isTypeSupported() { return true; }
     state = "inactive";
     mimeType = "audio/webm";
     stops = 0;
@@ -60,12 +66,14 @@ function micHarness() {
     setError: (value: string | null) => { error = value; }, setMicStream: () => {},
     stopSpeakingInternal: () => {},
     handleSend: async (text: string) => { sent.push(text); c.voiceStateRef.current = "thinking"; },
-    fetch: async () => { requests++; if (fail) throw new Error("offline"); return { ok: true, json: async () => pendingResponse ? await pendingResponse : { text: transcript } }; },
+    fetch: async () => { requests++; if (fail) throw new Error("offline"); return { ok: true, headers: new Headers({ "content-type": "application/json" }), json: async () => pendingResponse ? await pendingResponse : { text: transcript } }; },
     setTimeout: (fn: () => void) => { const id = ++timerId; timers.set(id, fn); return id; },
     clearTimeout: (id: number) => { timers.delete(id); },
     MediaRecorder: FakeRecorder, Blob, FormData, AbortController, DOMException, validTranscript,
+    recordingFilename, recordingMime, MAX_STT_AUDIO_BYTES, AUDIO_TOO_LARGE, readTutorResponse, setMicPending: () => {},
   };
   const api = runInNewContext(micJs, c) as {
+    transcribeAndSend: (blob: Blob, epoch: number) => Promise<void>;
     startRecording: () => Promise<void>; stopRecording: () => void; onMicClick: () => void;
     cleanupVoiceResources: () => void; endAssistantTurn: () => void;
   };
@@ -103,6 +111,14 @@ describe("user-controlled recording and STT lifecycle", () => {
       assert.equal(h.permissions(), 1);
       assert.equal(h.timers.size, 0);
     }
+  });
+  it("rejects oversized audio before fetch, without a recording duration timer", async () => {
+    const h = micHarness();
+    await h.api.transcribeAndSend(new Blob([new Uint8Array(MAX_STT_AUDIO_BYTES + 1)], { type: "audio/webm" }), 0);
+    assert.equal(h.requests(), 0);
+    assert.equal(h.error(), AUDIO_TOO_LARGE);
+    assert.equal(h.c.voiceStateRef.current, "idle");
+    assert.equal(h.timers.size, 0);
   });
   it("STT failure restores idle without opening the microphone again", async () => {
     const h = micHarness();
@@ -191,7 +207,7 @@ function harness() {
   let turns = 0;
   let tracksStopped = 0;
   const c = {
-    activeRef: ref(true), voiceOnRef: ref(true), ttsGenerationRef: ref(0),
+    activeRef: ref(true), mobileRef: ref(false), mountedRef: ref(true), activeSpeechRef: ref<unknown>(null), browserSpeechRef: ref(null), blobSpeech: null as unknown, voiceOnRef: ref(true), ttsGenerationRef: ref(0),
     ttsAbortRef: ref<AbortController | null>(null), sttAbortRef: ref<AbortController | null>(null), messageAbortRef: ref<AbortController | null>(null),
     cancelPlaybackRef: ref<(() => void) | null>(null), audioRef: ref<FakeAudio | null>(null), activeObjectUrlRef: ref<string | null>(null),
     latencyRef: ref<unknown>(null), requestEpochRef: ref(0),
@@ -200,7 +216,7 @@ function harness() {
     setVoiceState: (s: string) => { state = s; },
     endAssistantTurn: () => { state = "idle"; turns++; },
     setMicStream: () => {}, setTtsNotice: () => {}, markLatency: () => {},
-    chunkTextForSpeech, performance, AbortController, Blob, Audio: FakeAudio,
+    chunkTextForSpeech, performance, AbortController, DOMException, Blob, Audio: FakeAudio,
     URL: { createObjectURL: () => `blob:${audio.length}`, revokeObjectURL: (url: string) => revoked.push(url) },
     setTimeout: () => 1, clearTimeout: () => {},
     tts: { synthesize: (text: string, opts: { signal: AbortSignal }) => new Promise<Blob>((resolve, reject) => {
@@ -208,6 +224,8 @@ function harness() {
       opts.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
     }) },
   };
+  const adapters = runInNewContext(adapterJs, c);
+  c.blobSpeech = new adapters.BlobSpeechOutput(c.tts);
   const api = runInNewContext(js, c) as {
     speakReply: (text: string) => Promise<void>;
     stopSpeakingInternal: () => void;
@@ -258,7 +276,8 @@ describe("Tutor TTS async lifecycle", () => {
     const next = h.api.speakReply("새 응답입니다.");
     h.synth[1].resolve(new Blob(["new"]));
     await setImmediate();
-    h.api.finishSpeaking(oldGen);
+    await old; // stale completion must not clear the new turn
+    assert.notEqual(h.c.ttsGenerationRef.current, oldGen);
     assert.equal(h.audio.length, 1);
     assert.equal(h.audio[0].paused, false);
     assert.equal(h.synth[1].signal.aborted, false);
@@ -292,4 +311,88 @@ describe("Tutor TTS async lifecycle", () => {
     assert.equal(h.c.requestEpochRef.current, 1);
     assert.equal(h.state(), "idle");
   });
+});
+
+function browserHarness(voices = [{ lang: "ko-KR", localService: true, default: false }]) {
+  const utterances: any[] = [];
+  let cancels = 0;
+  const synthesis = { getVoices: () => voices, cancel: () => { cancels++; }, speak: (u: any) => utterances.push(u) };
+  const { BrowserSpeechOutput, koreanVoice } = runInNewContext(adapterJs, { chunkTextForSpeech, DOMException, AbortController, setTimeout, clearTimeout });
+  const output = new BrowserSpeechOutput(synthesis, (text: string) => ({ text }));
+  return { output, utterances, cancels: () => cancels, koreanVoice };
+}
+
+describe("browser SpeechOutput contract (mock speech, not hardware quality)", () => {
+  it("selects Korean local voice and completes all bounded chunks sequentially", async () => {
+    const h = browserHarness();
+    const run = h.output.speak("첫 번째 설명입니다.\n두 번째 설명입니다.", new AbortController().signal);
+    assert.equal(h.utterances.length, 1);
+    assert.equal(h.utterances[0].lang, "ko-KR");
+    h.utterances[0].onend();
+    await setImmediate();
+    assert.equal(h.utterances.length, 2);
+    h.utterances[1].onend();
+    await run;
+    assert.equal(h.utterances[0].onend, null);
+  });
+  it("missing Korean voice is explicit and never selects an English substitute", async () => {
+    const h = browserHarness([{ lang: "en-US", localService: true, default: true }]);
+    await assert.rejects(h.output.speak("안녕하세요", new AbortController().signal), /한국어/);
+    assert.equal(h.utterances.length, 0);
+  });
+  it("abort settles speech and stale completion cannot advance its queue", async () => {
+    const h = browserHarness();
+    const abort = new AbortController();
+    const run = h.output.speak("첫 번째 설명입니다.\n두 번째 설명입니다.", abort.signal);
+    const stale = h.utterances[0].onend;
+    const rejected = assert.rejects(run, { name: "AbortError" });
+    abort.abort();
+    stale();
+    await rejected;
+    assert.equal(h.utterances.length, 1);
+    assert.equal(h.cancels(), 1);
+  });
+  it("direct cancellation between chunks cannot start another utterance", async () => {
+    const h = browserHarness();
+    const run = h.output.speak("첫 번째 설명입니다.\n두 번째 설명입니다.", new AbortController().signal);
+    const rejected = assert.rejects(run, { name: "AbortError" });
+    h.utterances[0].onend();
+    h.output.cancel();
+    await rejected;
+    assert.equal(h.utterances.length, 1);
+  });
+  it("old end/error callbacks cannot finish a newer utterance", async () => {
+    const h = browserHarness();
+    const old = h.output.speak("이전 설명입니다.", new AbortController().signal);
+    const stale = h.utterances[0].onend;
+    const rejected = assert.rejects(old, { name: "AbortError" });
+    const next = h.output.speak("새 설명입니다.", new AbortController().signal);
+    stale();
+    assert.ok(h.utterances[1].onend);
+    h.utterances[1].onend();
+    await Promise.all([rejected, next]);
+  });
+  it("speech errors settle instead of locking the controller", async () => {
+    const h = browserHarness();
+    const run = h.output.speak("설명입니다.", new AbortController().signal);
+    const rejected = assert.rejects(run, /브라우저 음성/);
+    h.utterances[0].onerror();
+    await rejected;
+    assert.equal(h.utterances[0].onend, null);
+  });
+});
+const sendCode = app.body!.statements.filter((n) => ts.isFunctionDeclaration(n) && n.name?.text === 'handleSend').map(n=>n.getText(tree)).join('\n');
+const sendJs = ts.transpileModule(sendCode+'\n({handleSend})',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+describe('LLM late response ownership',()=>{
+ it('ignores a late reply after cancellation even when transport ignores AbortSignal',async()=>{
+  let resolve!:(v:Response)=>void;let spoken=0;let messages:any[]=[];
+  const c:any={input:'질문',activeRef:{current:true},viewRef:{current:'chat'},sessionIdRef:{current:'session'},messagesRef:{current:[]},voiceStateRef:{current:'idle'},handleStartCallIdRef:{current:1},requestEpochRef:{current:1},messageAbortRef:{current:null},mountedRef:{current:true},
+   AbortController,readTutorResponse,END_INTENT_PATTERN:/종료/,setTimeout,clearTimeout,
+   fetch:()=>new Promise(r=>resolve=r),setInput(){},setError(){},setShowEndConfirm(){},setFallbackNotice(){},setMessages:(v:any)=>{messages=typeof v==='function'?v(messages):v;},setVoiceState:(v:string)=>c.voiceStateRef.current=v,speakReply:()=>{spoken++;},stopSpeakingInternal(){}
+  };
+  const api=runInNewContext(sendJs,c);const run=api.handleSend();
+  c.requestEpochRef.current++;c.messageAbortRef.current.abort();
+  resolve(Response.json({reply:'늦은 응답'}));await run;
+  assert.equal(spoken,0);assert.equal(messages.length,1);assert.equal(messages[0].role,'user');
+ });
 });

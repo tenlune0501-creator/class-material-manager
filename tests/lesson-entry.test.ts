@@ -26,23 +26,19 @@ describe("자료에서 정규 Lesson 진입", () => {
     ], ["doc-a"]), []);
   });
 
-  it("과목·자료·검색·복습은 같은 링크 컴포넌트와 query 없는 Lesson URL을 사용한다", async () => {
-    for (const path of ["s/[subject]", "search", "study"]) {
+  it("자료 목록은 원본을 열고 Lesson 선택과 섞이지 않는다", async () => {
+    for (const path of ["s/[subject]", "learn", "examples/[id]", "materials/study"]) {
       const source = await readFile(`viewer/app/${path}/page.tsx`, "utf8");
-      assert.ok(source.includes("<MaterialLessonLinks materialIds="), path);
-      assert.ok(source.includes("materialEntryHref("), `${path}: 원래 Material 클릭도 resolver를 사용한다`);
+      assert.ok(source.includes("/m/${encodeURIComponent("), path);
+      assert.ok(!source.includes("materialEntryHref("), `${path}: 자료 제목은 Lesson으로 대체하지 않는다`);
+      assert.ok(!source.includes("<MaterialLessonLinks"), `${path}: 자료 목록에 Lesson을 섞지 않는다`);
     }
     const links = await readFile("viewer/components/MaterialLessonLinks.tsx", "utf8");
-    for (const path of ["learn", "examples/[id]"]) {
-      const source = await readFile(`viewer/app/${path}/page.tsx`, "utf8");
-      assert.ok(source.includes("materialEntryHref("), `${path}: 일반 학습 링크도 동일 resolver 사용`);
-    }
     assert.ok(links.includes("href={lessonHref(lesson.id)}"));
+    assert.ok(links.includes("Lesson · AI Tutor와 학습"));
     assert.ok(!links.includes("TutorApp"));
-    assert.ok(!/<Paper|<Typography|<List\s|aria-label="연결된 Lesson"/.test(links), "별도 카드·헤더·목록 wrapper를 만들지 않는다");
-    assert.ok(!links.includes("Lesson · AI Tutor와 공부하기"));
     const materialPage = await readFile("viewer/app/m/[docId]/page.tsx", "utf8");
-    assert.ok(!materialPage.includes("MaterialLessonLinks"), "원문 화면에 중간 진입 안내를 만들지 않는다");
+    assert.ok(!materialPage.includes("LessonTutorSidebar"), "자료에 Tutor를 복제하지 않는다");
     assert.ok(!materialPage.includes("redirect("), "직접 원문 접근은 redirect하지 않는다");
   });
 

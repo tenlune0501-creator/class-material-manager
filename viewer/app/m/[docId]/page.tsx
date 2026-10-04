@@ -253,7 +253,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ docId
               <StudyCard key={guide.comparisonId} guide={guide} showSubject={false} />
             ))}
 
-          <NavChip href={`/study?subject=${encodeURIComponent(material.subject ?? "")}`} label="이 과목 복습 전체 보기 →" size="small" />
+          <NavChip href={`/materials/study?subject=${encodeURIComponent(material.subject ?? "")}`} label="이 과목 복습 전체 보기 →" size="small" />
         </Box>
       )}
 

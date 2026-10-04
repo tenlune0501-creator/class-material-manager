@@ -18,7 +18,7 @@ import { describe, it } from "node:test";
 import { readFile } from "node:fs/promises";
 
 const source = await readFile("viewer/lib/data.ts", "utf8");
-const home = await readFile("viewer/app/page.tsx", "utf8");
+const home = await readFile("viewer/app/materials/page.tsx", "utf8");
 const NEWLINE = String.fromCodePoint(10);
 
 describe("자료를 읽지 못했을 때", () => {

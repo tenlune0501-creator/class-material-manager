@@ -18,8 +18,7 @@ import Typography from "@mui/material/Typography";
 import { NavChip, NavListItem } from "@/components/nav";
 import { getMaterial, subjectLabel } from "@/lib/data";
 import { getProjectExample } from "@/lib/projectExamples";
-import { safeHref, materialEntryHref } from "@/lib/url";
-import { getMaterialLessonIds } from "@/lib/curriculum";
+import { safeHref } from "@/lib/url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -53,7 +52,6 @@ export default async function ExampleDetailPage({ params }: { params: Promise<{ 
     }),
   );
   const related = relatedResults.filter((v): v is RelatedMaterial => v !== null);
-  const destinations = await getMaterialLessonIds(related.map((material) => material.docId));
 
   const lineLabel =
     example.lineStart != null && example.lineEnd != null
@@ -179,7 +177,7 @@ export default async function ExampleDetailPage({ params }: { params: Promise<{ 
           <Paper variant="outlined">
             <List dense disablePadding>
               {related.map((material) => (
-                <NavListItem key={material.docId} href={materialEntryHref(material.docId, destinations)}>
+                <NavListItem key={material.docId} href={`/m/${encodeURIComponent(material.docId)}`}>
                   <ListItemText
                     primary={material.title}
                     secondary={material.subject ? subjectLabel(material.subject) : undefined}

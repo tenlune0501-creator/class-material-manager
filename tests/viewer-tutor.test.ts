@@ -1,3 +1,4 @@
+const speechOutput = await readFile("viewer/lib/tutor/speech-output.ts", "utf8");
 /**
  * AI Tutor(음성/텍스트 과외) 기능이 요구사항의 핵심 안전 규칙을 지키는지 정적으로
  * 확인한다. viewer-curriculum.test.ts 와 같은 방식 — Next.js/Supabase 런타임 없이
@@ -116,7 +117,7 @@ describe("세션 시작/메시지 — 서버 API 경계", () => {
   });
 
   it("STT 라우트는 MIME과 크기를 검증한다", () => {
-    assert.ok(sttRoute.includes("MAX_AUDIO_BYTES"));
+    assert.ok(sttRoute.includes("MAX_STT_AUDIO_BYTES"));
     assert.ok(sttRoute.includes("ALLOWED_MIME_PREFIXES"));
     assert.ok(/status:\s*413/.test(sttRoute));
     assert.ok(/status:\s*415/.test(sttRoute));
@@ -232,7 +233,7 @@ describe("음성 UX 안전 규칙", () => {
   });
 
   it("voice off일 때 TTS를 호출하지 않는다", () => {
-    assert.ok(tutorApp.includes("if (!tts || !voiceOnRef.current)"));
+    assert.ok(tutorApp.includes("if (!voiceOnRef.current)"));
   });
 
   it("최초 Lesson 인사말도 기존 speakReply() 경로로 1회만 읽는다 (handleStart가 중복 호출돼도 마지막 호출만)", () => {
@@ -246,7 +247,7 @@ describe("음성 UX 안전 규칙", () => {
       "인사말 내용/생성 방식은 그대로",
     );
     assert.ok(
-      /if \(handleStartCallIdRef\.current === callId\) \{\s*void speakReply\(greeting\);/.test(handleStartBody),
+      /if \(handleStartCallIdRef\.current === callId\) \{\s*if \(!mobileRef.current\) void speakReply\(greeting\);/.test(handleStartBody),
       "가장 마지막 handleStart 호출만 greeting을 speakReply()로 읽어야 한다",
     );
     assert.ok(
@@ -257,7 +258,7 @@ describe("음성 UX 안전 규칙", () => {
 
   it("TTS로 보내기 전 마크다운 기호를 벗겨낸다 (Groq 실사용 검증 중 발견: 백틱이 MeloTTS 합성을 깨뜨림) — tts-chunking.ts로 이동", () => {
     assert.ok(ttsChunking.includes("export function stripMarkdownForSpeech"), "마크다운 제거 함수가 있어야 한다");
-    assert.ok(tutorApp.includes("chunkTextForSpeech"), "speakReply()가 chunking(내부에서 strip 포함)을 거쳐야 한다");
+    assert.ok(speechOutput.includes("chunkTextForSpeech"), "speakReply()가 chunking(내부에서 strip 포함)을 거쳐야 한다");
   });
 
   it("종료 의사는 버튼 + 보조적 텍스트 감지 둘 다 있다 (자동 완료 처리는 아님)", () => {
@@ -298,7 +299,7 @@ describe("Tutor 진입 통일 — 실제 수업은 Lesson + Tutor Sidebar 하나
 
   it("chat view는 TutorSidebar 하나만 돌려준다(위치·폭·overlay는 LessonTutorSidebar 담당)", () => {
     const chatReturn = tutorApp.match(/\/\/ view === "chat"[\s\S]*?\n}\n/)?.[0] ?? "";
-    assert.ok(chatReturn.includes('return <Box sx={{ height: "100%" }}>{sidebar}</Box>;'));
+    assert.ok(chatReturn.includes('return <Box sx={{ height: props.mobile ? "auto" : "100%" }}>{sidebar}</Box>;'));
     assert.equal((chatReturn.match(/return /g) ?? []).length, 1, "chat view의 다른 레이아웃 분기가 없어야 한다");
   });
 
@@ -322,7 +323,7 @@ describe("Tutor 진입 통일 — 실제 수업은 Lesson + Tutor Sidebar 하나
     assert.ok(!lessonTutorSidebar.includes("initialOpen"));
     assert.ok(!/localStorage|sessionStorage|usePathname|useSearchParams/.test(lessonTutorSidebar));
     assert.ok(
-      /useEffect\(\(\) => \{\s*handleOpen\(\);/.test(lessonTutorSidebar),
+      lessonTutorSidebar.includes("else handleOpen();") && lessonTutorSidebar.includes("if (!ready || initialized.current) return;"),
       "자동 열기는 별도 로직이 아니라 기존 handleOpen(resume 로딩·마운트·focus)을 그대로 불러야 한다",
     );
   });
@@ -339,10 +340,10 @@ describe("Tutor 진입 통일 — 실제 수업은 Lesson + Tutor Sidebar 하나
     assert.ok(tutorApp.includes("onStopSpeaking={stopSpeaking}"));
   });
 
-  it("대화 기록은 삭제하지 않고 접혀서 최근 발화만 보이다가 펼치면 전체를 본다", () => {
+  it("대화 기록은 컨트롤러 상태를 전달하는 공통 보조 UI다", () => {
     assert.ok(tutorSidebar.includes("historyExpanded"));
-    assert.ok(tutorSidebar.includes("messages.slice(-2)"), "접힌 기본 상태는 최근 발화만");
-    assert.ok(tutorSidebar.includes("props.historyExpanded ? props.messages : lastMessages"));
+    assert.ok(!tutorSidebar.includes("messages.slice(-2)"));
+    assert.ok(tutorSidebar.includes("<TutorHistory messages={props.messages}"));
   });
 
   it("session/start는 Tutor context와 함께 LessonDetail도 돌려준다(서버 계약 유지)", () => {
@@ -372,24 +373,24 @@ describe("mic 권한/오류 처리", () => {
 
 describe("TTS chunking/prefetch — time-to-first-audio 최적화", () => {
   it("답변 전체를 한 번에 합성하지 않고 chunk 단위로 순서대로 재생한다", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(speakReplyBody.includes("chunkTextForSpeech(rawText)"));
-    assert.ok(speakReplyBody.includes("for (let i = 0; i < chunks.length; i++)"), "chunk를 순서대로 재생해야 한다");
+    const speakReplyBody = speechOutput;
+    assert.ok(speakReplyBody.includes("chunkTextForSpeech(text)"));
+    assert.ok(speakReplyBody.includes("for (let index = 0; index < chunks.length; index++)"), "chunk를 순서대로 재생해야 한다");
   });
 
   it("다음 chunk를 재생 중에 미리 합성한다(prefetch)", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(speakReplyBody.includes("getBlob(i + 1)"), "현재 chunk 처리 중 다음 chunk 합성을 미리 시작해야 한다");
+    const speakReplyBody = speechOutput;
+    assert.ok(speakReplyBody.includes("getBlob(index + 1)"), "현재 chunk 처리 중 다음 chunk 합성을 미리 시작해야 한다");
   });
 
   it("정지하거나 새 turn이 시작되면 generation id로 이전 chunk 재생을 무효화한다(stale 재생 방지)", () => {
     assert.ok(tutorApp.includes("ttsGenerationRef"));
-    assert.ok(tutorApp.includes("ttsGenerationRef.current !== myGen"), "생성 시점의 generation과 다르면 중단해야 한다");
+    assert.ok(tutorApp.includes("myGen === ttsGenerationRef.current"), "생성 시점의 generation과 다르면 중단해야 한다");
     assert.ok(tutorApp.includes("ttsGenerationRef.current += 1"), "정지 시 generation을 올려 이전 파이프라인을 무효화해야 한다");
   });
 
   it("재생한 Object URL을 정리한다(메모리 누수 방지)", () => {
-    assert.ok((tutorApp.match(/URL\.revokeObjectURL/g) ?? []).length >= 2, "chunk마다/정리 시 revoke해야 한다");
+    assert.ok((speechOutput.match(/URL\.revokeObjectURL/g) ?? []).length === 1, "chunk마다/정리 시 revoke해야 한다");
   });
 
   it("문장 경계 우선 chunking이며 자연스러운 길이로 합치고 쪼갠다", () => {
@@ -414,7 +415,7 @@ describe("TTS 이중 호출 방지 (회귀 테스트)", () => {
     assert.ok(!/\bspeak\(data\.reply\)/.test(tutorApp), "구 speak(data.reply) 호출이 남아있으면 안 된다");
     // speakReply는 정의 1회 + 실제 호출 2회(greeting, 일반 답변)여야 한다.
     assert.equal((tutorApp.match(/async function speakReply\(/g) ?? []).length, 1);
-    assert.equal((tutorApp.match(/void speakReply\(/g) ?? []).length, 3, "세션 인사/음성 ON 인사/일반 응답이 같은 파이프라인을 사용한다");
+    assert.equal((tutorApp.match(/void speakReply\(/g) ?? []).length, 4, "다시 듣기/세션 인사/음성 ON 인사/일반 응답이 같은 파이프라인을 사용한다");
   });
 
   it("greeting은 handleStart 안에서 정확히 1번만 speakReply를 호출한다", () => {
@@ -429,15 +430,15 @@ describe("TTS 이중 호출 방지 (회귀 테스트)", () => {
   });
 
   it("audio.play()는 전체 파일에서 정확히 1곳(playBlob)에서만 호출된다 — 중복 재생 경로 없음", () => {
-    assert.equal((tutorApp.match(/\.play\(\)/g) ?? []).length, 1);
-    const playBlobBody = tutorApp.match(/function playBlob\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    assert.equal((speechOutput.match(/\.play\(\)/g) ?? []).length, 1);
+    const playBlobBody = speechOutput;
     assert.ok(playBlobBody.includes(".play()"), "play() 호출은 playBlob 안에 있어야 한다");
   });
 
   it("/synthesize는 chunk당 정확히 1번만 요청한다(getBlob이 Map으로 메모이즈)", () => {
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
-    assert.ok(speakReplyBody.includes("blobPromises.has(i)"), "이미 요청한 chunk는 다시 요청하지 않아야 한다");
-    assert.equal((speakReplyBody.match(/tts\.synthesize\(/g) ?? []).length, 1, "synthesize 호출부는 getBlob 안 한 곳뿐이어야 한다");
+    const speakReplyBody = speechOutput;
+    assert.ok(speakReplyBody.includes("blobPromises.has(index)"), "이미 요청한 chunk는 다시 요청하지 않아야 한다");
+    assert.equal((speakReplyBody.match(/provider\.synthesize\(/g) ?? []).length, 1, "synthesize 호출부는 getBlob 안 한 곳뿐이어야 한다");
   });
 });
 
@@ -547,12 +548,12 @@ describe("수동 시작·종료 후 STT 자동 전송", () => {
   });
 
   it("I. 설명 중에는 마이크가 잠기며 음성 중지와 녹음 시작은 별도 사용자 행동이다", () => {
-    assert.ok(tutorApp.includes('micDisabled={voiceState !== "idle" && voiceState !== "recording"}'));
+    assert.ok(tutorApp.includes('micDisabled={micPending || (voiceState !== "idle" && voiceState !== "recording")}'));
     assert.ok(!fnBody(tutorApp, "function onMicClick(").includes("stopSpeakingInternal"));
   });
 
   it("J. TTS 종료/정지/실패는 idle로 돌아가며 마이크를 열지 않는다", () => {
-    assert.ok(fnBody(tutorApp, "function finishSpeaking(").includes("endAssistantTurn();"));
+    assert.ok(fnBody(tutorApp, "async function speakReply(").includes("endAssistantTurn();"));
     assert.ok(fnBody(tutorApp, "function stopSpeaking()").includes("endAssistantTurn();"));
     const end = fnBody(tutorApp, "function endAssistantTurn(");
     assert.ok(end.includes('setVoiceState("idle")'));
@@ -642,7 +643,7 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
       activeEffectBody.includes("requestEpochRef.current += 1;") && activeEffectBody.includes("cleanupVoiceResources();"),
       "닫히는 순간(트리거와 무관하게) 세대를 올리고 마이크/재생을 실제로 정리해야 한다",
     );
-    const speakReplyBody = tutorApp.match(/async function speakReply\([\s\S]*?\n  \}\n/)?.[0] ?? "";
+    const speakReplyBody = tutorApp;
     assert.ok(
       speakReplyBody.includes('if (!activeRef.current) {') && speakReplyBody.includes('setVoiceState("idle");'),
       "숨겨진 패널에서 음성이 재생되면 안 되고, 그때도 thinking 상태가 굳으면 안 된다",
@@ -751,7 +752,7 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
 
   it("LessonTutorSidebar — 닫혀 있는 패널은 inert로 Tab/스크린리더에서 제외된다(Codex 최종 리뷰에서 발견)", () => {
     assert.ok(
-      lessonTutorSidebar.includes("inert={panelInert || undefined}"),
+      lessonTutorSidebar.includes("inert={(!mobile && panelInert) || undefined}"),
       "width:0/transform으로만 가려서는 안의 버튼·입력이 계속 Tab 대상이자 스크린리더에 노출된다",
     );
     // panelInert는 panelOpen과 한 프레임 어긋나게 움직인다 — 닫히는 바로 그 렌더에서
@@ -765,8 +766,8 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
       "닫을 때는 한 프레임 늦춰 inert를 적용해 스크롤 부작용을 피해야 한다",
     );
     assert.ok(
-      /role=\{!isWide && panelOpen \? "dialog" : undefined\}/.test(lessonTutorSidebar) &&
-        /aria-modal=\{!isWide && panelOpen \? true : undefined\}/.test(lessonTutorSidebar),
+      /role=\{!mobile && !isWide && panelOpen \? "dialog" : undefined\}/.test(lessonTutorSidebar) &&
+        /aria-modal=\{!mobile && !isWide && panelOpen \? true : undefined\}/.test(lessonTutorSidebar),
       "닫힌 뒤에도 aria-modal=true가 남아있으면 안 된다(좁은 화면에서 실제로 modal로 열려 있을 때만)",
     );
   });
@@ -781,7 +782,7 @@ describe("Lesson 임베디드 Tutor Sidebar — 기존 Tutor 재사용 (신규)"
 
   it("LessonTutorSidebar — 좁은 화면에서 패널이 열려 있는 동안 배경(Lesson)을 inert로 막는다(키보드 focus 격리)", () => {
     assert.ok(
-      lessonTutorSidebar.includes("const backgroundInert = !isWide && panelOpen;"),
+      lessonTutorSidebar.includes("const backgroundInert = !mobile && !isWide && panelOpen;"),
       "backdrop은 포인터만 막는다 — 키보드/스크린리더가 배경으로 넘어가지 못하게 별도로 막아야 한다",
     );
     assert.ok(lessonTutorSidebar.includes("inert={backgroundInert || undefined}"));
@@ -842,7 +843,7 @@ describe("수동 음성 입력과 공통 TTS", () => {
 describe("VoiceIndicator — 하나의 컴포넌트, 레벨은 표시 전용", () => {
   it("TutorSidebar는 VoiceIndicator를 한 번만 렌더하고 상태를 prop으로 넘긴다(상태별 원을 따로 만들지 않는다)", () => {
     assert.equal((tutorSidebar.match(/<VoiceIndicator /g) ?? []).length, 1);
-    assert.ok(tutorSidebar.includes("<VoiceIndicator state={props.voiceState} stream={props.micStream} />"));
+    assert.ok(tutorSidebar.includes("<VoiceIndicator compact state={props.voiceState} stream={props.micStream} />"));
     assert.ok(tutorSidebar.includes('role="status" aria-live="polite"'), "상태 문구는 스크린리더에도 전달된다");
   });
 

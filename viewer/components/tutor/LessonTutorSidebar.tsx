@@ -1,5 +1,8 @@
 "use client";
 
+import { readTutorResponse } from "@/lib/tutor/response";
+import { TutorError } from "@/components/tutor/TutorError";
+
 /**
  * Lesson 화면(/lesson/[...id])에 AI Tutor를 그 자리에서 열 수 있도록 붙이는 래퍼.
  *
@@ -13,7 +16,8 @@
  * 한 번 열리고 나면 이후의 "닫기"는
  * 순수 표시(CSS) 토글일 뿐이다(`panelOpen`) — TutorApp은 계속 마운트된 채로 남아
  * messages/sessionId/draft를 그대로 들고 있는다(재오픈하면 대화가 이어진다).
- * TutorApp에는 `active={panelOpen}`을 내려준다 — 닫힌 동안 뒤늦게 도착하는 마이크/STT/
+ * TutorApp에는 `active={mobile || panelOpen}
+            mobile={mobile}`을 내려준다 — 닫힌 동안 뒤늦게 도착하는 마이크/STT/
  * TTS/세션시작 응답은 TutorApp 내부에서 조용히 버려진다(제출·재생하지 않는다).
  *
  * ■ Desktop/Mobile을 나눠 두 번 마운트하지 않는다
@@ -36,6 +40,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
+import { useMobileShell, useMobileLesson, MobileTutorDock } from "@/components/mobile/MobileLayout";
 import { TutorApp } from "@/components/tutor/TutorApp";
 import type { ResumeStateDTO } from "@/lib/tutor/resume-dto";
 
@@ -61,6 +66,9 @@ export function LessonTutorSidebar({
   ttsConfigured: boolean;
   children: React.ReactNode;
 }) {
+  const { mobile, ready } = useMobileShell();
+  useMobileLesson({ title: lesson.title, href: "/curriculum" });
+  const initialized = useRef(false);
   const isWide = useMediaQuery(`(min-width:${PUSH_MIN_WIDTH_PX}px)`);
 
   const [everOpened, setEverOpened] = useState(false);
@@ -94,7 +102,7 @@ export function LessonTutorSidebar({
     setResumeError(null);
     try {
       const res = await fetch("/api/tutor/resume");
-      const data = await res.json();
+      const data = await readTutorResponse(res);
       if (!res.ok) throw new Error(data.error ?? "Tutor 정보를 불러오지 못했습니다.");
       setResume(data as ResumeStateDTO);
     } catch (err) {
@@ -139,32 +147,39 @@ export function LessonTutorSidebar({
   // 모든 Lesson 진입에서 사용자가 버튼을 누른 것과 똑같이 연다(같은 경로 재사용 —
   // resume 로딩·TutorApp 마운트·focus 처리가 전부 handleOpen 한 곳에 있다). 마운트 시 1회.
   useEffect(() => {
-    handleOpen();
+    if (!ready || initialized.current) return;
+    initialized.current = true;
+    if (mobile) {
+      setEverOpened(true);
+      setPanelOpen(true);
+      void ensureResumeLoaded();
+    } else handleOpen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready, mobile]);
 
   // Escape로 닫는다(모든 폭에서) — 열려 있을 때만 리스너를 붙인다.
   useEffect(() => {
-    if (!panelOpen) return;
+    if (mobile || !panelOpen) return;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") handleClose();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelOpen]);
+  }, [panelOpen, mobile]);
 
   // 좁은 화면에서 패널이 modal로 열려 있는 동안: 배경(Lesson+토글 버튼)을 inert로
   // 만들어 키보드/스크린리더가 뒤로 넘어가지 못하게 막는다(Codex 최종 리뷰: backdrop은
   // 포인터만 막고 키보드 focus 격리가 없었다). 넓은 화면(push)에서는 모달이 아니라
   // 나란히 쓰는 패널이라 배경을 막지 않는다.
-  const backgroundInert = !isWide && panelOpen;
+  const Preparation = mobile ? MobileTutorDock : Box;
+  const backgroundInert = !mobile && !isWide && panelOpen;
 
   return (
-    <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start", minWidth: 0 }}>
+    <Box sx={{ display: mobile ? "block" : "flex", gap: 3, alignItems: "flex-start", minWidth: 0 }}>
       <Box sx={{ flex: 1, minWidth: 0 }} inert={backgroundInert || undefined}>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-          {!panelOpen && (
+          {!mobile && !panelOpen && (
             <Button
               ref={toggleButtonRef}
               variant="contained"
@@ -180,7 +195,7 @@ export function LessonTutorSidebar({
       </Box>
 
       {/* 좁은 화면의 backdrop — 넓은 화면(push)에서는 필요 없어 렌더하지 않는다. */}
-      {!isWide && panelOpen && (
+      {!mobile && !isWide && panelOpen && (
         <Box
           onClick={handleClose}
           sx={{
@@ -199,17 +214,18 @@ export function LessonTutorSidebar({
           스크린리더에 노출된다(Codex 최종 리뷰에서 발견) — inert로 명시적으로 막는다. */}
       <Box
         ref={panelRef}
-        inert={panelInert || undefined}
+        inert={(!mobile && panelInert) || undefined}
         tabIndex={-1}
-        role={!isWide && panelOpen ? "dialog" : undefined}
-        aria-modal={!isWide && panelOpen ? true : undefined}
+        role={!mobile && !isWide && panelOpen ? "dialog" : undefined}
+        aria-modal={!mobile && !isWide && panelOpen ? true : undefined}
         aria-label="AI Tutor"
-        sx={{
+        sx={mobile ? { display: "block" } : {
           display: everOpened ? "block" : "none",
           position: isWide ? "sticky" : "fixed",
           top: { xs: 56, sm: 64 },
           right: 0,
-          height: { xs: `calc(100vh - 56px)`, sm: `calc(100vh - 64px)` },
+          // Push starts below AppShell padding before it becomes sticky. Reserve that inset too.
+          height: { xs: "calc(100dvh - 56px)", sm: isWide ? "calc(100dvh - 64px - var(--cmm-main-padding, 0px))" : "calc(100dvh - 64px)" },
           width: isWide ? (panelOpen ? PANEL_WIDTH : 0) : `min(88vw, ${PANEL_WIDTH}px)`,
           flexShrink: 0,
           zIndex: isWide ? "auto" : (t) => t.zIndex.drawer,
@@ -224,18 +240,19 @@ export function LessonTutorSidebar({
         }}
       >
         {resumeError ? (
+          <Preparation>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center", py: 4 }}>
-            <Alert severity="error" sx={{ width: "100%" }}>
-              {resumeError}
-            </Alert>
+            <TutorError message={resumeError} />
             <Button size="small" variant="outlined" onClick={() => void ensureResumeLoaded()}>
               다시 시도
             </Button>
           </Box>
+          </Preparation>
         ) : resume ? (
           <TutorApp
             layoutMode="sidebar"
-            active={panelOpen}
+            active={mobile || panelOpen}
+            mobile={mobile}
             onRequestClose={handleClose}
             initialLesson={lesson}
             ttsConfigured={ttsConfigured}
@@ -248,9 +265,11 @@ export function LessonTutorSidebar({
             lessonProgress={resume.lessonProgress}
           />
         ) : (
+          <Preparation>
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress size={24} />
+            <CircularProgress size={24} aria-label="Tutor 준비 중" />
           </Box>
+          </Preparation>
         )}
       </Box>
     </Box>

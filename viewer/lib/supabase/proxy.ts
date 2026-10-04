@@ -55,6 +55,12 @@ export async function updateSession(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname === "/login";
 
+  if (!user && request.nextUrl.pathname.startsWith("/api/")) {
+    const unauthorized = NextResponse.json({ error: "로그인이 만료되었습니다. 다시 로그인해 주세요.", code: "AUTH_REQUIRED" }, { status: 401 });
+    for (const cookie of response.cookies.getAll()) unauthorized.cookies.set(cookie);
+    return unauthorized;
+  }
+
   if (!user && !isLoginPage) {
     // 로그인 후 원래 보려던 화면(예: /lesson/...?tutor=open)으로 돌아갈 수 있게 경로를
     // ?next= 로 넘긴다. 내부 경로만 허용한다(safeNextPath — /api 등은 제외돼 그냥 / 로 간다).

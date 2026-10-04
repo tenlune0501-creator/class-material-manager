@@ -1,3 +1,4 @@
+const navigation = await readFile("viewer/lib/navigation.ts", "utf8");
 /**
  * 뷰어의 커리큘럼 화면이 **읽기 전용 + 빈 상태 안전** 인지 정적으로 확인한다.
  *
@@ -121,7 +122,8 @@ describe("curriculum-render.ts — 클라이언트 컴포넌트에서도 안전�
 
 describe("네비게이션", () => {
   it("사이드바에 커리큘럼 · 실전 프로젝트 학습 링크가 있다", () => {
-    assert.ok(appShell.includes('href="/curriculum"'));
-    assert.ok(appShell.includes('href="/projects"'));
+    assert.ok(appShell.includes("navigationItems.filter"));
+    assert.ok(navigation.includes('href: "/curriculum"'));
+    assert.ok(navigation.includes('href: "/projects"'));
   });
 });

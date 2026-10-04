@@ -10,7 +10,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSTTProvider, ProviderError } from "@/lib/tutor/providers";
 
-const MAX_AUDIO_BYTES = 20 * 1024 * 1024; // 20MB — 짧은 발화용 마이크 녹음이면 충분한 여유
+import { MAX_STT_AUDIO_BYTES, AUDIO_TOO_LARGE, recordingFilename } from "@/lib/tutor/recording";
+
 const ALLOWED_MIME_PREFIXES = ["audio/webm", "audio/ogg", "audio/wav", "audio/mp4", "audio/mpeg", "audio/x-m4a"];
 
 export async function POST(request: Request) {
@@ -39,8 +40,8 @@ export async function POST(request: Request) {
   if (file.size === 0) {
     return NextResponse.json({ error: "빈 오디오 파일입니다." }, { status: 400 });
   }
-  if (file.size > MAX_AUDIO_BYTES) {
-    return NextResponse.json({ error: "오디오 파일이 너무 큽니다(20MB 제한)." }, { status: 413 });
+  if (file.size > MAX_STT_AUDIO_BYTES) {
+    return NextResponse.json({ error: AUDIO_TOO_LARGE }, { status: 413 });
   }
   const mimeType = file.type || "application/octet-stream";
   if (!ALLOWED_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix))) {
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await stt.transcribe(buffer, mimeType, file.name || "recording.webm");
+    const result = await stt.transcribe(buffer, mimeType, recordingFilename(mimeType));
     return NextResponse.json({ text: result.text });
   } catch (err) {
     if (err instanceof ProviderError) {

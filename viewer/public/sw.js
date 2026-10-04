@@ -3,7 +3,7 @@
  *
  * 목표는 "설치 가능한 앱"이지 "오프라인 앱"이 아니다(요구사항: 전체 offline은 범위 밖).
  * 그래서 캐시하는 것은 Next.js 정적 빌드 자산(_next/static/**, 파일명에 content hash가
- * 있어 캐시해도 항상 최신)과 아이콘/manifest뿐이다.
+ * 있어 캐시해도 항상 최신)뿐이다. manifest와 아이콘은 고정 URL이므로 네트워크에서 갱신한다.
  *
  * 절대 캐시하지 않는 것 (요구사항: 하루 첫 접속 갱신·session/progress·AI API·사용자별
  * 동적 데이터를 stale하게 캐시하지 않는다):
@@ -12,7 +12,7 @@
  *   - /api/** (Tutor LLM/STT, session 등 전부 사용자별 동적)
  *   - Supabase REST 호출(브라우저가 직접 부르는 경우가 없어 이 SW를 거치지도 않는다)
  */
-const STATIC_CACHE = "cmm-tutor-static-v1";
+const STATIC_CACHE = "cmm-tutor-static-v2";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -22,7 +22,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith("cmm-tutor-static-") && key !== STATIC_CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );
 });
@@ -30,9 +30,7 @@ self.addEventListener("activate", (event) => {
 function isCacheableStaticAsset(url) {
   return (
     url.origin === self.location.origin &&
-    (url.pathname.startsWith("/_next/static/") ||
-      url.pathname === "/manifest.webmanifest" ||
-      /^\/(icon-192|icon-512|icon-512-maskable|apple-touch-icon)\.png$/.test(url.pathname))
+    url.pathname.startsWith("/_next/static/")
   );
 }
 

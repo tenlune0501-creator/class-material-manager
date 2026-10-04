@@ -28,6 +28,10 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme, useColorScheme } from "@mui/material/styles";
 
 import type { SubjectInfo } from "@/lib/data";
+import { navigationItems, materialNavigationItems, desktopDestination, isMaterialRoute } from "@/lib/navigation";
+import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import { useMobileShell, MobileLessonContext, MOBILE_BOTTOM, MOBILE_HEADER_HEIGHT, type MobileLessonMeta } from "@/components/mobile/MobileLayout";
+
 import { logout } from "@/lib/supabase/actions";
 
 const DRAWER_WIDTH = 240;
@@ -205,11 +209,14 @@ export function AppShell({
   referenceTotal: number;
   children: React.ReactNode;
 }) {
+  const { mobile } = useMobileShell();
+  const [lessonMeta, setLessonMeta] = useState<MobileLessonMeta | null>(null);
   const theme = useTheme();
   const isWide = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const pathname = usePathname();
+  useEffect(() => setOpen(false), [pathname]);
 
   // 로그인 화면은 사이드바 없이 이메일 · 비밀번호 · 버튼만 보여줍니다.
   if (pathname === "/login") {
@@ -219,148 +226,60 @@ export function AppShell({
   // 집중 학습 모드에서는 Desktop에서도 permanent Drawer를 쓰지 않는다 — Lesson이
   // 화면의 주인공이고, Navigation은 필요할 때만 여는 overlay가 된다.
   const desktopPermanent = isWide && !focusMode;
+  const inMaterials = isMaterialRoute(pathname);
 
   const drawerContent = (
     <>
-      <Toolbar />
+      {!mobile && <Toolbar />}
 
       {/*
         공부를 시작하는 자리를 맨 위에 둡니다.
         과목 목록은 "찾아보기"이고, 이쪽은 "바로 공부하기"입니다.
       */}
       <List dense sx={{ pt: 1 }}>
-        <ListItemButton
-          component={NextLink}
-          href="/tutor"
-          selected={pathname === "/tutor"}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="🎧 AI Tutor"
-            secondary="지난 진도 → 이어서 음성/텍스트 과외"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 700, color: "primary.main" } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/curriculum"
-          selected={pathname === "/curriculum" || pathname.startsWith("/curriculum/") || pathname.startsWith("/lesson/")}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="🗺️ 커리큘럼"
-            secondary="Track → Chapter → Lesson"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/projects"
-          selected={pathname === "/projects" || pathname.startsWith("/projects/") || pathname.startsWith("/unit/")}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="🏗️ 실전 프로젝트 학습"
-            secondary="Project → Unit → 관련 Lesson"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/learn"
-          selected={pathname === "/learn"}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="🎓 통합 학습자료"
-            secondary="설명 + 실습 코드 + 공식 문서"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/compare"
-          selected={pathname === "/compare"}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="⚖️ 수업 방식 점검"
-            secondary="지금도 그대로 써도 되나"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/study"
-          selected={pathname === "/study"}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="📚 다시 공부하기"
-            secondary="어디부터 다시 보면 되나"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
-
-        <ListItemButton
-          component={NextLink}
-          href="/examples"
-          selected={pathname === "/examples" || pathname.startsWith("/examples/")}
-          onClick={() => setOpen(false)}
-        >
-          <ListItemText
-            primary="🧩 실전 예제"
-            secondary="개념을 실제 프로젝트 코드로"
-            slotProps={{
-              primary: { sx: { fontSize: "0.9rem", fontWeight: 600 } },
-              secondary: { sx: { fontSize: "0.7rem" } },
-            }}
-          />
-        </ListItemButton>
+        {navigationItems.filter((item) => !mobile || !["tutor", "curriculum"].includes(item.id)).map((item) => (
+          <ListItemButton key={item.id} component={NextLink} href={item.href}
+            selected={desktopDestination(pathname) === item.id} aria-current={desktopDestination(pathname) === item.id ? "page" : undefined} onClick={() => setOpen(false)}>
+            <ListItemText primary={`${item.icon} ${item.label}`} secondary={item.description}
+              slotProps={{ primary: { sx: { fontSize: "0.9rem", fontWeight: item.id === "tutor" ? 700 : 600, color: item.id === "tutor" ? "primary.main" : undefined } }, secondary: { sx: { fontSize: "0.7rem" } } }} />
+          </ListItemButton>
+        ))}
       </List>
 
+      {inMaterials && <>
       <Divider />
+      <List dense subheader={<ListSubheader>학습자료 탐색</ListSubheader>}>
+        {materialNavigationItems.map((item) => (
+          <ListItemButton key={item.id} component={NextLink} href={item.href}
+            selected={pathname === item.href || pathname.startsWith(`${item.href}/`)} onClick={() => setOpen(false)}>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
       <SubjectList subjects={subjects} onNavigate={() => setOpen(false)} />
       <Divider />
       <Box sx={{ p: 2 }}>
         <Chip
           component={NextLink}
-          href="/"
+          href="/materials"
           clickable
           size="small"
           label={`공식 문서 요약 ${referenceTotal}건`}
           sx={{ width: "100%" }}
         />
       </Box>
+      </>}
     </>
   );
 
   return (
+    <MobileLessonContext.Provider value={setLessonMeta}>
     <SetLessonFocusModeContext.Provider value={setFocusMode}>
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        {mobile ? <MobileNavigation lesson={lessonMeta} open={open} setOpen={setOpen}>
+          <Box sx={{ p: 2, display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}><SearchBox /><ThemeToggle /><IconButton onClick={() => void logout()} aria-label="로그아웃" sx={{ minWidth: 48, minHeight: 48 }}>🚪</IconButton></Box>
+          {drawerContent}
+        </MobileNavigation> : <>
         <AppBar
           position="fixed"
           elevation={0}
@@ -390,7 +309,7 @@ export function AppShell({
                 whiteSpace: "nowrap",
               }}
             >
-              📚 수업자료 아카이브
+              📚 CMM 학습
             </Typography>
 
             <Box sx={{ flex: 1 }} />
@@ -423,11 +342,17 @@ export function AppShell({
           {drawerContent}
         </Drawer>
 
-        <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 4 } }}>
-          <Toolbar />
+        </>}
+        <Box component="main" sx={{ flexGrow: 1, minWidth: 0, "--cmm-main-padding": (t) => ({ xs: t.spacing(2), md: t.spacing(mobile ? 2 : 4) }), p: "var(--cmm-main-padding)", ...(mobile ? { pb: `calc(${MOBILE_BOTTOM} + 16px)`, pl: "max(16px, env(safe-area-inset-left, 0px))", pr: "max(16px, env(safe-area-inset-right, 0px))" } : {}) }}>
+          {mobile ? <Box sx={{ height: `calc(${MOBILE_HEADER_HEIGHT}px + env(safe-area-inset-top, 0px))` }} /> : <Toolbar />}
+          {inMaterials && <Box sx={{ mb: 2 }}>
+            <Typography component={NextLink} href="/materials" sx={{ color: "primary.main", fontWeight: 700 }}>학습자료</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>원본과 참고 자료를 찾아보는 공간입니다. 수업은 커리큘럼에서 Lesson을 선택하세요.</Typography>
+          </Box>}
           {children}
         </Box>
       </Box>
     </SetLessonFocusModeContext.Provider>
+    </MobileLessonContext.Provider>
   );
 }

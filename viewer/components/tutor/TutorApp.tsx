@@ -1,5 +1,8 @@
 "use client";
 
+import { readTutorResponse } from "@/lib/tutor/response";
+import { TutorError } from "@/components/tutor/TutorError";
+
 /**
  * AI Tutor 상태 기계 — 수업 준비 → 대화(Tutor 사이드바) → 종료 요약 확인.
  *
@@ -52,7 +55,10 @@ import Typography from "@mui/material/Typography";
 
 import { TutorSidebar } from "@/components/tutor/TutorSidebar";
 import { MeloTTSProvider } from "@/lib/tutor/providers/melotts-local";
-import { chunkTextForSpeech } from "@/lib/tutor/tts-chunking";
+import { BlobSpeechOutput, BrowserSpeechOutput, koreanVoice, type SpeechOutput } from "@/lib/tutor/speech-output";
+import { AUDIO_TOO_LARGE, MAX_STT_AUDIO_BYTES, recordingFilename, recordingMime } from "@/lib/tutor/recording";
+import { MobileTutorHud } from "@/components/mobile/MobileTutorHud";
+import { MobileTutorDock, MobileTutorStage } from "@/components/mobile/MobileLayout";
 import { type VoiceState } from "@/lib/tutor/voice-state";
 import { validTranscript } from "@/lib/tutor/transcript-validation";
 import { lessonHref } from "@/lib/url";
@@ -106,6 +112,7 @@ interface TutorAppProps {
    * 도착해도 조용히 버린다(제출·재생하지 않는다) — messages/sessionId/draft는 그대로
    * 보존한다(재오픈 시 대화가 이어진다). 생략하면 항상 true(standalone 기존 동작). */
   active?: boolean;
+  mobile?: boolean;
   /** sidebar 모드에서만 쓰인다 — "접기"/닫기 등으로 부모에게 패널을 숨겨 달라고 요청한다
    * (TutorApp 자신은 계속 마운트된 채로 남는다 — unmount하지 않아야 대화가 보존된다). */
   onRequestClose?: () => void;
@@ -135,6 +142,12 @@ function lessonLabel(lesson: LessonRef): string {
 
 export function TutorApp(props: TutorAppProps) {
   const router = useRouter();
+  const mobileRef = useRef(props.mobile ?? false);
+  mobileRef.current = props.mobile ?? false;
+  const [browserVoiceAvailable, setBrowserVoiceAvailable] = useState(false);
+  const [micPending, setMicPending] = useState(false);
+  const browserSpeechRef = useRef<BrowserSpeechOutput | null>(null);
+  const activeSpeechRef = useRef<SpeechOutput | null>(null);
   const layoutMode = props.layoutMode ?? "standalone";
 
   const [view, setViewRaw] = useState<View>("start");
@@ -162,6 +175,8 @@ export function TutorApp(props: TutorAppProps) {
   const [ttsNotice, setTtsNotice] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [summarizeError, setSummarizeError] = useState<string | null>(null);
   const [manualNextLessonId, setManualNextLessonId] = useState<string>("");
 
@@ -190,30 +205,60 @@ export function TutorApp(props: TutorAppProps) {
 
   // ── ref: 미디어/오디오 자원 ──
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const activeObjectUrlRef = useRef<string | null>(null);
   /** TTS "턴"이 바뀔 때마다 올라간다 — 이전 턴의 pending 합성/재생이 뒤늦게 끝나도
    * generation이 다르면 전부 무시한다(정지·새 턴 시작 시 stale 재생 방지). */
   const ttsGenerationRef = useRef(0);
   const ttsAbortRef = useRef<AbortController | null>(null);
   const sttAbortRef = useRef<AbortController | null>(null);
-  const cancelPlaybackRef = useRef<(() => void) | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const latencyRef = useRef<{ start: number; generation: number } | null>(null);
   const mountedRef = useRef(true);
   const messageAbortRef = useRef<AbortController | null>(null);
-
-  function markLatency(point: string) {
-    const trace = latencyRef.current;
-    if (process.env.NODE_ENV === "development" && trace?.generation === ttsGenerationRef.current) {
-      console.debug("[Tutor voice latency]", point, Math.round(performance.now() - trace.start), "ms", trace.generation);
-    }
-  }
 
   const tts = useMemo(
     () => (props.ttsConfigured ? new MeloTTSProvider(process.env.NEXT_PUBLIC_MELOTTS_URL!) : null),
     [],
   );
+
+  const blobSpeech = useMemo(() => tts ? new BlobSpeechOutput(tts) : null, [tts]);
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const synthesis = window.speechSynthesis;
+    browserSpeechRef.current = new BrowserSpeechOutput(synthesis);
+    const refresh = () => setBrowserVoiceAvailable(Boolean(koreanVoice(synthesis.getVoices())));
+    refresh();
+    synthesis.addEventListener("voiceschanged", refresh);
+    return () => { synthesis.removeEventListener("voiceschanged", refresh); browserSpeechRef.current?.cancel(); };
+  }, []);
+
+  useEffect(() => {
+    if (!props.mobile) return;
+    // Chrome lifecycle: hidden, pagehide and freeze are suspension boundaries.
+    // A visible visibilitychange or window blur (e.g. permission UI) never cancels recording.
+    const suspend = () => {
+      if (!activeRef.current) return;
+      activeRef.current = false;
+      const recording = voiceStateRef.current === "recording" || micStartingRef.current;
+      const interrupted = voiceStateRef.current !== "idle" || micStartingRef.current;
+      cleanupVoiceResources();
+      if (interrupted) setError(recording
+        ? "앱이 백그라운드로 이동해 녹음을 취소했습니다. 녹음은 전송하지 않았습니다. 다시 말하기 시작을 눌러 주세요."
+        : "앱이 백그라운드로 이동해 진행 중인 음성 응답을 취소했습니다. 다시 질문하거나 답변을 재생해 주세요.");
+    };
+    const visibility = () => { if (document.hidden) suspend(); else activeRef.current = props.active ?? true; };
+    const freeze = suspend;
+    document.addEventListener("visibilitychange", visibility);
+    document.addEventListener("freeze", freeze);
+    window.addEventListener("pagehide", freeze);
+    window.addEventListener("pageshow", visibility);
+    return () => {
+      document.removeEventListener("visibilitychange", visibility);
+      document.removeEventListener("freeze", freeze);
+      window.removeEventListener("pagehide", freeze);
+      window.removeEventListener("pageshow", visibility);
+    };
+    // Presentation collapse is deliberately absent from this lifecycle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.mobile, props.active]);
 
   function setVoiceState(next: VoiceState) {
     voiceStateRef.current = next;
@@ -227,7 +272,8 @@ export function TutorApp(props: TutorAppProps) {
 
   useEffect(() => {
     try {
-      const enabled = window.localStorage.getItem("cmm-tutor-voice") === "on";
+      const saved = window.localStorage.getItem("cmm-tutor-voice");
+      const enabled = saved === "on" || (mobileRef.current && saved !== "off");
       voiceOnRef.current = enabled;
       setVoiceOn(enabled);
     } catch {
@@ -331,7 +377,7 @@ export function TutorApp(props: TutorAppProps) {
       cleanupVoiceResources();
     } else {
       const greeting = messagesRef.current;
-      if (voiceStateRef.current === "idle" && greeting.length === 1 && greeting[0].role === "assistant") {
+      if (!mobileRef.current && voiceStateRef.current === "idle" && greeting.length === 1 && greeting[0].role === "assistant") {
         void speakReply(greeting[0].content);
       }
     }
@@ -349,159 +395,47 @@ export function TutorApp(props: TutorAppProps) {
   // ── TTS: chunk 단위 합성 + prefetch 재생 ────────────────────────────
 
   function stopSpeakingInternal() {
-    ttsGenerationRef.current += 1; // 진행 중이던 합성/재생 파이프라인을 전부 무효화한다
+    ttsGenerationRef.current += 1;
     ttsAbortRef.current?.abort();
     ttsAbortRef.current = null;
-    cancelPlaybackRef.current?.();
-    cancelPlaybackRef.current = null;
-    audioRef.current?.pause();
-    audioRef.current = null;
-    if (activeObjectUrlRef.current) {
-      URL.revokeObjectURL(activeObjectUrlRef.current);
-      activeObjectUrlRef.current = null;
-    }
+    activeSpeechRef.current?.cancel();
+    activeSpeechRef.current = null;
   }
 
-  /** Sidebar의 "음성 중지" 버튼 — 재생을 취소하고 idle로 돌아간다. */
   function stopSpeaking() {
     stopSpeakingInternal();
     endAssistantTurn();
   }
 
-  function playBlob(blob: Blob, gen: number, first = false): Promise<boolean> {
-    return new Promise((resolve) => {
-      if (ttsGenerationRef.current !== gen) return resolve(false);
-      if (activeObjectUrlRef.current) {
-        URL.revokeObjectURL(activeObjectUrlRef.current);
-        activeObjectUrlRef.current = null;
-      }
-      const url = URL.createObjectURL(blob);
-      activeObjectUrlRef.current = url;
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      let settled = false;
-      const settle = (ok: boolean) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(watchdog);
-        audio.onended = audio.onerror = audio.onplaying = null;
-        audio.pause();
-        audio.removeAttribute("src");
-        audio.load();
-        URL.revokeObjectURL(url);
-        if (activeObjectUrlRef.current === url) activeObjectUrlRef.current = null;
-        if (audioRef.current === audio) audioRef.current = null;
-        if (cancelPlaybackRef.current === cancel) cancelPlaybackRef.current = null;
-        resolve(ok);
-      };
-      const cancel = () => settle(false);
-      const watchdog = setTimeout(cancel, 120_000);
-      cancelPlaybackRef.current = cancel;
-      audio.onended = () => settle(ttsGenerationRef.current === gen);
-      audio.onerror = cancel;
-      audio.onplaying = () => { if (first) { markLatency("T5 playback start"); audio.onplaying = null; } };
-      if (first) markLatency("T4 play()");
-      audio.play().catch(cancel);
-    });
-  }
-
-  function finishSpeaking(gen: number) {
-    if (ttsGenerationRef.current !== gen) return;
-    ttsAbortRef.current?.abort();
-    ttsAbortRef.current = null;
-    if (activeObjectUrlRef.current) {
-      URL.revokeObjectURL(activeObjectUrlRef.current);
-      activeObjectUrlRef.current = null;
-    }
-    audioRef.current = null;
-    if (ttsGenerationRef.current !== gen) return; // 이미 다음 턴/정지로 넘어감
-    endAssistantTurn();
-  }
-
-  /**
-   * 답변 전체를 chunk로 나눠 첫 chunk를 즉시 합성/재생하고, 재생 중 다음 chunk를
-   * prefetch한다 — 긴 답변 전체 합성이 끝날 때까지 기다리지 않는다(time-to-first-audio
-   * 최적화, tts-chunking.ts 상단 실측 주석 참고).
-   */
   async function speakReply(rawText: string) {
-    // sidebar 모드에서 패널이 닫힌 뒤에는 화면에 보이지 않는 곳에서 음성이 재생되면
-    // 안 된다 — standalone에서는 activeRef가 항상 true라 영향이 없다. voiceState를
-    // 여기서 idle로 되돌리지 않으면 handleSend가 남겨둔 "thinking"이 그대로 굳어
-    // 입력이 잠긴 채로 남는다(Codex 최종 리뷰에서 발견).
-    if (!activeRef.current) {
-      setVoiceState("idle");
-      return;
-    }
+    if (!activeRef.current) { setVoiceState("idle"); return; }
     stopSpeakingInternal();
     const myGen = ttsGenerationRef.current;
-    latencyRef.current = { start: performance.now(), generation: myGen };
-    markLatency("T0 reply received / greeting ready");
-
-    if (!tts || !voiceOnRef.current) {
-      endAssistantTurn(); // 읽어줄 음성이 없다 — 답변이 화면에 표시된 지금이 턴의 끝
+    const output = mobileRef.current ? browserSpeechRef.current : blobSpeech;
+    if (!voiceOnRef.current) { endAssistantTurn(); return; }
+    if (!output) {
+      if (mobileRef.current) setTtsNotice("이 브라우저는 음성 출력을 지원하지 않습니다. 텍스트로 계속할 수 있습니다.");
+      endAssistantTurn();
       return;
     }
-
-    const chunks = chunkTextForSpeech(rawText);
-    if (chunks.length === 0) {
-      finishSpeaking(myGen);
-      return;
-    }
-
-    setVoiceState("speaking");
-    setTtsNotice(null);
     const controller = new AbortController();
     ttsAbortRef.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 180_000);
-    controller.signal.addEventListener("abort", () => clearTimeout(timeout), { once: true });
-
-    const blobPromises = new Map<number, Promise<Blob>>();
-    const getBlob = (i: number): Promise<Blob> | null => {
-      if (i < 0 || i >= chunks.length) return null;
-      if (!blobPromises.has(i)) {
-        if (i === 0) markLatency("T1 synthesize request");
-        const promise = tts.synthesize(chunks[i], {
-          signal: controller.signal,
-          onResponse: () => { if (i === 0 && myGen === ttsGenerationRef.current) markLatency("T2 response headers"); },
-        }).then((blob) => {
-          if (i === 0 && myGen === ttsGenerationRef.current) markLatency("T3 blob ready");
-          return blob;
-        });
-        // Prefetch may reject before playback reaches it. Attach a handler immediately.
-        void promise.catch(() => {});
-        blobPromises.set(i, promise);
+    activeSpeechRef.current = output;
+    setVoiceState("speaking");
+    setTtsNotice(null);
+    try {
+      await output.speak(rawText, controller.signal);
+    } catch (error) {
+      if (myGen === ttsGenerationRef.current && activeRef.current && mountedRef.current) {
+        setTtsNotice(error instanceof Error ? error.message : "음성 재생에 실패했습니다. 텍스트로 계속해 주세요.");
       }
-      return blobPromises.get(i) ?? null;
-    };
-
-    getBlob(0); // 첫 chunk는 즉시 합성 시작
-
-    for (let i = 0; i < chunks.length; i++) {
-      if (ttsGenerationRef.current !== myGen) return; // 정지/새 턴 — 조용히 중단
-
-      let blob: Blob;
-      try {
-        blob = await getBlob(i)!;
-      } catch {
-        if (ttsGenerationRef.current !== myGen) return;
-        setTtsNotice("음성 서비스에 연결할 수 없습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
-        break;
-      }
-      if (ttsGenerationRef.current !== myGen) return;
-
-      const playback = playBlob(blob, myGen, i === 0);
-      getBlob(i + 1); // 첫 합성 완료 후에만 prefetch: 첫 chunk와 서버 자원을 경쟁하지 않는다.
-      const played = await playback;
-      blobPromises.delete(i);
-      if (!played) {
-        if (ttsGenerationRef.current === myGen) {
-          setTtsNotice((prev) => prev ?? "음성 재생 중 문제가 발생했습니다. 텍스트 수업은 계속 사용할 수 있습니다.");
-        }
-        break;
+    } finally {
+      if (myGen === ttsGenerationRef.current && mountedRef.current) {
+        ttsAbortRef.current = null;
+        activeSpeechRef.current = null;
+        endAssistantTurn();
       }
     }
-
-    finishSpeaking(myGen);
   }
 
   function classifyMicError(err: unknown): string {
@@ -524,15 +458,16 @@ export function TutorApp(props: TutorAppProps) {
    * 녹음이 자동 제출되는 것을 못 막는다(Codex 최종 리뷰에서 발견). */
   async function transcribeAndSend(blob: Blob, myEpoch: number) {
     if (!activeRef.current || requestEpochRef.current !== myEpoch) return;
+    if (blob.size > MAX_STT_AUDIO_BYTES) { setError(AUDIO_TOO_LARGE); setVoiceState("idle"); return; }
     setVoiceState("transcribing");
     const controller = new AbortController();
     sttAbortRef.current = controller;
     const timeout = setTimeout(() => controller.abort(), 30_000);
     try {
       const form = new FormData();
-      form.append("audio", blob, "recording.webm");
+      form.append("audio", blob, recordingFilename(blob.type));
       const res = await fetch("/api/tutor/stt", { method: "POST", body: form, signal: controller.signal });
-      const data = await res.json();
+      const data = await readTutorResponse(res);
       clearTimeout(timeout);
       if (!activeRef.current || requestEpochRef.current !== myEpoch) {
         // 응답 도착 전에 패널이 닫혔거나, 닫혔다 다시 열렸다 — 오래된 녹음이니 버린다.
@@ -590,17 +525,20 @@ export function TutorApp(props: TutorAppProps) {
 
     const myEpoch = requestEpochRef.current;
     micStartingRef.current = true;
+    setMicPending(true);
     setError(null);
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     } catch (err) {
       micStartingRef.current = false;
+      setMicPending(false);
       if (requestEpochRef.current !== myEpoch) return;
       setError(classifyMicError(err));
       return;
     }
     micStartingRef.current = false;
+    setMicPending(false);
     if (!activeRef.current || requestEpochRef.current !== myEpoch || voiceStateRef.current !== "idle") {
       // 권한 요청 중 패널이 닫혔거나(또는 정리됐거나) 그 사이 텍스트 전송 등으로 다른 상태가
       // 됐다 — 뒤늦게 허용돼도 녹음을 시작하지 않는다.
@@ -610,7 +548,8 @@ export function TutorApp(props: TutorAppProps) {
 
     let recorder: MediaRecorder;
     try {
-      recorder = new MediaRecorder(stream);
+      const mimeType = recordingMime((type) => MediaRecorder.isTypeSupported(type));
+      recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
     } catch (err) {
       stream.getTracks().forEach((track) => track.stop());
       setError(classifyMicError(err));
@@ -678,7 +617,7 @@ export function TutorApp(props: TutorAppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ targetKind: "lesson", targetId: lesson.id }),
       });
-      const data = await res.json();
+      const data = await readTutorResponse(res);
       // activeRef로 여기를 막지 않는다 — sidebar 모드에서 첫 세션 준비 중 패널이 닫히면
       // (이 mount-effect 호출은 단 한 번뿐이라) 재시도할 방법이 없어 재오픈해도 영구
       // 로딩에 빠진다(Codex 최종 리뷰에서 발견). 세션 데이터는 항상 반영하고, 숨겨진
@@ -701,7 +640,7 @@ export function TutorApp(props: TutorAppProps) {
       // handleStart가 (Strict Mode의 mount effect 이중 호출 등으로) 중복 실행됐다면
       // 가장 마지막 호출만 읽는다 — 기존 speak()를 그대로 재사용, 새 TTS 구현 없음.
       if (handleStartCallIdRef.current === callId) {
-        void speakReply(greeting);
+        if (!mobileRef.current) void speakReply(greeting);
       }
     } catch (err) {
       if (!mountedRef.current || handleStartCallIdRef.current !== callId) return;
@@ -762,7 +701,7 @@ export function TutorApp(props: TutorAppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ history, message: text }),
       });
-      const data = await res.json();
+      const data = await readTutorResponse(res);
       clearTimeout(timeout);
       if (messageAbortRef.current === controller) messageAbortRef.current = null;
       if (handleStartCallIdRef.current !== sendGen) return;
@@ -785,7 +724,8 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   async function beginEndSession() {
-    if (!sessionId) return;
+    if (!sessionId || viewRef.current !== "chat") return;
+    const summaryGeneration = handleStartCallIdRef.current;
     cleanupVoiceResources();
     setShowEndConfirm(false);
     setView("summarizing");
@@ -796,12 +736,14 @@ export function TutorApp(props: TutorAppProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ history: messages }),
       });
-      const data = await res.json();
+      const data = await readTutorResponse(res);
+      if (!mountedRef.current || handleStartCallIdRef.current !== summaryGeneration) return;
       if (!res.ok) throw new Error(data.error ?? "요약 생성에 실패했습니다.");
       setDraft(data.draft);
       setManualNextLessonId(data.draft.suggestedNextLesson?.id ?? "");
       setView("summarize");
     } catch (err) {
+      if (!mountedRef.current || handleStartCallIdRef.current !== summaryGeneration) return;
       setSummarizeError(err instanceof Error ? err.message : "요약을 만들지 못했습니다. 직접 입력해 주세요.");
       // 실패해도 사용자가 직접 채울 수 있게 빈 초안으로 넘어간다.
       setDraft({
@@ -817,11 +759,14 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   async function saveAndFinish() {
-    if (!sessionId || !draft) return;
+    if (!sessionId || !draft || savingRef.current) return;
     if (!draft.todaySummary.trim()) {
       setSummarizeError("오늘 배운 내용을 한 줄이라도 적어주세요.");
       return;
     }
+    savingRef.current = true;
+    setSaving(true);
+    const saveGeneration = handleStartCallIdRef.current;
     setSummarizeError(null);
     try {
       const res = await fetch(`/api/tutor/session/${sessionId}/finish`, {
@@ -836,11 +781,16 @@ export function TutorApp(props: TutorAppProps) {
           nextStartNote: draft.nextStartNote || null,
         }),
       });
-      const data = await res.json();
+      const data = await readTutorResponse(res);
+      if (!mountedRef.current || handleStartCallIdRef.current !== saveGeneration) return;
       if (!res.ok) throw new Error(data.error ?? "저장에 실패했습니다.");
       setView("saved");
     } catch (err) {
+      if (!mountedRef.current || handleStartCallIdRef.current !== saveGeneration) return;
       setSummarizeError(err instanceof Error ? err.message : "저장에 실패했습니다. 다시 시도해 주세요.");
+    } finally {
+      savingRef.current = false;
+      if (mountedRef.current) setSaving(false);
     }
   }
 
@@ -883,17 +833,20 @@ export function TutorApp(props: TutorAppProps) {
 
   // ── 화면 ──────────────────────────────────────────────────────────
 
+  const stage = (content: React.ReactNode, title: string) => props.mobile
+    ? <MobileTutorStage key={view} title={title}>{content}</MobileTutorStage> : content;
+
   if (view === "start") {
     // sidebar 모드: 화면에 보이는 Lesson으로만 시작한다 — 다른 Lesson을 고를 수 있는
     // 전체 목록 picker는 보여주지 않는다(화면 Lesson과 Tutor Lesson이 어긋나면 안 된다).
     if (layoutMode === "sidebar") {
+      const Preparing = props.mobile ? MobileTutorDock : Box;
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 6 }}>
+        <Preparing>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 2 }}>
           {error ? (
             <>
-              <Alert severity="error" sx={{ width: "100%" }}>
-                {error}
-              </Alert>
+              <TutorError message={error} />
               <Button
                 variant="outlined"
                 size="small"
@@ -912,6 +865,7 @@ export function TutorApp(props: TutorAppProps) {
             </>
           )}
         </Box>
+        </Preparing>
       );
     }
     return (
@@ -930,16 +884,16 @@ export function TutorApp(props: TutorAppProps) {
   }
 
   if (view === "summarizing") {
-    return (
+    return stage(
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 8 }}>
         <CircularProgress size={28} />
         <Typography color="text.secondary">오늘 배운 내용을 정리하고 있어요…</Typography>
       </Box>
-    );
+    , "학습 요약 준비" );
   }
 
   if (view === "summarize" && draft) {
-    return (
+    return stage(
       <SummaryScreen
         draft={draft}
         setDraft={setDraft}
@@ -947,14 +901,15 @@ export function TutorApp(props: TutorAppProps) {
         allLessons={props.allLessons}
         manualNextLessonId={manualNextLessonId}
         setManualNextLessonId={setManualNextLessonId}
+        saving={saving}
         onSave={saveAndFinish}
         onCancel={cancelSummarize}
       />
-    );
+    , "학습 요약 검토" );
   }
 
   if (view === "saved") {
-    return (
+    return stage(
       <Box sx={{ maxWidth: 560 }}>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
           ✅ 저장했습니다
@@ -969,24 +924,25 @@ export function TutorApp(props: TutorAppProps) {
           >
             이 Lesson 새 대화 시작
           </Button>
-          <Button variant="outlined" onClick={() => props.onRequestClose?.()}>
+          {!props.mobile && <Button variant="outlined" onClick={() => props.onRequestClose?.()}>
             닫기
-          </Button>
+          </Button>}
         </Stack>
       </Box>
-    );
+    , "학습 저장 완료" );
   }
 
   // view === "chat" — Lesson 교재는 부모(/lesson/[...id] 페이지)가 그리고, 여기서는 그 옆
   // Tutor 사이드바만 그린다(위치·폭·overlay 여부는 LessonTutorSidebar 담당).
   const lessonMeta = currentLesson ? `${currentLesson.trackTitle} · ${currentLesson.chapterTitle}` : "";
 
+  const Presentation = props.mobile ? MobileTutorHud : TutorSidebar;
   const sidebar = (
-    <TutorSidebar
+    <Presentation
       lessonTitle={currentLesson?.title ?? ""}
       lessonMeta={lessonMeta}
       voiceState={voiceState}
-      ttsAvailable={Boolean(tts)}
+      ttsAvailable={props.mobile ? browserVoiceAvailable : Boolean(tts)}
       voiceOn={voiceOn}
       onToggleVoice={toggleVoice}
       onStopSpeaking={stopSpeaking}
@@ -994,7 +950,9 @@ export function TutorApp(props: TutorAppProps) {
       onFinishUtterance={stopRecording}
       onMicClick={onMicClick}
       recording={voiceState === "recording"}
-      micDisabled={voiceState !== "idle" && voiceState !== "recording"}
+      micDisabled={micPending || (voiceState !== "idle" && voiceState !== "recording")}
+      micPending={micPending}
+      onReplay={() => { const reply = [...messagesRef.current].reverse().find((m) => m.role === "assistant"); if (reply) { voiceOnRef.current = true; setVoiceOn(true); void speakReply(reply.content); } }}
       messages={messages}
       historyExpanded={historyExpanded}
       onToggleHistoryExpanded={() => setHistoryExpanded((v) => !v)}
@@ -1021,7 +979,7 @@ export function TutorApp(props: TutorAppProps) {
 
   // 부모(LessonTutorSidebar)가 위치·폭·overlay 여부를 담당한다 — 여기서는 순수
   // TutorSidebar 하나만 돌려준다(Lesson 렌더링도, 자체 Drawer도 없음 — 복제 없음).
-  return <Box sx={{ height: "100%" }}>{sidebar}</Box>;
+  return <Box sx={{ height: props.mobile ? "auto" : "100%" }}>{sidebar}</Box>;
 }
 
 // ── 시작 화면 ──────────────────────────────────────────────────────
@@ -1143,6 +1101,7 @@ function SummaryScreen(props: {
   allLessons: LessonRef[];
   manualNextLessonId: string;
   setManualNextLessonId: (id: string) => void;
+  saving: boolean;
   onSave: () => void;
   onCancel: () => void;
 }) {
@@ -1171,7 +1130,7 @@ function SummaryScreen(props: {
         진도에 반영됩니다.
       </Typography>
 
-      {props.error && <Alert severity="warning" sx={{ mb: 2 }}>{props.error}</Alert>}
+      {props.error && <TutorError message={props.error} />}
 
       <Stack spacing={2}>
         <Box>
@@ -1241,10 +1200,10 @@ function SummaryScreen(props: {
         <Divider />
 
         <Stack direction="row" spacing={1}>
-          <Button variant="contained" onClick={props.onSave}>
+          <Button variant="contained" onClick={props.onSave} disabled={props.saving}>
             저장하고 종료
           </Button>
-          <Button variant="outlined" onClick={props.onCancel}>
+          <Button variant="outlined" onClick={props.onCancel} disabled={props.saving}>
             취소하고 계속 공부하기
           </Button>
         </Stack>

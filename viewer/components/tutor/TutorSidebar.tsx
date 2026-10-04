@@ -1,4 +1,5 @@
 "use client";
+import { TutorError } from "@/components/tutor/TutorError";
 
 /**
  * AI Tutor 사이드바 — 교재(LessonContent) 옆에 붙는 좁은 패널.
@@ -20,7 +21,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
+import { TutorHistory } from "./TutorHistory";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
@@ -100,20 +101,18 @@ function StateChip({ voiceState }: { voiceState: VoiceState }) {
 }
 
 export function TutorSidebar(props: TutorSidebarProps) {
-  const lastMessages = props.messages.slice(-2);
-  // 음성이 오가는 중에는 원형 Indicator로 크게 보여준다. 그 외(텍스트만
-  // 쓰는 대기 상태)에는 기존의 작은 상태 칩으로 자리를 아낀다.
+  // 음성 상태와 수동 조작을 기록 위에 유지한다. 대기 중에는 상태 칩을 쓴다.
   const showIndicator = props.voiceState !== "idle";
 
   return (
-    <Stack sx={{ height: "100%", display: "flex", flexDirection: "column", gap: 1.5, minWidth: 0 }}>
+    <Stack sx={{ height: "100%", display: "flex", flexDirection: "column", gap: 1, minWidth: 0, minHeight: 0, "& > :not([data-tutor-history])": { flexShrink: 0 } }}>
       <Box>
         <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }} noWrap title={props.lessonTitle}>
             🎧 {props.lessonTitle}
           </Typography>
           {props.onCollapse && (
-            <IconButton size="small" onClick={props.onCollapse} aria-label="Tutor 패널 접기" title="접기">
+            <IconButton size="small" sx={{ minWidth: 44, minHeight: 44 }} onClick={props.onCollapse} aria-label="Tutor 패널 접기" title="접기">
               ▸
             </IconButton>
           )}
@@ -136,15 +135,27 @@ export function TutorSidebar(props: TutorSidebarProps) {
       >
         {showIndicator ? (
           <>
-            <VoiceIndicator state={props.voiceState} stream={props.micStream} />
+            <VoiceIndicator compact state={props.voiceState} stream={props.micStream} />
             <Typography variant="body2" sx={{ fontWeight: 600 }} role="status" aria-live="polite">
               {VOICE_STATE_LABEL[props.voiceState]}
             </Typography>
           </>
         ) : (
-          <StateChip voiceState={props.voiceState} />
+          <Box role="status" aria-live="polite"><StateChip voiceState={props.voiceState} /></Box>
         )}
         <Stack direction="row" spacing={1} sx={{ mt: showIndicator ? 0.5 : 0 }}>
+          <Button
+            variant="outlined"
+            color={props.recording ? "error" : "primary"}
+            onClick={props.onMicClick}
+            disabled={props.micDisabled}
+            aria-label={props.recording ? "말하기 끝" : "말하기 시작"}
+            title={props.recording ? "말하기 끝" : "말하기 시작"}
+            size="small"
+            sx={{ border: 1, borderColor: "divider", minWidth: 44, minHeight: 44 }}
+          >
+            {props.recording ? "⏹ 말하기 끝" : "🎤 말하기 시작"}
+          </Button>
           {props.recording && (
             // 발화 종료는 이 버튼(또는 🎤 옆 ⏹)으로만 — 침묵이 길어도 자동으로 끝나지 않는다.
             <Button variant="contained" size="small" onClick={props.onFinishUtterance}>
@@ -172,9 +183,7 @@ export function TutorSidebar(props: TutorSidebarProps) {
       </Stack>
 
       {props.error && (
-        <Alert severity="warning" onClose={props.onDismissError} sx={{ py: 0 }}>
-          <Typography variant="caption">{props.error}</Typography>
-        </Alert>
+        <TutorError message={props.error} onClose={props.onDismissError} />
       )}
       {props.fallbackNotice && (
         <Alert severity="info" onClose={props.onDismissFallbackNotice} sx={{ py: 0 }}>
@@ -189,55 +198,7 @@ export function TutorSidebar(props: TutorSidebarProps) {
 
       <Divider />
 
-      {/* ── 대화 기록: 기본은 최근 발화만, 펼치면 전체 ── */}
-      <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="caption" sx={{ fontWeight: 700 }}>
-            대화 기록
-          </Typography>
-          <Button size="small" onClick={props.onToggleHistoryExpanded}>
-            {props.historyExpanded ? "접기" : "전체 보기"}
-          </Button>
-        </Stack>
-
-        <Paper
-          variant="outlined"
-          sx={{
-            flex: props.historyExpanded ? 1 : "0 0 auto",
-            minHeight: props.historyExpanded ? 0 : "auto",
-            overflowY: "auto",
-            p: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          {(props.historyExpanded ? props.messages : lastMessages).map((m, i) => (
-            <Box
-              key={i}
-              sx={{
-                alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-                maxWidth: "92%",
-                bgcolor: m.role === "user" ? "primary.main" : "action.hover",
-                color: m.role === "user" ? "primary.contrastText" : "text.primary",
-                borderRadius: 2,
-                px: 1.2,
-                py: 0.7,
-                whiteSpace: "pre-wrap",
-                fontSize: "0.8rem",
-                lineHeight: 1.6,
-              }}
-            >
-              {m.content}
-            </Box>
-          ))}
-          {props.messages.length === 0 && (
-            <Typography variant="caption" color="text.secondary">
-              아직 대화가 없습니다.
-            </Typography>
-          )}
-        </Paper>
-      </Box>
+      <TutorHistory messages={props.messages} expanded={props.historyExpanded} onToggle={props.onToggleHistoryExpanded} />
 
       {props.showEndConfirm && (
         <Alert
@@ -258,22 +219,12 @@ export function TutorSidebar(props: TutorSidebarProps) {
       )}
 
       <Stack direction="row" spacing={1} sx={{ alignItems: "flex-end" }}>
-        <IconButton
-          color={props.recording ? "error" : "default"}
-          onClick={props.onMicClick}
-          disabled={props.micDisabled}
-          aria-label={props.recording ? "말하기 끝" : "말하기 시작"}
-          title={props.recording ? "말하기 끝" : "말하기 시작"}
-          size="small"
-          sx={{ border: 1, borderColor: "divider" }}
-        >
-          {props.recording ? "⏹" : "🎤"}
-        </IconButton>
         <TextField
           fullWidth
           multiline
           maxRows={3}
           size="small"
+          label="텍스트로 질문"
           placeholder="메시지를 입력하거나 마이크를 눌러 말해보세요"
           value={props.input}
           onChange={(e) => props.onInputChange(e.target.value)}
@@ -290,14 +241,13 @@ export function TutorSidebar(props: TutorSidebarProps) {
       </Stack>
 
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ cursor: "pointer", textDecoration: "underline" }}
+        <Button
+          size="small"
+          color="inherit"
           onClick={props.onLeaveWithoutSaving}
         >
           저장하지 않고 나가기
-        </Typography>
+        </Button>
         <Button size="small" color="error" variant="outlined" onClick={props.onRequestEnd}>
           학습 종료
         </Button>

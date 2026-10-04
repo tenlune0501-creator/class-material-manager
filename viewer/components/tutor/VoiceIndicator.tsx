@@ -41,10 +41,9 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-const SIZE = 88;
-const CORE = 52;
-
-export function VoiceIndicator({ state, stream }: { state: VoiceState; stream: MediaStream | null }) {
+export function VoiceIndicator({ state, stream, compact = false }: { state: VoiceState; stream: MediaStream | null; compact?: boolean }) {
+  const SIZE = compact ? 36 : 88;
+  const CORE = compact ? 24 : 52;
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

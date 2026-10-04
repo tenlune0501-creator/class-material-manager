@@ -17,8 +17,6 @@ import Typography from "@mui/material/Typography";
 
 import { NavListItem } from "@/components/nav";
 import { MaterialLessonLinks } from "@/components/MaterialLessonLinks";
-import { getMaterialLessonIds } from "@/lib/curriculum";
-import { materialEntryHref } from "@/lib/url";
 import { search, subjectLabel } from "@/lib/data";
 
 export default async function SearchPage({
@@ -46,7 +44,6 @@ export default async function SearchPage({
 
   const materials = hits.filter((h) => h.type === "material");
   const references = hits.filter((h) => h.type === "reference");
-  const destinations = await getMaterialLessonIds(materials.map((hit) => decodeURIComponent(hit.href.slice("/m/".length))));
 
   /** 표시 개수가 전체보다 적으면 "n건 중 m건" 으로 알려 줍니다. */
   const countLabel = (shown: number, total: number): string =>
@@ -58,7 +55,7 @@ export default async function SearchPage({
         “{query}” 검색 결과
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        수업자료 {countLabel(materials.length, totalMaterials)} · 공식 문서 요약{" "}
+        학습자료 {countLabel(materials.length, totalMaterials)} · 공식 문서 요약{" "}
         {countLabel(references.length, totalReferences)}
       </Typography>
 
@@ -68,8 +65,15 @@ export default async function SearchPage({
         </Typography>
       )}
 
+      {materials.length > 0 && <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>검색된 자료와 연결된 Lesson</Typography>
+        <List aria-label="관련 Lesson">
+          <MaterialLessonLinks materialIds={materials.map((hit) => decodeURIComponent(hit.href.slice("/m/".length)))} />
+        </List>
+      </Box>}
+
       {[
-        { label: "수업자료", items: materials, total: totalMaterials },
+        { label: "학습자료", items: materials, total: totalMaterials },
         { label: "공식 문서 요약", items: references, total: totalReferences },
       ].map(({ label, items, total }) =>
         items.length === 0 ? null : (
@@ -79,19 +83,17 @@ export default async function SearchPage({
             </Typography>
 
             <List dense disablePadding>
-              {label === "수업자료" && (
-                <MaterialLessonLinks materialIds={materials.map((hit) => decodeURIComponent(hit.href.slice("/m/".length)))} />
-              )}
               {items.map((hit) => (
                 <NavListItem
                   key={hit.href}
-                  href={hit.type === "material" ? materialEntryHref(decodeURIComponent(hit.href.slice("/m/".length)), destinations) : hit.href}
+                  href={hit.href}
                   sx={{ py: 1.2, alignItems: "flex-start" }}
                 >
                   <ListItemText
                     primary={
                       <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
                         <span>{hit.title}</span>
+                        <Chip size="small" label={hit.type === "material" ? "학습자료" : "공식 문서"} />
                         <Chip size="small" variant="outlined" label={subjectLabel(hit.subject)} />
                         {hit.inTitle && <Chip size="small" color="primary" label="제목 일치" />}
                         {/* 본문에는 없고 딸린 실습 코드에서 걸린 자료임을 알려 줍니다. */}

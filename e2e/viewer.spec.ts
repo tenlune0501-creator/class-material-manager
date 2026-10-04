@@ -14,6 +14,9 @@
  * 그래서 "몇 건이 있다" 가 아니라 "화면이 제 일을 한다" 만 봅니다.
  */
 import { expect, test, type Page } from "@playwright/test";
+import { mockTutor } from "./helpers/tutor-mocks";
+
+test.use({ viewport: { width: 1440, height: 960 } });
 
 /** 브라우저 콘솔에 난 오류를 모읍니다 */
 function watchErrors(page: Page): string[] {
@@ -58,6 +61,7 @@ async function isEmptyState(page: Page): Promise<boolean> {
  * 여기서 건너뜁니다.
  */
 test.beforeEach(async ({ page }) => {
+  await mockTutor(page);
   const response = await page.goto("/");
 
   if ((response?.status() ?? 0) >= 500) {
@@ -77,13 +81,15 @@ test.describe("화면이 뜬다", () => {
 
     // 페이지마다 <h1> 은 정확히 하나여야 합니다. (18단계에서 바로잡은 것)
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toContainText("수업자료 아카이브");
+    await expect(page.locator("h1")).toContainText("커리큘럼");
 
     expect(errors, `브라우저 오류: ${errors.join(" | ")}`).toEqual([]);
   });
 
   for (const [name, path] of [
     ["커리큘럼", "/curriculum"],
+    ["학습자료", "/materials"],
+    ["자료 복습 가이드", "/materials/study"],
     ["실전 프로젝트 학습", "/projects"],
     ["통합 학습자료", "/learn"],
     ["수업 방식 점검", "/compare"],
@@ -120,7 +126,7 @@ test.describe("눌러서 옮겨 간다", () => {
   });
 
   test("과목을 눌러 그 과목 화면으로 간다", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/materials");
     await settled(page);
 
     if (await isEmptyState(page)) test.skip(true, "아직 자료가 없어 건너뜁니다");
@@ -266,7 +272,7 @@ test.describe("커리큘럼 · 실전 프로젝트 학습을 오간다", () => {
 
 test.describe("걸러 보기가 된다", () => {
   test("복습 우선순위로 좁혀 볼 수 있다", async ({ page }) => {
-    await page.goto("/study");
+    await page.goto("/materials/study");
     await settled(page);
 
     const filter = page.locator('a[href*="priority="]').first();
