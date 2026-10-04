@@ -13,9 +13,52 @@ import {
   HARD_MAX_CHUNK_CHARS,
   MAX_CHUNK_CHARS,
   MIN_CHUNK_CHARS,
+  normalizePronunciation,
   splitIntoSentences,
   stripMarkdownForSpeech,
 } from "../viewer/lib/tutor/tts-chunking.ts";
+import { semanticReply } from "./fixtures/tts-semantic-reply.ts";
+
+describe("speech pronunciation", () => {
+  for (const [raw, speech] of [
+    ["div", "디아이브이"], ["DIV", "디아이브이"], ["<div>", "디아이브이"],
+    ["div에 id를 지정하면", "디아이브이에 아이디를 지정하면"],
+    ["id", "아이디"], ["ID", "아이디"], ['id="header"', '아이디 이퀄 "header"'],
+    ['`div`에 `id`를 줍니다.', '디아이브이에 아이디를 줍니다.'],
+    ["div+id", "디아이브이 플러스 아이디"],
+  ]) it(`${raw} changes only in the speech copy`, () => {
+    const message = { content: raw };
+    assert.deepEqual(chunkTextForSpeech(message.content), [speech]);
+    assert.equal(message.content, raw);
+  });
+  it("keeps identifiers and URLs intact", () => {
+    const text = 'grid video identifier constructor toString user_id div2 data-id $id https://example.com/div/id?grid=video+id#id';
+    assert.equal(normalizePronunciation(text), text);
+    assert.deepEqual(chunkTextForSpeech(text), [text.replace('user_id', 'userid')]); // existing Markdown underscore stripping
+    assert.deepEqual(chunkTextForSpeech('_id'), ['id']); // identifier must not become a new lexicon match after stripping
+  });
+  it("omits fenced code, retains surrounding prose and normalizes inline code", () => {
+    assert.deepEqual(chunkTextForSpeech('`div` 설명\n```html\n<div id="header"></div>\n```\n`id` 설명'), ['디아이브이 설명', '아이디 설명']);
+  });
+  it("reproduces all six reply chunks with safe final input", () => {
+    const chunks = chunkTextForSpeech(semanticReply);
+    assert.deepEqual(chunks.map(c => c.length), [69, 15, 62, 56, 68, 41]);
+    assert.equal(chunks[5], '이 정도면 "왜 디아이브이 플러스 아이디로는 부족한지"는 이제 명확해질까?');
+    assert.equal(chunks.join(' '), normalizePronunciation(stripMarkdownForSpeech(semanticReply)).replace(/\n/g, ' '));
+    assert.ok(semanticReply.includes('디아이브이+id'));
+    assert.ok(!chunks.some(c => c.includes('+')));
+  });
+  it("normalizes before chunk limits and preserves order without duplication", () => {
+    const text = Array.from({length:80}, () => 'div에 id를 지정하면').join(' ') + '.';
+    const chunks = chunkTextForSpeech(text);
+    assert.ok(chunks.length > 1);
+    assert.ok(chunks.every(c => c.length <= HARD_MAX_CHUNK_CHARS));
+    assert.equal(chunks.join(' '), normalizePronunciation(text));
+    assert.equal(chunks.join(' ').match(/디아이브이/g)?.length, 80);
+    assert.equal(chunks.join(' ').match(/아이디/g)?.length, 80);
+    assert.deepEqual(chunkTextForSpeech(text), chunks);
+  });
+});
 
 describe("stripMarkdownForSpeech", () => {
   it("MeloTTS에서 실패하는 인라인 코드의 =와 =>를 음성용 말로 바꾼다", () => {

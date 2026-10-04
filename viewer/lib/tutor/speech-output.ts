@@ -28,7 +28,18 @@ export class BlobSpeechOutput implements SpeechOutput {
     const getBlob = (index: number) => {
       if (index >= chunks.length) return;
       if (!blobPromises.has(index)) {
-        const promise = this.provider.synthesize(chunks[index], { signal: controller.signal });
+        const promise = this.provider.synthesize(chunks[index], { signal: controller.signal }).catch((error: unknown) => {
+          if (!controller.signal.aborted) {
+            const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : undefined;
+            // Synthesis runs in the browser, not Vercel. Log metadata only;
+            // neither the reply nor the upstream error body belongs in logs.
+            console.warn("[CMM TTS] synthesis failed", {
+              chunk: index + 1, total: chunks.length, chars: chunks[index].length,
+              category: status ? "upstream_http" : "network", status, retries: 0,
+            });
+          }
+          throw error;
+        });
         void promise.catch(() => {}); // prefetch may fail before it is awaited
         blobPromises.set(index, promise);
       }

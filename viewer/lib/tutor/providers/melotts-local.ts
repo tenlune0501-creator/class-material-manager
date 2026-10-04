@@ -14,6 +14,14 @@
  */
 import { TTSProvider } from "./types";
 
+export class MeloTTSError extends Error {
+  readonly category = "upstream_http";
+  constructor(readonly status: number) {
+    super(`MeloTTS 합성 실패 (${status})`);
+    this.name = "MeloTTSError";
+  }
+}
+
 export class MeloTTSProvider implements TTSProvider {
   readonly name = "melotts-local";
 
@@ -37,7 +45,8 @@ export class MeloTTSProvider implements TTSProvider {
     });
     options?.onResponse?.();
     if (!res.ok) {
-      throw new Error(`MeloTTS 합성 실패 (${res.status})`);
+      // Never expose the upstream response body: it may include user text.
+      throw new MeloTTSError(res.status);
     }
     return res.blob();
   }

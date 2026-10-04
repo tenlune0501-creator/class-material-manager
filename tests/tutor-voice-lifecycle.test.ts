@@ -206,6 +206,8 @@ function harness() {
   let state = "idle";
   let turns = 0;
   let tracksStopped = 0;
+  let notice: string | null = null;
+  const diagnostics: unknown[][] = [];
   const c = {
     activeRef: ref(true), mobileRef: ref(false), mountedRef: ref(true), activeSpeechRef: ref<unknown>(null), browserSpeechRef: ref(null), blobSpeech: null as unknown, voiceOnRef: ref(true), ttsGenerationRef: ref(0),
     ttsAbortRef: ref<AbortController | null>(null), sttAbortRef: ref<AbortController | null>(null), messageAbortRef: ref<AbortController | null>(null),
@@ -215,8 +217,9 @@ function harness() {
     mediaRecorderRef: ref<unknown>(null),
     setVoiceState: (s: string) => { state = s; },
     endAssistantTurn: () => { state = "idle"; turns++; },
-    setMicStream: () => {}, setTtsNotice: () => {}, markLatency: () => {},
-    chunkTextForSpeech, performance, AbortController, DOMException, Blob, Audio: FakeAudio,
+    setMicStream: () => {}, setTtsNotice: (value: string | null) => { notice = value; }, markLatency: () => {},
+    console: { warn: (...args: unknown[]) => diagnostics.push(args) },
+    chunkTextForSpeech, performance, AbortController, DOMException, Error, Blob, Audio: FakeAudio,
     URL: { createObjectURL: () => `blob:${audio.length}`, revokeObjectURL: (url: string) => revoked.push(url) },
     setTimeout: () => 1, clearTimeout: () => {},
     tts: { synthesize: (text: string, opts: { signal: AbortSignal }) => new Promise<Blob>((resolve, reject) => {
@@ -232,10 +235,44 @@ function harness() {
     cleanupVoiceResources: () => void;
     finishSpeaking: (generation: number) => void;
   };
-  return { api, c, synth, audio, revoked, state: () => state, turns: () => turns, tracks: () => tracksStopped };
+  return { api, c, synth, audio, revoked, diagnostics, notice: () => notice, state: () => state, turns: () => turns, tracks: () => tracksStopped };
 }
 
 describe("Tutor TTS async lifecycle", () => {
+  it("middle 502 stops the queue, reports metadata only and never replays a successful chunk", async () => {
+    const h = harness();
+    const run = h.api.speakReply('첫 번째 설명입니다.\n두 번째 설명입니다.\n세 번째 설명입니다.');
+    h.synth[0].resolve(new Blob(['first']));
+    await setImmediate();
+    const error = Object.assign(new Error('MeloTTS 합성 실패 (502)'), {status:502});
+    h.synth[1].reject(error);
+    await setImmediate();
+    h.audio[0].onended?.();
+    await run;
+    assert.equal(h.synth.length, 2);
+    assert.equal(h.audio.length, 1);
+    assert.equal(h.state(), 'idle');
+    assert.equal(h.turns(), 1);
+    assert.equal(h.diagnostics.length, 1);
+    assert.deepEqual(JSON.parse(JSON.stringify(h.diagnostics[0][1])), {chunk:2,total:3,chars:11,category:'upstream_http',status:502,retries:0});
+    assert.ok(!JSON.stringify(h.diagnostics).includes('두 번째 설명'));
+    assert.equal(h.notice(), 'MeloTTS 합성 실패 (502)');
+  });
+  it("a later explicit speech call can succeed after 502 without stale queued audio", async () => {
+    const h = harness();
+    const failed = h.api.speakReply('실패한 설명입니다.');
+    h.synth[0].reject(new Error('MeloTTS 합성 실패 (502)'));
+    await failed;
+    const next = h.api.speakReply('다음 설명입니다.');
+    h.synth[1].resolve(new Blob(['next']));
+    await setImmediate();
+    h.audio[0].onended?.();
+    await next;
+    assert.equal(h.synth.length, 2); // no automatic retry of deterministic input
+    assert.equal(h.audio.length, 1);
+    assert.equal(h.notice(), null);
+    assert.equal(h.state(), 'idle');
+  });
   it("plays the first blob before requesting the next and preserves queue order", async () => {
     const h = harness();
     const run = h.api.speakReply("첫 번째 설명입니다.\n두 번째 설명입니다.");

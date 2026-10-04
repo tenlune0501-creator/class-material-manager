@@ -25,6 +25,23 @@ export const MAX_CHUNK_CHARS = 70;
 /** 문장 하나가 이 길이를 넘으면(쉼표/공백 등 보조 기준으로) 강제로 더 쪼갠다. */
 export const HARD_MAX_CHUNK_CHARS = 140;
 
+/** Keep URLs intact in the speech copy, including query operators and identifiers. */
+function outsideUrls(text: string, transform: (part: string) => string): string {
+  return text.split(/((?:https?:\/\/|www\.)[^\s<>"`]+)/gi)
+    .map((part, index) => index % 2 ? part : transform(part)).join("");
+}
+
+const PRONUNCIATIONS = new Map([
+  ["div", "디아이브이"],
+  ["id", "아이디"],
+]);
+
+/** Speech-only lexicon. ASCII identifiers stay whole; Korean particles may follow. */
+export function normalizePronunciation(text: string): string {
+  return outsideUrls(text, (part) => part.replace(/[A-Za-z0-9_$-]+/g,
+    (token) => PRONUNCIATIONS.get(token.toLowerCase()) ?? token));
+}
+
 /**
  * TTS로 읽기 전에 마크다운 기호를 없앤다.
  *
@@ -34,8 +51,8 @@ export const HARD_MAX_CHUNK_CHARS = 140;
  * 발견) — 그래서 안전을 위해서도 코드/강조 기호는 읽기 전에 반드시 벗겨낸다.
  */
 export function stripMarkdownForSpeech(text: string): string {
-  return text
-    .replace(/```[\s\S]*?```/g, "") // 코드 블록은 음성으로 읽지 않고 생략한다
+  const withoutBlocks = text.replace(/```[\s\S]*?```/g, "");
+  return outsideUrls(withoutBlocks, (part) => part
     .replace(/`([^`]*)`/g, "$1")
     .replace(/\*\*([^*]*)\*\*/g, "$1")
     .replace(/\*([^*]*)\*/g, "$1")
@@ -45,9 +62,12 @@ export function stripMarkdownForSpeech(text: string): string {
     // 화면의 코드는 보존하고 음성 사본에서만 연산자를 읽을 수 있는 말로 바꾼다.
     .replace(/=>/g, " 화살표 ")
     .replace(/=+/g, " 이퀄 ")
-    .replace(/[`*_~#>|]/g, "")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
+    // Reproduced in the final chunk of a real reply: '+' is absent from
+    // MeloTTS's Korean symbol table. Retrying identical input cannot fix it.
+    .replace(/\+/g, " 플러스 ")
+    // '<' also fails in the Korean symbol table; strip both tag delimiters.
+    .replace(/[`*_~#<>|]/g, "")
+    .replace(/\n{2,}/g, "\n")).trim();
 }
 
 /**
@@ -115,7 +135,9 @@ function chunkLine(sentences: string[]): string[] {
  * 부자연스럽다. 같은 줄 안에서만 문장을 합치거나 쪼갠다.
  */
 export function chunkTextForSpeech(rawText: string): string[] {
-  const stripped = stripMarkdownForSpeech(rawText);
+  // Normalize the complete speech copy before splitting: expansion counts toward
+  // chunk limits and a split cannot prevent a token from matching the lexicon.
+  const stripped = stripMarkdownForSpeech(normalizePronunciation(rawText));
   if (!stripped) return [];
   const lines = stripped
     .split("\n")
